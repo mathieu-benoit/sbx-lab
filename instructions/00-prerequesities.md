@@ -27,25 +27,4 @@ Every exercise depends on `sbx` running correctly on your host machine. **Do not
 
     If you need to login, complete the instructions on the screen to do so.
 
-## Project setup
-
-This lab is going to use some of the features of Git (namely worktrees). In order to do so, the project needs to be configured as a local git repo.
-
-FIXME:
-- fork
-- clone
-
-1. Initialize a repo in the current directory with `git init`:
-
-    ```bash
-    git init
-    ```
-
-2. Commit the starting project contents into the repo:
-
-    ```bash
-    git add .
-    git commit -m "Initial commit"
-    ```
-
 You're all ready to go! Go ahead and move on to the next module!
