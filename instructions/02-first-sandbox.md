@@ -7,7 +7,7 @@ The `sbx create` command provisions a sandbox without attaching to it — useful
 1. Create your first sandbox by using the `sbx create` command:
 
     ```bash
-    sbx create --name=quickstart copilot .
+    sbx create --name quickstart copilot .
     ```
 
 2. Confirm it was created by listing all sandboxes:
