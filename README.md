@@ -1,5 +1,12 @@
 # Docker Sandboxes Quickstart Lab with GitHub Copilot
 
+TODOs:
+- `/project` folder with apps
+- replace `claude` by `copilot`
+- Move policies earlier
+- `docker/sbx-kit-copilot`?
+- dry-run
+
 
 Setup:
 - Sbx locally free (sbx login) Win, MacOS, Linux
