@@ -1,28 +1,6 @@
 # Docker Sandboxes Quickstart Lab with GitHub Copilot
 
-TODOs:
-- `/project` folder with apps
-- replace `claude` by `copilot`
-- Move policies earlier
-- `docker/sbx-kit-copilot`?
-- dry-run
-
-
-Setup:
-- Sbx locally free (sbx login) Win, MacOS, Linux
-  - Free Doker login
-- GitHub (Copilot)
-  - Free GH: https://github.com/signup
-  - Free Copilot: https://github.com/features/copilot/plans
-
-Format:
-- Labspace --> NO (because private launcher + no windows)
-- Simspace --> NO (just simultated) - and if time permits, let's have this lab as simspace too? Or labspace's PDF is enough?
-
-Getting started:
-- Fork GH repo
-- Git clone
-- Start the lab
+This lab will walk you through many of the features and capabilities of Docker Sandboxes.
 
 TOC:
 - [Prerequisites](instructions/00-prerequisites.md)
@@ -34,3 +12,18 @@ TOC:
 - [Docker inside the Sandbox](instructions/06-docker-inside-the-sandbox.md)
 - [Port forwarding](instructions/07-port-forwarding.md)
 - [Network policies](instructions/08-network-policies.md)
+
+Start the lab!
+
+1. Fork the https://github.com/mathieu-benoit/sbx-lab repo
+
+2. Clone locally the forked repo:
+
+    ```bash
+    git clone https://github.com/YOUR-FORK/sbx-lab
+    cd sbx-lab
+    ```
+3. Open the [`README.md`](README.md) and follow the instructions, enjoy!
+
+FIXME:
+- Create a `/project` folder with apps with this remote folder https://github.com/dockersamples/labspace-sbx-quickstart/tree/main/project

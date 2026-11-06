@@ -1,5 +1,8 @@
 # 📦 Creating your first sandbox
 
+FIXME:
+- Add the concept of `--yolo` preconfigured in this copilot sandbox
+
 The `sbx create` command provisions a sandbox without attaching to it — useful when you want to set it up, verify it appears in `sbx ls`, or script multiple sandboxes before starting any of them. `sbx run` then attaches an agent session to an existing sandbox (or creates one on the fly if it doesn't exist yet).
 
 ## Starting the sandbox
@@ -32,14 +35,14 @@ The `sbx create` command provisions a sandbox without attaching to it — useful
     4. What the test suite covers
     ```
 
-    Claude will read the source files, check the requirements, and report back. Because the workspace is mounted directly into the VM, Claude sees your actual files — including any changes you make on the host while it's running.
+    Your agent will read the source files, check the requirements, and report back. Because the workspace is mounted directly into the VM, your agent sees your actual files — including any changes you make on the host while it's running.
 
 ### Controlling the session
 
 `sbx run` is interactive — it occupies your terminal as a live agent session.
 
 - Press **`Ctrl-C` twice** to exit the session and drop back to your host terminal. 
-- Type **`!`** before any command inside Claude to run it as a shell command without leaving the session — e.g. `!ls` or `!git status`.
+- Type **`!`** before any command inside your agent to run it as a shell command without leaving the session — e.g. `!ls` or `!git status`.
 
 Go ahead and exit the sandbox by **pressing `ctrl-c` twice** 
 

@@ -1,6 +1,6 @@
 # 🔑 Secrets and credentials
 
-`sbx` has a built-in secrets manager that stores credentials in your OS keychain — never in plain text on disk or inside the VM. When your agent makes an outbound request that needs authentication, the host-side proxy intercepts it and injects the credential automatically. Claude can make authenticated API calls but can never read, log, or exfiltrate the raw credential.
+`sbx` has a built-in secrets manager that stores credentials in your OS keychain — never in plain text on disk or inside the VM. When your agent makes an outbound request that needs authentication, the host-side proxy intercepts it and injects the credential automatically. Your agent can make authenticated API calls but can never read, log, or exfiltrate the raw credential.
 
 1. Store your GitHub token **now**, before creating a sandbox. The `-g` flag makes it global — available to all sandboxes you create:
 
@@ -26,4 +26,4 @@
     (global)   copilot   gho_TK421****...****R2D2
     ```
 
-[[Next >> First Sandbox]](02-first-sandbox.md)
+[[Prerequisites << Previous](00-prerequisites.md) | [Next >> First Sandbox](02-first-sandbox.md)]

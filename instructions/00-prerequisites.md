@@ -1,6 +1,11 @@
 # Prerequisites
 
-This lab will walk you through many of the features and capabilities of Docker Sandboxes.
+FIXME:
+- Sbx locally free (sbx login) Win, MacOS, Linux
+  - Free Doker login
+- GitHub (Copilot)
+  - Free GH: https://github.com/signup
+  - Free Copilot: https://github.com/features/copilot/plans
 
 > [!WARNING]
 > The commands in this lab are written to use the `sbx` CLI directly on your host machine (MacOS, Windows or Linux environments).

@@ -81,7 +81,7 @@ As you can see, the list of allowed hosts is small to begin with. However, it is
 > # Allow multiple at once
 > sbx policy allow network "smtp.mailgun.org,api.sendgrid.com"
 >
-> # Allow all npm and PyPI (useful if Claude can't install packages)
+> # Allow all npm and PyPI (useful if your agent can't install packages)
 > sbx policy allow network "*.npmjs.org,*.pypi.org,files.pythonhosted.org"
 > ```
 

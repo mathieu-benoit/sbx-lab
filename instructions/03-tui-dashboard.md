@@ -22,7 +22,7 @@ The following table displays a few useful keyboard shortcuts:
 | `Tab`   | Switch between the Sandboxes panel and Network panel |
 | `?`     | Show all shortcuts                                   |
 
-The **Network panel** (press `Tab`) shows a live log of every outbound connection the sandbox makes — which hosts were reached, which were blocked. Use the arrow keys to navigate the log and allow or block hosts directly. This is the fastest way to debug "why can't Claude install this package?"
+The **Network panel** (press `Tab`) shows a live log of every outbound connection the sandbox makes — which hosts were reached, which were blocked. Use the arrow keys to navigate the log and allow or block hosts directly. This is the fastest way to debug "why can't my agent install this package?"
 
 **Press `Ctrl-C` and then `Y`** to exit the dashboard without stopping any sandboxes.
 
