@@ -26,4 +26,4 @@
     (global)   copilot   gho_TK421****...****R2D2
     ```
 
-[[Prerequisites << Previous](00-prerequisites.md) | [Next >> First Sandbox](02-first-sandbox.md)]
+[[Prerequisites << Previous](00-prerequisites.md) | [Next >> First Sandbox](03-first-sandbox.md)]

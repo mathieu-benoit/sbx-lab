@@ -29,4 +29,4 @@ The **Network panel** (press `Tab`) shows a live log of every outbound connectio
 > [!TIP]
 > While you can use the keyboard to navigate around the TUI, it also has full mouse support!
 
-[[First sandbox << Previous](02-first-sandbox.md) | [Next >> Run in direct mode](04-run-in-direct-mode.md)]
+[[First sandbox << Previous](03-first-sandbox.md) | [Next >> Run in direct mode](05-run-in-direct-mode.md)]

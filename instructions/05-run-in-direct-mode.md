@@ -51,4 +51,4 @@ This exercise shows your agent working in **direct mode** — the default, where
 > Installed packages **persist** across agent restarts for this sandbox. If you stop
 > and reconnect to `quickstart`, you won't need to `pip install` again.
 
-[[TUI dashboard << Previous](03-tui-dashboard.md) | [Next >> Parallel agents](05-parallel-agents.md)]
+[[TUI dashboard << Previous](04-tui-dashboard.md) | [Next >> Parallel agents](06-parallel-agents.md)]
