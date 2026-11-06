@@ -26,4 +26,8 @@ You will use Copilot in a Docker Sandbox to update the sample DevBoard applicati
     git clone https://github.com/YOUR-FORK/sbx-lab
     cd sbx-lab
     ```
-3. Open the [`README.md`](README.md) and follow the instructions, enjoy!
+3. Open the [`README.md`](README.md) and follow the instructions.
+
+Enjoy!
+
+[[Next >> Prerequisites](instructions/00-prerequisites.md)]
