@@ -7,14 +7,14 @@ You will use Copilot in a Docker Sandbox to update the sample DevBoard applicati
 ## TOC
 
 - [Prerequisites](instructions/00-prerequisites.md)
-- [Credentials](instructions/01-secrets-credentials.md)
-- [First Sandbox](instructions/02-first-sandbox.md)
-- [TUI dashboard](instructions/03-tui-dashboard.md)
-- [Run in direct mode](instructions/04-run-in-direct-mode.md)
-- [Parallel agents](instructions/05-parallel-agents.md)
-- [Docker inside the Sandbox](instructions/06-docker-inside-the-sandbox.md)
-- [Port forwarding](instructions/07-port-forwarding.md)
-- [Network policies](instructions/08-network-policies.md)
+- [Network policies](instructions/01-network-policies.md)
+- [Credentials](instructions/02-secrets-credentials.md)
+- [First Sandbox](instructions/03-first-sandbox.md)
+- [TUI dashboard](instructions/04-tui-dashboard.md)
+- [Run in direct mode](instructions/05-run-in-direct-mode.md)
+- [Parallel agents](instructions/06-parallel-agents.md)
+- [Docker inside the Sandbox](instructions/07-docker-inside-the-sandbox.md)
+- [Port forwarding](instructions/08-port-forwarding.md)
 
 ## Getting started
 
