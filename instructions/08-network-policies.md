@@ -121,3 +121,5 @@ sbx policy allow network localhost:11434
 ```
 
 Then inside the sandbox, point your client at `host.docker.internal:11434`.
+
+[[Port forwarding << Previous](07-port-forwarding.md)]

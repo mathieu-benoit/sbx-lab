@@ -54,4 +54,4 @@ The `sbx create` command provisions a sandbox without attaching to it — useful
 
 Go ahead and exit the sandbox by **pressing `ctrl-c` twice** 
 
-[[Next >> TUI dashboard]](03-tui-dashboard.md)
+[[Secrets and credentials << Previous](01-secrets-credentials.md) | [Next >> TUI dashboard](03-tui-dashboard.md)]

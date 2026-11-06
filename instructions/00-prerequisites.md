@@ -37,4 +37,4 @@ Every exercise depends on `sbx` running correctly on your host machine. **Do not
 
 You're all ready to go! Go ahead and move on to the next module!
 
-[[Next >> Credentials]](01-secrets-credentials.md)
+[[Next >> Secrets and credentials]](01-secrets-credentials.md)

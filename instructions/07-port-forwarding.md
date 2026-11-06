@@ -57,4 +57,4 @@ default. `sbx ports` punches a hole from a host port to a sandbox port.
 > Published ports don't survive a sandbox stop/restart. Re-run `sbx ports`
 > after restarting.
 
-[[Next >> Network policies]](08-network-policies.md)
+[[Docker inside the sandbox << Previous](06-docker-inside-the-sandbox.md) | [Next >> Network policies](08-network-policies.md)]
