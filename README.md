@@ -1,8 +1,10 @@
-# Docker Sandboxes Quickstart Lab with GitHub Copilot
+# Docker Sandboxes with GitHub Copilot Lab
+
+👋 Welcome to the **Docker Sandboxes with GitHub Copilot Lab**!
 
 This lab will walk you through many of the features and capabilities of Docker Sandboxes.
 
-You will use Copilot in a Docker Sandbox to update the sample DevBoard application used in the exercises is in [`project/`](project/).
+You will use Copilot in a Docker Sandbox to update the sample DevBoard application used in the exercises located in the [`project/`](project/) folder.
 
 ## TOC
 
@@ -15,6 +17,7 @@ You will use Copilot in a Docker Sandbox to update the sample DevBoard applicati
 - [Parallel agents](instructions/06-parallel-agents.md)
 - [Docker inside the Sandbox](instructions/07-docker-inside-the-sandbox.md)
 - [Port forwarding](instructions/08-port-forwarding.md)
+- [Wrap up](instructions/09-wrap-up.md)
 
 ## Getting started
 
