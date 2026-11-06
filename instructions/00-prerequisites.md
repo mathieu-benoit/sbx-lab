@@ -1,14 +1,13 @@
 # Prerequisites
 
-FIXME:
-- Sbx locally free (sbx login) Win, MacOS, Linux
-  - Free Doker login
-- GitHub (Copilot)
-  - Free GH: https://github.com/signup
-  - Free Copilot: https://github.com/features/copilot/plans
+## Accounts and platform
+
+- A computer running macOS, Windows, or Linux.
+- A Docker account. Docker Sandboxes are free to use; [create a Docker account](https://hub.docker.com/signup) if you don't have one.
+- A GitHub account and access to GitHub Copilot. [Create a GitHub account](https://github.com/signup) and check the [Copilot plans](https://github.com/features/copilot/plans) for available options.
 
 > [!WARNING]
-> The commands in this lab are written to use the `sbx` CLI directly on your host machine (MacOS, Windows or Linux environments).
+> The commands in this lab are written to use the `sbx` CLI directly on your host machine (macOS, Windows, or Linux).
 
 ## sbx setup
 
@@ -32,11 +31,13 @@ Every exercise depends on `sbx` running correctly on your host machine. **Do not
 
     If you need to login, complete the instructions on the screen to do so.
 
-3. This lab assume that your Docker username doesn't belong to an Organization that may have already AI Governance policies in place, check that this list is empty:
+3. This lab assumes your Docker account is not subject to organization AI Governance policies. Check the configured policies:
 
     ```bash
     sbx policy ls
     ```
+
+    If your organization has policies that restrict this lab, use a personal Docker account or ask your administrator for guidance.
 
 You're all ready to go! Go ahead and move on to the next module!
 

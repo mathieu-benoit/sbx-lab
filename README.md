@@ -1,6 +1,7 @@
 # Docker Sandboxes Quickstart Lab with GitHub Copilot
 
 This lab will walk you through many of the features and capabilities of Docker Sandboxes.
+The sample DevBoard application used in the exercises is in [`project/`](project/).
 
 TOC:
 - [Prerequisites](instructions/00-prerequisites.md)
@@ -24,6 +25,3 @@ Start the lab!
     cd sbx-lab
     ```
 3. Open the [`README.md`](README.md) and follow the instructions, enjoy!
-
-FIXME:
-- Create a `/project` folder with apps with this remote folder https://github.com/dockersamples/labspace-sbx-quickstart/tree/main/project
