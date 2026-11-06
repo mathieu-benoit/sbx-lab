@@ -17,7 +17,7 @@ Every exercise depends on `sbx` running correctly on your host machine. **Do not
     sbx version
     ```
 
-    Expected output: a version string like `sbx v0..0` or similar.
+    Expected output: a version string like `sbx version v0..0` or similar.
 
 2. Ensure you are logged in by running the following command:
 
@@ -31,6 +31,14 @@ Every exercise depends on `sbx` running correctly on your host machine. **Do not
 
     ```bash
     sbx policy ls
+    ```
+  
+    You should see this:
+
+    ```none
+      POLICY             SOURCE   APPLIES TO   SUMMARY
+      default-deny-all   local    all          network: deny when no rule decides
+      local-policy       local    all          network: 20 allow; filesystem read: 1 allow; filesystem write: 1 allow
     ```
 
     If your organization has policies that restrict this lab, use a personal Docker account or ask your administrator for guidance.

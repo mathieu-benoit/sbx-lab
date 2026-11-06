@@ -1,7 +1,6 @@
 # 🔒 Network policies
 
-Every sandbox routes outbound HTTP/HTTPS through a host-side proxy that enforces
-access rules you define. There are three built-in postures:
+Every sandbox routes outbound HTTP/HTTPS through a host-side proxy that enforces access rules you define. There are three built-in postures:
 
 | Policy      | Description                                                                          |
 |-------------|--------------------------------------------------------------------------------------|
