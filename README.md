@@ -1,9 +1,11 @@
 # Docker Sandboxes Quickstart Lab with GitHub Copilot
 
 This lab will walk you through many of the features and capabilities of Docker Sandboxes.
-The sample DevBoard application used in the exercises is in [`project/`](project/).
 
-TOC:
+You will use Copilot in a Docker Sandbox to update the sample DevBoard application used in the exercises is in [`project/`](project/).
+
+## TOC
+
 - [Prerequisites](instructions/00-prerequisites.md)
 - [Credentials](instructions/01-secrets-credentials.md)
 - [First Sandbox](instructions/02-first-sandbox.md)
@@ -14,7 +16,7 @@ TOC:
 - [Port forwarding](instructions/07-port-forwarding.md)
 - [Network policies](instructions/08-network-policies.md)
 
-Start the lab!
+## Getting started
 
 1. Fork the https://github.com/mathieu-benoit/sbx-lab repo
 

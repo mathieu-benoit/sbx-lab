@@ -5,9 +5,7 @@
 - A computer running macOS, Windows, or Linux.
 - A Docker account. Docker Sandboxes are free to use; [create a Docker account](https://hub.docker.com/signup) if you don't have one.
 - A GitHub account and access to GitHub Copilot. [Create a GitHub account](https://github.com/signup) and check the [Copilot plans](https://github.com/features/copilot/plans) for available options.
-
-> [!WARNING]
-> The commands in this lab are written to use the `sbx` CLI directly on your host machine (macOS, Windows, or Linux).
+- The `sbx` CLI installed on your computer; follow [these instructions](https://docs.docker.com/ai/sandboxes/install/) to install or update `sbx`.
 
 ## sbx setup
 
@@ -20,8 +18,6 @@ Every exercise depends on `sbx` running correctly on your host machine. **Do not
     ```
 
     Expected output: a version string like `sbx v0..0` or similar.
-
-    If it is not installed, follow [these instructions](https://docs.docker.com/ai/sandboxes/install/) to install or update `sbx`.
 
 2. Ensure you are logged in by running the following command:
 
