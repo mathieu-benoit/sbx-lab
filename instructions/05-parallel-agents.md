@@ -96,3 +96,5 @@ After fetching, each agent's commits are available as remote-tracking branches â
 
     > **Tip**: Prefer reviewing one agent's diff before merging the second. Running
     > `git diff sandbox-add-search/main` shows exactly what will change before you commit to it.
+
+[[Next >> Docker inside the Sandbox]](06-docker-inside-the-sandbox.md)

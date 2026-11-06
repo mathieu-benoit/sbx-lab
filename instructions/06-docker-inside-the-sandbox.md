@@ -43,3 +43,5 @@ build images, and start containers — none of which appear in your host's `dock
 
 The containers your agent runs live entirely inside the sandbox. When you `sbx rm` the
 sandbox, all images, containers, and Postgres data are deleted automatically.
+
+[[Next >> Port forwarding]](07-port-forwarding.md)

@@ -42,3 +42,5 @@ The `sbx create` command provisions a sandbox without attaching to it — useful
 - Type **`!`** before any command inside Claude to run it as a shell command without leaving the session — e.g. `!ls` or `!git status`.
 
 Go ahead and exit the sandbox by **pressing `ctrl-c` twice** 
+
+[[Next >> TUI dashboard]](03-tui-dashboard.md)

@@ -56,3 +56,5 @@ default. `sbx ports` punches a hole from a host port to a sandbox port.
 > [!IMPORTANT]
 > Published ports don't survive a sandbox stop/restart. Re-run `sbx ports`
 > after restarting.
+
+[[Next >> Network policies]](08-network-policies.md)

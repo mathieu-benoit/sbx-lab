@@ -25,3 +25,5 @@
     (global)   github    gho_TK421****...****R2D2
     (global)   copilot   gho_TK421****...****R2D2
     ```
+
+[[Next >> First Sandbox]](02-first-sandbox.md)
