@@ -40,6 +40,9 @@ Every exercise depends on `sbx` running correctly on your host machine. **Do not
       default-deny-all   local    all          network: deny when no rule decides
       local-policy       local    all          network: 20 allow; filesystem read: 1 allow; filesystem write: 1 allow
     ```
+      POLICY             SOURCE   APPLIES TO   SUMMARY
+      default-deny-all   local    all          network: deny when no rule decides
+      local-policy       local    all          filesystem read: 1 allow; filesystem write: 1 allow
 
     If your organization has policies that restrict this lab, use a personal Docker account or ask your administrator for guidance.
 

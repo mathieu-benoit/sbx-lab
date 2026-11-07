@@ -8,36 +8,74 @@ Every sandbox routes outbound HTTP/HTTPS through a host-side proxy that enforces
 | Balanced    | Default deny, with a broad allow-list covering AI APIs, npm, pip, GitHub, registries |
 | Locked Down | Everything blocked; you explicitly allow what you need                               |
 
-## Inspect current rules
-
 To view the existing rules, use the `sbx policy ls` command:
 
 ```bash terminal-id=host
 sbx policy ls
 ```
 
-You will see a long list of allowed websites. 
+## Test the `Locked Down` network policies profile
+
+Run this command to set the default:
+
+    ```bash terminal-id=host
+    sbx policy reset
+    ```
+
+The CLI restarts the daemon, resets policies, and shows the picker, choose the `3. Locked Down  — All network traffic blocked unless you allow it.` option.
+
+Check the configured policies:
+
+    ```bash
+    sbx policy ls
+    ```
+
+You should now see this:
+
+    ```none
+      POLICY             SOURCE   APPLIES TO   SUMMARY
+      default-deny-all   local    all          network: deny when no rule decides
+      local-policy       local    all          filesystem read: 1 allow; filesystem write: 1 allow
+    ```
+
+Run a simple Sandbox:
+
+    ```bash
+    sbx run shell
+    ```
+
+Once the sandbox is created, try to reach `docker.com` from there:
+
+    ```bash
+    curl docker.com
+    ```
+
+You will see this message:
+
+```none
+Approval required for docker.com:80.
+```
+
+Exit this sandbox to return on your host:
+
+```bash
+exit
+```
 
 ## See what the sandbox is actually hitting
 
 To view a list of the hosts that were allowed or blocked by the proxy, use the `sbx policy log` command:
 
-```bash terminal-id=host
-sbx policy log quickstart
+```bash
+sbx policy log
 ```
 
 You should see output similar to the following:
 
-```console no-copy-button no-run-button
-Blocked requests:
-SANDBOX      TYPE      HOST                       PROXY         RULE                                                                                                  REASON                                  LAST SEEN         COUNT
-quickstart   network   telemetry.nextjs.org:443   transparent   no applicable policies for op(action=net:connect:tcp, resource=net:domain:telemetry.nextjs.org:443)   No matching allow rule (default deny)   16:11:06 30-Apr   2
-
-Allowed requests:
-SANDBOX      TYPE      HOST                                                                               PROXY            RULE             REASON   LAST SEEN         COUNT
-quickstart   network   api.anthropic.com:443                                                              forward          domain-allowed            16:18:46 30-Apr   11
-quickstart   network   registry.yarnpkg.com:443                                                           transparent      domain-allowed            16:11:04 30-Apr   1
-...
+```none
+  BLOCKED REQUESTS
+  SANDBOX           TYPE      HOST                                         PROXY     RULE                                                                                                                    REASON                                  LAST SEEN        COUNT
+  shell-Mathieu     network   docker.com:80                                forward   no applicable policies for op(action=net:connect:tcp, resource=net:domain:docker.com:80)                                No matching allow rule (default deny)   11:03:48 7-Nov   2
 ```
 
 Adding the `--json` flag will output the log details in a machine-readable JSON format.
@@ -46,29 +84,16 @@ Adding the `--json` flag will output the log details in a machine-readable JSON 
 
 As you can see, the list of allowed hosts is small to begin with. However, it is easy to modify the list.
 
-1. In your agent terminal, ask it to fetch the contents of example.com.
-
-    ```bash
-    ! curl example.com
-    ```
-
-    You should see output suggesting it was blocked:
-
-    ```console no-copy-button no-run-button
-    Blocked by network policy: domain example.com:80                                                                                  
-       detail: no matching allow rule — blocked by default deny policy
-    ```
-
-2. Use the `sbx policy allow network` command to allow communication with example.com:
+Use the `sbx policy allow network` command to allow communication with docker.com:
 
     ```bash terminal-id=host
-    sbx policy allow network example.com
+    sbx policy allow network docker.com
     ```
 
-3. Try the request to get example.com again:
+Try the request to get docker.com again:
 
     ```bash
-    ! curl example.com
+    curl docker.com
     ```
 
     It should work now!
@@ -120,5 +145,29 @@ sbx policy allow network localhost:11434
 ```
 
 Then inside the sandbox, point your client at `host.docker.internal:11434`.
+
+## Set the `2. Balanced` network policies profile for the rest of the lab
+
+Run this command to set the default:
+
+    ```bash terminal-id=host
+    sbx policy reset
+    ```
+
+The CLI restarts the daemon, resets policies, and shows the picker, choose the `2. Balanced   default deny, with common dev sites allowed` option.
+
+Check the configured policies:
+
+    ```bash
+    sbx policy ls
+    ```
+
+You should now see this:
+
+    ```none
+        POLICY             SOURCE   APPLIES TO   SUMMARY
+        default-deny-all   local    all          network: deny when no rule decides
+        local-policy       local    all          network: 195 allow; filesystem read: 1 allow; filesystem write: 1 allow
+    ```
 
 [[Prerequisites << Previous](00-prerequisites.md) | [Next >> Secrets and credentials](02-secrets-credentials.md)]

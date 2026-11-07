@@ -25,7 +25,7 @@ The `sbx create` command provisions a sandbox without attaching to it — useful
 4. With the sandbox created, start a new agent in it and attach to it:
 
     ```bash
-    sbx run quickstart
+    sbx run --name quickstart
     ```
 
     Docker Sandboxes starts Copilot with `--yolo` by default and trusts the workspace directory. This lets Copilot work in the project without repeated permission confirmations; you do not need to add the flag yourself.

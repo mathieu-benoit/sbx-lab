@@ -5,7 +5,7 @@ This exercise shows your agent working in **direct mode** — the default, where
 1. Reconnect to your sandbox:
 
     ```bash
-    sbx run quickstart
+    sbx run --name quickstart
     ```
 
 2. Run the existing test suite by giving your agent the following prompt:

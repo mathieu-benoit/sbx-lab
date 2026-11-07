@@ -5,8 +5,8 @@
 1. Store your GitHub token **now**, before creating a sandbox. The `-g` flag makes it global — available to all sandboxes you create:
 
     ```bash
-    echo "$(gh auth token)" | sbx secret set -g github
-    echo "$(gh auth token)" | sbx secret set -g copilot
+    sbx secret set github --command 'gh auth token'
+    sbx secret set copilot --command 'gh auth token'
     ```
 
     > [!IMPORTANT]
