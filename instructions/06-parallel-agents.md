@@ -48,7 +48,7 @@ The `prompts/` directory in this repo includes a ready-made prompt file for each
 1. Start one agent in a new terminal, giving it the prompt to implement search (the specification is provided in the `prompts` directory):
 
     ```bash terminal-id=parallel-agent-1
-    sbx run copilot --clone --name=add-search -- --allow-dangerously-skip-permissions "$(cat prompts/implement-search.txt)"
+    sbx run copilot --clone --name add-search -- --yolo -i "$(cat prompts/implement-search.txt)"
     ```
 
     > **Note**: the `"$(cat ...)"` must be quoted or the prompt won't be passed correctly
@@ -57,7 +57,7 @@ The `prompts/` directory in this repo includes a ready-made prompt file for each
 2. Launch a second agent in another terminal to implement notifications, giving it its specification:
 
     ```bash terminal-id=parallel-agent-2
-    sbx run copilot --clone --name=add-notif -- --allow-dangerously-skip-permissions "$(cat prompts/implement-notifications.txt)"
+    sbx run copilot --clone --name=add-notif -- --yolo -i "$(cat prompts/implement-notifications.txt)"
     ```
 
 Each sandbox gets its own isolated Git clone, so they read and write completely separate copies of the code with no conflicts. You'll see both sandboxes in `sbx ls`.
