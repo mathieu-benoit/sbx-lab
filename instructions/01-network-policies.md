@@ -18,37 +18,37 @@ sbx policy ls
 
 Run this command to set the default:
 
-    ```bash
-    sbx policy reset
-    ```
+```bash
+sbx policy reset
+```
 
 The CLI restarts the daemon, resets policies, and shows the picker, choose the `3. Locked Down  — All network traffic blocked unless you allow it.` option.
 
 Check the configured policies:
 
-    ```bash
-    sbx policy ls
-    ```
+```bash
+sbx policy ls
+```
 
 You should now see this:
 
-    ```none
-      POLICY             SOURCE   APPLIES TO   SUMMARY
-      default-deny-all   local    all          network: deny when no rule decides
-      local-policy       local    all          filesystem read: 1 allow; filesystem write: 1 allow
-    ```
+```none
+  POLICY             SOURCE   APPLIES TO   SUMMARY
+  default-deny-all   local    all          network: deny when no rule decides
+  local-policy       local    all          filesystem read: 1 allow; filesystem write: 1 allow
+```
 
 Run a simple Sandbox:
 
-    ```bash
-    sbx run shell
-    ```
+```bash
+sbx run shell
+```
 
 Once the sandbox is created, try to reach `docker.com` from there:
 
-    ```bash
-    curl docker.com
-    ```
+```bash
+curl docker.com
+```
 
 You will see this message:
 
@@ -86,15 +86,15 @@ As you can see, the list of allowed hosts is small to begin with. However, it is
 
 Use the `sbx policy allow network` command to allow communication with docker.com:
 
-    ```bash
-    sbx policy allow network docker.com
-    ```
+```bash
+sbx policy allow network docker.com
+```
 
 Try the request to get docker.com again:
 
-    ```bash
-    curl docker.com
-    ```
+```bash
+curl docker.com
+```
 
 It should work now!
 
@@ -123,16 +123,15 @@ Each policy statement you define manually is stored as a separate policy stateme
 
 1. Remove the allow rule for example.com with the following command:
 
-    ```bash terminal-id=host
-    sbx policy rm network --resource=example.com
-    ```
+```bash
+sbx policy rm network --resource=example.com
+```
 
 2. Remove the deny rule for ads.example.com with the following command:
 
-    ```bash terminal-id=host
-    sbx policy rm network --resource=ads.example.com
-    ```
-
+```bash
+sbx policy rm network --resource=ads.example.com
+```
 
 ## Reaching host services from inside the sandbox
 
@@ -150,24 +149,24 @@ Then inside the sandbox, point your client at `host.docker.internal:11434`.
 
 Run this command to set the default:
 
-    ```bash terminal-id=host
-    sbx policy reset
-    ```
+```bash terminal-id=host
+sbx policy reset
+```
 
 The CLI restarts the daemon, resets policies, and shows the picker, choose the `2. Balanced   default deny, with common dev sites allowed` option.
 
 Check the configured policies:
 
-    ```bash
-    sbx policy ls
-    ```
+```bash
+sbx policy ls
+```
 
 You should now see this:
 
-    ```none
-        POLICY             SOURCE   APPLIES TO   SUMMARY
-        default-deny-all   local    all          network: deny when no rule decides
-        local-policy       local    all          network: 195 allow; filesystem read: 1 allow; filesystem write: 1 allow
-    ```
+```none
+    POLICY             SOURCE   APPLIES TO   SUMMARY
+    default-deny-all   local    all          network: deny when no rule decides
+    local-policy       local    all          network: 195 allow; filesystem read: 1 allow; filesystem write: 1 allow
+```
 
 [[Prerequisites << Previous](00-prerequisites.md) | [Next >> Secrets and credentials](02-secrets-credentials.md)]
