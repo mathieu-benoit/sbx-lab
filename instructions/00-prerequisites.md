@@ -27,7 +27,13 @@ Every exercise depends on `sbx` running correctly on your host machine. **Do not
 
     If you need to login, complete the instructions on the screen to do so.
 
-3. This lab assumes your Docker account is not subject to organization AI Governance policies. Check the configured policies:
+3. Ensure your `sbx` setup has been successfully done by running this following command:
+
+    ```bash
+    sbx diagnose
+    ```
+
+4. This lab assumes your Docker account is not subject to organization AI Governance policies. Check the configured policies:
 
     ```bash
     sbx policy ls
