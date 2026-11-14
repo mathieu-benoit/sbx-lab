@@ -38,6 +38,21 @@ You should now see this:
   local-policy       local    all          filesystem read: 1 allow; filesystem write: 1 allow
 ```
 
+Try to reach `docker.com`:
+
+```bash
+sbx policy check network docker.com
+```
+
+You will see this message:
+
+```none
+    Denied:      docker.com:443
+    Governance:  Local policy only
+    Context:     global
+    Reason:      no matching allow rule (default deny)
+```
+
 Run a simple Sandbox:
 
 ```bash
@@ -90,7 +105,27 @@ Use the `sbx policy allow network` command to allow communication with docker.co
 sbx policy allow network docker.com
 ```
 
-Try the request to get docker.com again:
+Try to reach `docker.com`:
+
+```bash
+sbx policy check network docker.com
+```
+
+You will see this message:
+
+```none
+    Allowed:     docker.com:443
+    Governance:  Local policy only
+    Context:     global
+```
+
+Run to the Sandbox:
+
+```bash
+sbx run shell
+```
+
+Once in the sandbox, try to reach `docker.com` from there:
 
 ```bash
 curl docker.com
@@ -124,13 +159,13 @@ Each policy statement you define manually is stored as a separate policy stateme
 1. Remove the allow rule for example.com with the following command:
 
 ```bash
-sbx policy rm network --resource=example.com
+sbx policy rm network --resource example.com
 ```
 
 2. Remove the deny rule for ads.example.com with the following command:
 
 ```bash
-sbx policy rm network --resource=ads.example.com
+sbx policy rm network --resource ads.example.com
 ```
 
 ## Reaching host services from inside the sandbox
