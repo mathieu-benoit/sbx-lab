@@ -4,7 +4,15 @@ updates:
     directory: /project/backend
     schedule:
       interval: weekly
+    groups:
+      ci:
+        patterns:
+          - "*"
   - package-ecosystem: npm
     directory: /project/frontend
     schedule:
       interval: weekly
+    groups:
+      ci:
+        patterns:
+          - "*"
