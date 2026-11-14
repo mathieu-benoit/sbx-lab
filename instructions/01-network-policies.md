@@ -10,9 +10,9 @@ Every sandbox routes outbound HTTP/HTTPS through a host-side proxy that enforces
 
 To view the existing rules, use the `sbx policy ls` command:
 
-    ```bash
-    sbx policy ls
-    ```
+```bash
+sbx policy ls
+```
 
 ## Test the `Locked Down` network policies profile
 
