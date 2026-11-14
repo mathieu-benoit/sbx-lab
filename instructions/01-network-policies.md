@@ -10,15 +10,15 @@ Every sandbox routes outbound HTTP/HTTPS through a host-side proxy that enforces
 
 To view the existing rules, use the `sbx policy ls` command:
 
-```bash terminal-id=host
-sbx policy ls
-```
+    ```bash
+    sbx policy ls
+    ```
 
 ## Test the `Locked Down` network policies profile
 
 Run this command to set the default:
 
-    ```bash terminal-id=host
+    ```bash
     sbx policy reset
     ```
 
@@ -86,7 +86,7 @@ As you can see, the list of allowed hosts is small to begin with. However, it is
 
 Use the `sbx policy allow network` command to allow communication with docker.com:
 
-    ```bash terminal-id=host
+    ```bash
     sbx policy allow network docker.com
     ```
 
@@ -96,7 +96,7 @@ Try the request to get docker.com again:
     curl docker.com
     ```
 
-    It should work now!
+It should work now!
 
 > [!TIP]
 > You can allow multiple hosts in a single command or even use wildcards
