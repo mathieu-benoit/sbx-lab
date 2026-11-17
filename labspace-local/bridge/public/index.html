@@ -140,7 +140,7 @@
       };
     }
 
-    // Only one page sends input to the shells (see server.js): the one you use takes over.
+    // Only one page sends input to the shells (see main.go): the one you use takes over.
     for (const type of ["keydown", "mousedown", "focus"]) {
       window.addEventListener(type, () => sendMsg({ t: "claim" }), true);
     }

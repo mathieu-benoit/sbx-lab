@@ -1,48 +1,58 @@
 #!/usr/bin/env bash
 # Starts the lab as a Labspace whose terminal runs on this machine:
-#   - the bridge (bridge/server.js) on http://localhost:8085, natively, with your shell
+#   - the bridge (bridge/) on http://localhost:8085, natively, with your shell
 #   - the Labspace interface in a container on http://localhost:3030
-# Ctrl-C stops both.
+# Ctrl-C stops both. Needs Docker only: the bridge is a binary downloaded from the repository's
+# releases, and checked against bridge/release.lock (or, without a release, built in a container). On Windows without Git Bash, use start.ps1.
 #
 # Running it again while the Labspace runs is safe: it reuses the running bridge, makes sure the
 # interface is up, opens the browser and returns.
+#
+# Environment: LABSPACE_BRIDGE (a bridge binary to use instead, e.g. one you built),
+# LABSPACE_NO_OPEN (don't open the browser), LABSPACE_INTERFACE_IMAGE, BRIDGE_PORT.
 set -euo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
 export BRIDGE_PORT="${BRIDGE_PORT:-8085}"
 url="http://localhost:3030"
 export LABSPACE_INTERFACE_IMAGE="${LABSPACE_INTERFACE_IMAGE:-dockersamples/labspace-interface:latest}"
+compose=(docker compose -f "$here/compose.yaml")
+# The image that builds the bridge when bridge/release.lock names no release
+go_image="golang:1.25-alpine"
 
-command -v node >/dev/null || { echo "Node.js 20+ is required for the bridge." >&2; exit 1; }
 command -v docker >/dev/null || { echo "Docker is required for the Labspace interface." >&2; exit 1; }
 
 # The token the interface sends to the bridge with every Run and Save. It is kept in a file
 # (readable by you only), so that the bridge and the interface of every start agree on it.
 token_file="$here/.token"
 if [ ! -s "$token_file" ]; then
-  (umask 077 && node -e 'console.log(require("crypto").randomBytes(24).toString("hex"))' > "$token_file")
+  (umask 077 && od -An -tx1 -N24 /dev/urandom | tr -d ' \n' > "$token_file")
 fi
-LABSPACE_TOKEN="$(cat "$token_file")"
+LABSPACE_TOKEN="$(tr -d ' \r\n' < "$token_file")"
 export LABSPACE_TOKEN
+
+# On Linux, the content containers write .content and .ui as you
+if [ "$(uname -s)" = Linux ]; then
+  LABSPACE_USER="$(id -u):$(id -g)"
+  export LABSPACE_USER
+fi
+# Created here, so that Docker doesn't create them (as root, and index.html as a folder)
+mkdir -p "$here/.content" "$here/.ui"
+[ -e "$here/.ui/index.html" ] || : > "$here/.ui/index.html"
 
 open_browser() {
   if [ -n "${LABSPACE_NO_OPEN:-}" ]; then :
   elif command -v open >/dev/null; then open "$url"
   elif command -v xdg-open >/dev/null; then xdg-open "$url" >/dev/null 2>&1
+  elif command -v cmd.exe >/dev/null; then cmd.exe //c start "" "$url" # Windows (Git Bash)
   fi
 }
-
-# The interface's own index.html, with theme.css added: it gives the Labspace the look of the
-# simulated lab. Taken from the image, so it always matches the image's assets.
-docker image inspect "$LABSPACE_INTERFACE_IMAGE" >/dev/null 2>&1 || docker pull -q "$LABSPACE_INTERFACE_IMAGE" >/dev/null
-docker run --rm --entrypoint /bin/cat "$LABSPACE_INTERFACE_IMAGE" /usr/local/app/public/index.html \
-  | node "$here/content.mjs" --themed-index "$here/.ui/index.html"
 
 # Already running? Then the bridge answers its health check: keep it and its shells, make sure the
 # interface is up (Compose leaves it alone when nothing changed), and leave the running start in
 # charge of stopping everything.
-if curl -fsS --max-time 2 "http://127.0.0.1:$BRIDGE_PORT/healthz" >/dev/null 2>&1; then
-  docker compose -f "$here/compose.yaml" up -d --pull missing --wait
+if curl -fsS --max-time 2 "http://127.0.0.1:$BRIDGE_PORT/healthz" -H "Host: localhost:$BRIDGE_PORT" >/dev/null 2>&1; then
+  "${compose[@]}" up -d --pull missing --wait interface content
   echo
   echo "Labspace already running: $url"
   echo "Stop it with Ctrl-C where it was started."
@@ -54,33 +64,90 @@ if (exec 3<>"/dev/tcp/127.0.0.1/$BRIDGE_PORT") 2>/dev/null; then
   exit 1
 fi
 
-if [ ! -d "$here/bridge/node_modules/yaml" ]; then
-  echo "Installing the bridge dependencies..."
-  (cd "$here/bridge" && npm install --no-audit --no-fund --loglevel=error)
-fi
-# node-pty ships macOS and Windows binaries; its install script, which recent npm versions may skip,
-# is what makes the macOS helper executable.
-chmod +x "$here"/bridge/node_modules/node-pty/prebuilds/darwin-*/spawn-helper 2>/dev/null || true
+# ---------------------------------------------------------------- the bridge binary
+
+sha256() {
+  if command -v sha256sum >/dev/null; then sha256sum "$1" | cut -d' ' -f1
+  else shasum -a 256 "$1" | cut -d' ' -f1
+  fi
+}
+
+bridge_binary() {
+  if [ -n "${LABSPACE_BRIDGE:-}" ]; then
+    echo "$LABSPACE_BRIDGE"
+    return
+  fi
+  local os arch ext="" name repo version expected bin
+  case "$(uname -s)" in
+    Darwin) os=darwin ;;
+    Linux) os=linux ;;
+    MINGW* | MSYS* | CYGWIN*) os=windows ext=.exe ;;
+    *) echo "No bridge for $(uname -s)." >&2; return 1 ;;
+  esac
+  case "$(uname -m)" in
+    x86_64 | amd64) arch=amd64 ;;
+    arm64 | aarch64) arch=arm64 ;;
+    *) echo "No bridge for $(uname -m)." >&2; return 1 ;;
+  esac
+  name="labspace-bridge-$os-$arch$ext"
+  repo="$(awk '$1 == "repo" { print $2 }' "$here/bridge/release.lock")"
+  version="$(awk '$1 == "version" { print $2 }' "$here/bridge/release.lock")"
+  expected="$(awk -v n="$name" '$2 == n { print $1 }' "$here/bridge/release.lock")"
+
+  if [ -z "$version" ]; then
+    # No release yet: build it from source, in the Go image (Go isn't needed on your machine).
+    # The Go caches are kept in a volume, so later builds take seconds.
+    echo "Building the bridge..." >&2
+    mkdir -p "$here/.bin"
+    # Host paths as Windows paths in Git Bash, and no conversion of the container paths
+    local src out
+    src="$(cd "$here/bridge" && { pwd -W 2>/dev/null || pwd; })"
+    out="$(cd "$here/.bin" && { pwd -W 2>/dev/null || pwd; })"
+    MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL="*" docker run --rm \
+      -v "$src:/src" -v "$out:/out" -v labspace-bridge-go-cache:/cache -w /src \
+      -e GOCACHE=/cache/build -e GOMODCACHE=/cache/mod -e CGO_ENABLED=0 -e TARGET="$os/$arch" \
+      -e OWNER="$(id -u):$(id -g)" -e BIN="labspace-bridge-dev$ext" \
+      "$go_image" sh -c 'go generate ./... &&
+        GOOS="${TARGET%/*}" GOARCH="${TARGET#*/}" go build -trimpath -o "/out/$BIN" . &&
+        chown -R "$OWNER" "/out/$BIN" public/vendor' >&2
+    echo "$here/.bin/labspace-bridge-dev$ext"
+    return
+  fi
+  [ -n "$expected" ] || { echo "bridge/release.lock has no checksum for $name." >&2; return 1; }
+
+  bin="$here/.bin/$version/$name"
+  if [ ! -x "$bin" ] || [ "$(sha256 "$bin")" != "$expected" ]; then
+    echo "Downloading the bridge $version ($name)..." >&2
+    mkdir -p "$(dirname "$bin")"
+    curl -fsSL --retry 2 -o "$bin.part" "https://github.com/$repo/releases/download/$version/$name"
+    if [ "$(sha256 "$bin.part")" != "$expected" ]; then
+      rm -f "$bin.part"
+      echo "The downloaded bridge doesn't match its checksum in bridge/release.lock: not using it." >&2
+      return 1
+    fi
+    chmod +x "$bin.part"
+    mv -f "$bin.part" "$bin"
+  fi
+  echo "$bin"
+}
+
+bridge="$(bridge_binary)"
 
 cleanup() {
   trap - EXIT INT TERM
   echo
   echo "Stopping..."
-  docker compose -f "$here/compose.yaml" down --remove-orphans >/dev/null 2>&1 || true
+  "${compose[@]}" down --remove-orphans >/dev/null 2>&1 || true
   [ -n "${bridge_pid:-}" ] && kill "$bridge_pid" 2>/dev/null || true
-  [ -n "${content_pid:-}" ] && kill "$content_pid" 2>/dev/null || true
 }
 trap cleanup EXIT INT TERM
 
-# instructions/ as the Labspace shows it (without the GitHub navigation footers), kept current
-node "$here/content.mjs" "$here/.content"
-node "$here/content.mjs" "$here/.content" --watch &
-content_pid=$!
-
-node "$here/bridge/server.js" &
+# The shells start in the root of the repository
+# (as a Windows path in Git Bash, for the Windows binary)
+LABSPACE_WORKSPACE="${LABSPACE_WORKSPACE:-$(cd "$here/.." && { pwd -W 2>/dev/null || pwd; })}" "$bridge" &
 bridge_pid=$!
 
-docker compose -f "$here/compose.yaml" up -d --pull missing --wait
+"${compose[@]}" up -d --pull missing --wait interface content
 
 echo
 echo "Labspace ready: $url"

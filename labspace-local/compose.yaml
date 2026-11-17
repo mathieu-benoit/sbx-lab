@@ -1,9 +1,39 @@
 # Labspace interface only: the instructions on the left, and on the right the terminal
-# served by the bridge (bridge/server.js) that runs on your machine, not in a container.
-# Start it with ./start.sh, which also starts the bridge and sets LABSPACE_TOKEN.
+# served by the bridge (bridge/) that runs on your machine, not in a container.
+# Start it with ./start.sh (or start.ps1), which also starts the bridge and sets LABSPACE_TOKEN.
+
+# content.mjs, run with the Node.js and the yaml package of the interface image, so that nothing
+# but Docker and the bridge is needed on your machine
+x-content: &content
+  image: ${LABSPACE_INTERFACE_IMAGE:-dockersamples/labspace-interface:latest}
+  entrypoint: ["node", "/repo/labspace-local/content.mjs"]
+  # The owner of the files it writes (start.sh sets your own on Linux)
+  user: ${LABSPACE_USER:-1000:1000}
+  volumes:
+    - ..:/repo:ro
+    - ./.content:/out/content
+    - ./.ui:/out/ui
+
 services:
+  # instructions/ as the Labspace shows it (without the GitHub navigation footers), and the
+  # interface's index.html with theme.css and labspace-ui.js
+  content-init:
+    <<: *content
+    command: ["/out/content", "--themed-index", "/out/ui/index.html", "/usr/local/app/public/index.html"]
+
+  # Keeps .content current while the Labspace runs, so edits show on refresh
+  content:
+    <<: *content
+    command: ["/out/content", "--watch"]
+    depends_on:
+      content-init:
+        condition: service_completed_successfully
+
   interface:
     image: ${LABSPACE_INTERFACE_IMAGE:-dockersamples/labspace-interface:latest}
+    depends_on:
+      content-init:
+        condition: service_completed_successfully
     ports:
       - "127.0.0.1:3030:3030"
     environment:
@@ -17,11 +47,10 @@ services:
       # Already set by Docker Desktop; needed on Docker Engine for Linux
       - host.docker.internal:host-gateway
     volumes:
-      # instructions/ without the GitHub navigation footers, kept current by content.mjs --watch
       - ./.content:/labspace/instructions:ro
       - ./metadata.json:/etc/labspace-support/metadata/metadata.json:ro
       # Read at start-up by the VS Code workspace service, which the ttyd mode doesn't use
       - ./unused-signing.key:/etc/labspace-support/private-key/labspace.key:ro
-      # The look of the simulated lab (simspace/): the image's index.html, which also loads theme.css and the
-      # header and milestones of labspace-ui.js, served from .content (see start.sh and content.mjs)
+      # The look of the simulated lab (simspace/): the image's index.html, which also loads theme.css
+      # and the header and milestones of labspace-ui.js, served from .content (content-init)
       - ./.ui/index.html:/usr/local/app/public/index.html:ro

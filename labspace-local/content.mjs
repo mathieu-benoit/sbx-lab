@@ -10,8 +10,10 @@
 // - labspace-ui.json carries what the header, the milestones and the code-block labels (host,
 //   sandbox, or the language) need (labspace-ui.js).
 //
-//   node labspace-local/content.mjs <out-dir> [--watch]
-//   node labspace-local/content.mjs --themed-index <out-file> < index.html
+//   node labspace-local/content.mjs [<out-dir>] [--watch] [--themed-index <out-file> [<index.html>]]
+//
+// start.sh runs it in the Labspace interface's own image (compose.yaml), which has Node.js and the
+// yaml package: the theme is added to that image's index.html, and nothing is needed on your machine.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -130,8 +132,8 @@ export function withTheme(html, base = "/") {
 }
 
 function yamlParser() {
-  // Installed with the bridge's dependencies
-  return createRequire(path.join(here, "bridge", "package.json"))("yaml").parse;
+  // From the current folder: the interface image's app (/usr/local/app) has the yaml package
+  return createRequire(path.join(process.cwd(), "noop.js"))("yaml").parse;
 }
 
 // The theme and the header/milestones script, served with the content: the content is a mounted
@@ -152,36 +154,62 @@ export function writeContent(outDir, parse = yamlParser()) {
   for (const [from, to] of Object.entries(UI_FILES)) fs.copyFileSync(path.join(here, from), path.join(outDir, to));
 }
 
+// The modification times of the files the content is made of
+function signature() {
+  const files = [
+    ...fs.readdirSync(instructionsDir).map((name) => path.join(instructionsDir, name)),
+    ...Object.keys(UI_FILES).map((name) => path.join(here, name)),
+  ];
+  return files
+    .map((file) => {
+      try {
+        const stat = fs.statSync(file);
+        return `${file}:${stat.mtimeMs}:${stat.size}`;
+      } catch {
+        return `${file}:gone`;
+      }
+    })
+    .join("\n");
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
-if (isMain && process.argv[2] === "--themed-index") {
-  // node content.mjs --themed-index <out-file> < index.html
-  const html = fs.readFileSync(0, "utf8");
-  fs.mkdirSync(path.dirname(process.argv[3]), { recursive: true });
-  fs.writeFileSync(process.argv[3], withTheme(html));
-} else if (isMain) {
-  const outDir = process.argv[2];
-  if (!outDir) {
-    console.error("usage: node content.mjs <out-dir> [--watch]");
+if (isMain) {
+  const args = process.argv.slice(2);
+  const watch = args.includes("--watch");
+  const themed = args.indexOf("--themed-index");
+  const [indexOut, indexIn] = themed >= 0 ? args.slice(themed + 1, themed + 3).filter((a) => !a.startsWith("--")) : [];
+  const outDir = args[0] && !args[0].startsWith("--") ? args[0] : null;
+  if ((!outDir && themed < 0) || (themed >= 0 && !indexOut)) {
+    console.error("usage: node content.mjs [<out-dir>] [--watch] [--themed-index <out-file> [<index.html>]]");
     process.exit(1);
   }
-  writeContent(outDir);
-  if (process.argv.includes("--watch")) {
-    // Keep the copy current while the Labspace runs, so edits show on refresh.
-    // Editors and git replace files (delete, then create): a copy can catch a file that is gone,
-    // so a failed copy is retried on the next change instead of stopping the watcher.
-    let timer;
-    const update = () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
+
+  if (themed >= 0) {
+    // The interface's index.html, from a file or stdin, with the theme
+    const html = fs.readFileSync(indexIn || 0, "utf8");
+    fs.mkdirSync(path.dirname(indexOut), { recursive: true });
+    // Written in place: the file is mounted on its own in the interface container, and a mounted
+    // single file keeps showing the old one when it is replaced
+    fs.writeFileSync(indexOut, withTheme(html));
+  }
+  if (outDir) {
+    writeContent(outDir);
+    if (watch) {
+      // Keep the copy current while the Labspace runs, so edits show on refresh. Polled: file
+      // events don't reach a container from a Windows folder, and editors and git replace files.
+      let last = signature();
+      setInterval(() => {
+        const now = signature();
+        if (now === last) return;
+        last = now;
         try {
           writeContent(outDir);
         } catch (err) {
           console.error(`content.mjs: ${err.message}; retrying on the next change`);
+          last = null;
         }
-      }, 150);
-    };
-    fs.watch(instructionsDir, update);
-    fs.watch(here, (_, name) => name in UI_FILES && update());
+      }, 1000);
+    }
   }
 }

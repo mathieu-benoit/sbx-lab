@@ -128,7 +128,9 @@ body {
 .workshop-body h3 { font-size: 18px; font-weight: 700; margin: 28px 0 12px; }
 .workshop-body h4 { font-size: 16px; font-weight: 700; margin: 24px 0 10px; }
 
-.workshop-body :not(pre) > code {
+/* Inline code only: the interface renders code blocks in a div, not a pre, so they are excluded by
+   class (an inline padding there would indent only their first line) */
+.workshop-body :not(pre) > code:not(.code-block code) {
   background: var(--wp-code-inline-bg);
   color: var(--wp-code-inline-text);
   font-size: 0.86em;

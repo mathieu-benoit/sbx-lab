@@ -1,0 +1,6 @@
+# The bridge binaries that start.sh and start.ps1 download, from the repository's releases.
+# Written by bridge/lock.sh after the bridge-release workflow has published a release:
+#   labspace-local/bridge/lock.sh bridge-v0.1.0
+# Without a version, the start scripts build the bridge from source, in the golang image.
+repo mathieu-benoit/sbx-lab
+version
