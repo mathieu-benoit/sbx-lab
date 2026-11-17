@@ -97,7 +97,7 @@ export function codeBlocks(markdown) {
     const [language = "", ...meta] = fence[1].trim().split(/\s+/);
     const id = meta.find((m) => m.startsWith("id="))?.slice(3) || null;
     const shown = language === "sh" || language === "console" ? "bash" : language || "text";
-    blocks.push({ label: id || shown, id });
+    blocks.push({ label: id || shown, id, language: shown });
   }
   return blocks;
 }
