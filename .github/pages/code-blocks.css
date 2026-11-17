@@ -17,6 +17,25 @@
 .code-block-label:has(> span[title="sandbox"]) > .code-block-label-icon::before {
   content: "deployed_code";
 }
+/* A yaml block is a file to read: it keeps the file icon, wherever it is */
+.code-block:has(code.language-yaml) .code-block-label:has(> span[title="host"]) > .code-block-label-icon::before {
+  content: "draft";
+}
+
+/* A Dockerfile gets the Docker whale: the site's own docker.svg (the header logo, next to this
+   file), as a mask painted in the icon's colour. Last, so it wins over the rules above. */
+.code-block:has(code.language-dockerfile) .code-block-label > .code-block-label-icon {
+  font-size: 0;
+}
+.code-block:has(code.language-dockerfile) .code-block-label > .code-block-label-icon::before {
+  content: "";
+  display: inline-block;
+  width: calc(var(--cb-fs-label, 0.72rem) * 1.4);
+  height: calc(var(--cb-fs-label, 0.72rem) * 1.4);
+  background: currentColor;
+  -webkit-mask: url("docker.svg") center / contain no-repeat;
+  mask: url("docker.svg") center / contain no-repeat;
+}
 
 /* A sandbox block's header is blue, so you see at a glance that the command runs in the sandbox
    (same colours as labspace-local/theme.css) */

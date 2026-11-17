@@ -103,7 +103,13 @@
   // ("host" or "sandbox"), or its language. The interface numbers its blocks (data-code-index);
   // labspace-ui.json lists them in the same order. Added last and shown first (order: -1), so the
   // interface's own first child keeps its styles.
-  const SANDBOX_ICON = "deployed_code";
+  // Material Symbols: a box for the sandbox, a file for a yaml file, a terminal otherwise; a
+  // Dockerfile gets the Docker whale instead (theme.css draws it from docker.svg)
+  const icon = (info) => (info.id === "sandbox" ? "deployed_code" : info.language === "yaml" ? "draft" : "terminal");
+  const iconElement = (info) =>
+    info.language === "dockerfile"
+      ? el("span", "lsui-code-label-icon lsui-code-label-docker")
+      : el("span", "lsui-code-label-icon material-symbols-outlined", icon(info));
   function renderCodeLabels(section) {
     for (const block of document.querySelectorAll(".workshop-body .code-block")) {
       const index = Number(block.querySelector("[data-code-index]")?.getAttribute("data-code-index"));
@@ -119,7 +125,7 @@
       label = el("div", "lsui-code-label");
       label.dataset.label = info.label;
       label.append(
-        el("span", "lsui-code-label-icon material-symbols-outlined", info.id === "sandbox" ? SANDBOX_ICON : "terminal"),
+        iconElement(info),
         el("span", "lsui-code-label-text", info.label),
       );
       block.append(label);

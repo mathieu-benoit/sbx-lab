@@ -86,7 +86,7 @@ Run the commands of this module from the root of the repository.
     sbx kit inspect sbx/copilot --format yaml
     ```
 
-    ```yaml
+    ```yaml id=host
     schemaVersion: "3"
     kind: sandbox
     name: copilot
@@ -131,7 +131,7 @@ It uses more of the format than the Copilot kit:
 
 Writing a kit is mostly writing YAML. The DevBoard project includes a small mixin, [`project/kits/python/python.yaml`](../project/kits/python/python.yaml), that adds Python to an agent's sandbox, so your agent doesn't have to install it by hand.
 
-```yaml
+```yaml id=host
 # syntax=docker/sandbox-kit:3
 schemaVersion: "3"
 kind: mixin
@@ -200,7 +200,7 @@ To share a kit, publish it in a Git repository or an OCI registry (`sbx kit push
 
 The Python kit installs its tool when the sandbox is created, so its network policy must open the Debian hosts during that install. A kit can also bring a Dockerfile and install its tools **when the kit itself is built**, on your machine, before any sandbox exists. The project includes a second mixin made that way, [`project/kits/trivy/`](../project/kits/trivy/), adapted from Docker's [trivy-mixin kit](https://github.com/docker/sbx-kits-contrib/tree/v3/trivy-mixin). It adds [Trivy](https://trivy.dev/), Aqua's open source vulnerability scanner, to an agent's sandbox:
 
-```yaml
+```yaml id=host
 # syntax=docker/sandbox-kit:3
 schemaVersion: "3"
 kind: mixin
@@ -280,7 +280,7 @@ The next two sections show two more ways to package what you just did. They're h
 
 In this lab you add mixins to the Copilot kit with `--kit` each time you create a sandbox: the Python kit, and in [MCP servers](10-mcp-servers.md), the Trivy kit. A [kit set](https://docs.docker.com/ai/sandboxes/customize/author/kit-sets/) (Early Access) packages such a combination as a single kit, so your team runs one reference, with the versions you chose:
 
-```yaml
+```yaml id=host
 # syntax=docker/sandbox-kit:3
 schemaVersion: "3"
 kind: set
@@ -304,7 +304,7 @@ A kit packages tools. An [environment file](https://docs.docker.com/ai/sandboxes
 
 The repository doesn't include one, but this file, saved as `sbxenv.yaml` at the root of the repository, would gather the setup you'll do step by step in the next modules:
 
-```yaml
+```yaml id=host
 schemaVersion: "1"
 name: quickstart
 agent: copilot

@@ -246,6 +246,17 @@ body {
   color: rgba(255, 255, 255, 0.4);
 }
 
+/* A Dockerfile's icon: the Docker whale, docker.svg (the header logo, served next to this file)
+   as a mask painted in the icon's colour (as in .github/pages/code-blocks.css) */
+.workshop-body .code-block > .lsui-code-label .lsui-code-label-docker {
+  display: inline-block;
+  width: 1.4em;
+  height: 1.4em;
+  background: currentColor;
+  -webkit-mask: url("docker.svg") center / contain no-repeat;
+  mask: url("docker.svg") center / contain no-repeat;
+}
+
 /* A sandbox block's header is blue, so you see at a glance that the command runs in the sandbox
    (same colours as .github/pages/code-blocks.css) */
 .workshop-body .code-block > .lsui-code-label[data-label="sandbox"] {

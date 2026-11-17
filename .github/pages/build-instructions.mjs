@@ -11,7 +11,7 @@
 //   - links to other files of the repository (../project/...) point to GitHub
 //   - the [[<< Previous | Next >>]] lines are dropped: the runtime has its own Previous/Next
 //   - code blocks get no-run-button and lose terminal-id=: there's no terminal to run them in
-//     (the Copy button stays)
+//     (the Copy button stays, except on none blocks, which are outputs)
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -58,6 +58,8 @@ function convert(src) {
     if (fence) {
       let info = fence[3].replace(/\s*terminal-id=\S+/g, "");
       if (!inFence && info.trim() && !info.trim().startsWith("mermaid")) info += " no-run-button";
+      // A none block is a command's output, to read: nothing to copy either (as in labspace/)
+      if (!inFence && info.trim().split(/\s+/)[0] === "none") info += " no-copy-button";
       inFence = !inFence;
       lines.push(fence[1] + fence[2] + info);
       continue;

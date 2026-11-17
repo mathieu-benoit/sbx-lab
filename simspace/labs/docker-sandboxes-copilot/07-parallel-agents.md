@@ -76,7 +76,7 @@ This module uses several terminals on your host, all opened at the root of the r
 
 3. Give your agent the following prompt to fix the last failing test:
 
-    ```prompt
+    ```prompt id=sandbox
     One test is still failing: test_updated_at_changes_on_update. The updated_at columns in project/backend/app/models.py are never refreshed when a row is updated. Fix the bug, run the tests to confirm it, and commit with a descriptive message.
     ```
 
@@ -100,7 +100,7 @@ This module uses several terminals on your host, all opened at the root of the r
 
     Once merged, exit the `fix-bugs` session in Terminal 1:
 
-    ```prompt terminal-id=t1
+    ```prompt id=sandbox terminal-id=t1
     /exit
     ```
 
@@ -192,22 +192,22 @@ After fetching, each agent's commits are available as remote-tracking branches, 
 
     Then give the agent this prompt:
 
-    ```prompt terminal-id=t2
+    ```prompt id=sandbox terminal-id=t2
     Run the full test suite and report the results.
     ```
 
     All the tests should now pass, including the search test and the new notification tests. Exit the session:
 
-    ```prompt terminal-id=t2
+    ```prompt id=sandbox terminal-id=t2
     /exit
     ```
 
 4. Finally, leave the two agent sessions that are still open in Terminals 1 and 3:
 
-    ```prompt terminal-id=t1
+    ```prompt id=sandbox terminal-id=t1
     /exit
     ```
 
-    ```prompt terminal-id=t3
+    ```prompt id=sandbox terminal-id=t3
     /exit
     ```

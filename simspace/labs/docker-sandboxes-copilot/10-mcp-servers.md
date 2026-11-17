@@ -96,7 +96,7 @@ graph LR
 
     Then give it this prompt:
 
-    ```prompt terminal-id=t2
+    ```prompt id=sandbox terminal-id=t2
     For both the frontend and the backend app, from their Dockerfiles, find the runtime Docker Hardened Image (not a -dev variant) that matches it and how many known CVEs it has. At the end, list the tools you called.
     ```
 
@@ -110,7 +110,7 @@ graph LR
 
 5. Exit the session, then look at the sandbox's network activity:
 
-    ```prompt terminal-id=t2
+    ```prompt id=sandbox terminal-id=t2
     /exit
     ```
 
