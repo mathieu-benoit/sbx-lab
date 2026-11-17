@@ -54,7 +54,7 @@ graph LR
 
 2. Give your agent the following prompt:
 
-    ```prompt
+    ```prompt id=sandbox
     Start the full application stack using Docker Compose.
     Once everything is healthy:
     1. Confirm the backend API is responding at http://localhost:8000/health
@@ -70,7 +70,7 @@ graph LR
 
 3. From inside the agent session, list the running containers:
 
-    ```prompt
+    ```prompt id=sandbox
     !docker ps
     ```
 

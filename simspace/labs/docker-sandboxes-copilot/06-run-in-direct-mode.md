@@ -41,7 +41,7 @@ graph LR
 
 2. Run the existing test suite by giving your agent the following prompt:
 
-    ```prompt
+    ```prompt id=sandbox
     Set up the Python environment for the FastAPI backend and run the test suite.
     Report:
     - Which tests pass
@@ -62,7 +62,7 @@ graph LR
 
 3. Ask your agent to fix the pagination bug:
 
-    ```prompt
+    ```prompt id=sandbox
     Two tests are failing because of a pagination bug. Fix it:
 
     1. test_pagination_first_page_returns_results
@@ -78,7 +78,7 @@ graph LR
 
 4. Confirm the result:
 
-    ```prompt
+    ```prompt id=sandbox
     Run the full test suite and report the results.
     ```
 
@@ -86,7 +86,7 @@ graph LR
 
 5. Exit the agent session, then review the change on your host:
 
-    ```prompt
+    ```prompt id=sandbox
     /exit
     ```
 

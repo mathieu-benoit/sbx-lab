@@ -97,7 +97,7 @@ sbx run shell --name shell-demo
 
 Your prompt changes: you're now inside the sandbox. Try to reach `docker.com` from there:
 
-```prompt
+```prompt id=sandbox
 curl docker.com
 ```
 
@@ -105,7 +105,7 @@ The request never left your machine: the host-side proxy blocked it and filed a 
 
 Leave this sandbox to return to your host:
 
-```prompt
+```prompt id=sandbox
 /exit
 ```
 
@@ -139,13 +139,13 @@ Reconnect to the sandbox and try again, showing only the response headers:
 sbx run --name shell-demo
 ```
 
-```prompt
+```prompt id=sandbox
 curl -I docker.com
 ```
 
 This time `docker.com` answers itself, with a `301 Moved Permanently` redirect to HTTPS, instead of the proxy's approval message.
 
-```prompt
+```prompt id=sandbox
 /exit
 ```
 

@@ -43,7 +43,7 @@ graph LR
 
 First, if the `quickstart` agent session from the *Docker inside the sandbox* module is still open in Terminal 1, leave it:
 
-```prompt terminal-id=t1
+```prompt id=sandbox terminal-id=t1
 /exit
 ```
 
