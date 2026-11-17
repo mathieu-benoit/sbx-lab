@@ -17,6 +17,10 @@
 .code-block-label:has(> span[title="sandbox"]) > .code-block-label-icon::before {
   content: "deployed_code";
 }
+/* A yaml block is a file to read: it keeps the file icon, wherever it is */
+.code-block:has(code.language-yaml) .code-block-label:has(> span[title="host"]) > .code-block-label-icon::before {
+  content: "draft";
+}
 
 /* A sandbox block's header is blue, so you see at a glance that the command runs in the sandbox
    (same colours as labspace-local/theme.css) */

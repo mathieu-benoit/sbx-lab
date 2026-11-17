@@ -34,8 +34,8 @@ for (const file of dirs.flatMap(files)) {
     open = true;
     const meta = fence[3].trim().split(/\s+/);
     if (meta.some((m) => m.startsWith("filename=") || m.startsWith("save-as"))) continue;
-    // A yaml block is a file to read: filename=yaml keeps its "yaml" label and gives it the
-    // runtime's file icon (code-blocks.css only changes the host and sandbox icons)
+    // A yaml block without an id is a file to read: filename=yaml keeps its "yaml" label and
+    // gives it the runtime's file icon (code-blocks.css keeps that icon for yaml host blocks too)
     const id = meta.find((m) => m.startsWith("id="))?.slice(3) || (meta[0] === "yaml" ? "yaml" : null);
     if (!id) continue;
     lines[i] = `${fence[1]}${fence[2]}${[...meta, `filename=${id}`].join(" ")}`;

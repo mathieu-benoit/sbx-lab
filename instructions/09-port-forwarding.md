@@ -103,7 +103,7 @@ graph LR
 
 `sbx port publish` publishes a port after the sandbox exists. A [kit](02-kits.md) can declare the ports its sandbox serves instead, with the `com.docker.sandbox/port@1` capability: the port is then published as soon as the sandbox is created, for everyone who uses the kit. The project includes a small mixin for the API's port, [`project/kits/api-port/api-port.yaml`](../project/kits/api-port/api-port.yaml):
 
-```yaml
+```yaml id=host
 # syntax=docker/sandbox-kit:3
 schemaVersion: "3"
 kind: mixin
