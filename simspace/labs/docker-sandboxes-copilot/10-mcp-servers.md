@@ -104,7 +104,7 @@ graph LR
 
     > **Note:** most hardened images come in two variants. The **runtime** image is minimal: no shell, no package manager. The **`-dev`** variant adds them (pip, npm, a shell…) for building, and is meant for the build stage of a multi-stage Dockerfile. Because DevBoard's Dockerfiles install packages, an agent left to choose tends to pick the `-dev` variants, which is why the prompt asks for the runtime image. The difference shows in a scan of the Debian-based images: `dhi.io/python:3.12-debian13-dev` had 414 vulnerabilities in a test run, against 54 for `dhi.io/python:3.12`.
 
-    > **Note:** the CVE counts the agent reports come from the DHI catalog's scan summary (read through the MCP server), so they won't match the Trivy numbers below, which come from scanning the images yourself with Trivy's database and the VEX statements. Compare the hardened image with the original within one source, not across them.
+    > **Note:** the CVE counts the agent reports come from the DHI catalog's scan summary (read through the MCP server), so they won't match the Trivy numbers below, which come from scanning the images yourself with Trivy's database and the VEX statements. For example, the catalog reported 1 high CVE for `dhi.io/python:3.12-alpine` in a test run, while the Trivy scan below finds 0. Compare the hardened image with the original within one source, not across them.
 
     > **Important:** the DHI server also has tools that change things (creating and removing mirrors in your Docker organization). The prompt only asks the agent to look things up, and to list the tools it called: check that list.
 
