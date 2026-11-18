@@ -102,7 +102,7 @@ graph LR
     sbx policy ls
     ```
 
-    A new `kit` policy applies only to `sandbox:quickstart`. Inspect it (`sbx policy inspect <POLICY>`) to see Copilot's own hosts, plus the apt and PyPI hosts your kit declared. These rules add to your **Locked Down** policy, for this sandbox only.
+    A new `kit` policy applies only to `sandbox:quickstart`. Its name, in the `POLICY` column, is an ID such as `0e9c5242-cd95-4d02-89c3-0f6181c07dbd`: copy it and inspect the policy (`sbx policy inspect <POLICY>`) to see Copilot's own hosts, plus the apt and PyPI hosts your kit declared. These rules add to your **Locked Down** policy, for this sandbox only.
 
 ## See the isolation for yourself
 

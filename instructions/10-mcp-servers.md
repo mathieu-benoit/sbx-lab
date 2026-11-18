@@ -71,7 +71,7 @@ graph LR
     sbx mcp add dhi --url https://dhi.io/mcp
     ```
 
-    If a browser window opens, sign in with your Docker account to authorize it.
+    If a browser window opens, sign in with your Docker account to authorize it. If `dhi` is already registered, for example from an earlier run of the lab, the command registers it again, which is safe. You can ignore the `WARN: oauth` lines it may print.
 
 2. Check that it's registered and ready:
 

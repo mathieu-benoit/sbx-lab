@@ -173,7 +173,13 @@ Try it in a separate sandbox, from the `project` directory, in another terminal.
     sbx create --name ports-demo --kit ./kits/python --kit ./kits/api-port copilot .
     ```
 
-3. List its ports. You haven't published anything, yet port 8000 is already there, on a host port that `sbx` picked:
+3. Keep it running without an agent session. No agent is attached to this sandbox, so without this step it stops shortly after the `sbx exec` below, and the web server with it:
+
+    ```bash id=host terminal-id=terminal-2
+    sbx run --detach --name ports-demo
+    ```
+
+4. List its ports. You haven't published anything, yet port 8000 is already there, on a host port that `sbx` picked:
 
     ```bash id=host terminal-id=terminal-2
     sbx port ls ports-demo
@@ -184,15 +190,17 @@ Try it in a separate sandbox, from the `project` directory, in another terminal.
     127.0.0.1   60000       8000           tcp4
     ```
 
-4. Start a small web server on port 8000 in the sandbox. It serves the project folder:
+    `sbx` picks the host port again each time the sandbox starts, so list the ports after the sandbox is running.
+
+5. Start a small web server on port 8000 in the sandbox. It serves the project folder:
 
     ```bash id=host terminal-id=terminal-2
     sbx exec ports-demo sh -c 'nohup python3 -m http.server 8000 >/dev/null 2>&1 &'
     ```
 
-5. Open `http://127.0.0.1:<HOST PORT>/`, with the host port from step 3: you see the files of the `project` folder, served from inside the sandbox.
+6. Open `http://127.0.0.1:<HOST PORT>/`, with the host port from step 4: you see the files of the `project` folder, served from inside the sandbox.
 
-6. Remove the sandbox:
+7. Remove the sandbox:
 
     ```bash id=host terminal-id=terminal-2
     sbx rm --force ports-demo

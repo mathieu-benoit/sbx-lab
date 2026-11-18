@@ -4,6 +4,7 @@ Run `sbx diagnose` first: it checks the most common installation problems.
 
 | Problem | Solution |
 |---------|----------|
+| `sbx diagnose` reports `✗ Daemon diagnostics — check timed out` | If the line above it shows `✓ Daemon — healthy` and the other required checks pass, you can continue: in a full run of the lab on Windows with `sbx` v0.54.0, this check timed out every time, and every module still worked. |
 | `sbx create` fails because the sandbox name already exists | Remove the old sandbox with `sbx rm <name>` (see the names with `sbx ls`), then create it again. |
 | The agent can't install packages or reach a website | The lab runs with the **Locked Down** policy, so only the hosts allowed in [Network policies](01-network-policies.md#allow-only-what-the-lab-needs) are reachable. Check that those rules exist with `sbx policy ls`, then run `sbx policy log` to see which hosts were blocked. Allow what is needed with `sbx policy allow network <host>`, or use the **Network** panel of the TUI (`sbx`, then `Tab`). |
 | `sbx policy ls` shows policies whose `SOURCE` is not `local` | Your organization manages your sandbox policies and some exercises may be blocked. Use a personal Docker account or ask your administrator. |
