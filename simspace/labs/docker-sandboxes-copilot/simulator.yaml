@@ -1633,7 +1633,7 @@ scenarios:
         - "  Arguments:"
         - "    repository=python"
         - { text: "  Result:", delay: work }
-        - "    python: Alpine runtime tag 3.12-alpine, 0 known CVEs. The -dev variants add pip and a shell."
+        - "    python: Alpine runtime tag 3.12-alpine (Python 3.12.16, Alpine 3.24), 1 known CVE (high). The -dev variants add pip and a shell."
         - ""
         - "→ Calling MCP tool: mcp-gateway-dhi_get_repository"
         - "  Arguments:"
@@ -1642,7 +1642,7 @@ scenarios:
         - "    node: Alpine runtime tag 22-alpine, 0 known CVEs. The -dev variants add npm and a shell."
         - ""
         - "Alpine runtime hardened images (not -dev):"
-        - "  backend   python:3.12-slim  ->  dhi.io/python:3.12-alpine  0 known CVEs"
+        - "  backend   python:3.12-slim  ->  dhi.io/python:3.12-alpine  1 known CVE (high)"
         - "  frontend  node:22-alpine    ->  dhi.io/node:22-alpine      0 known CVEs"
         - ""
         - "Tools I called: mcp-gateway-dhi_get_repository (x2). I did not call any tool that changes your organization."
