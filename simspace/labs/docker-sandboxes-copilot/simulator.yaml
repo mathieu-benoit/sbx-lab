@@ -1221,10 +1221,10 @@ scenarios:
       state: { scan.done: true }
       output:
         - "Downloading the vulnerability database (about 130 MB) and the VEX statements..."
-        - { text: "python:3.12-slim         83 vulnerabilities (0 critical, 15 high)", delay: scan }
-        - { text: "dhi.io/python:3.12       49 vulnerabilities (0 critical, 7 high)", delay: scan }
-        - { text: "node:22-alpine           16 vulnerabilities (0 critical, 6 high)", delay: scan }
-        - { text: "dhi.io/node:22-alpine    0 vulnerabilities (0 critical, 0 high)", delay: scan }
+        - { text: "python:3.12-slim           92 vulnerabilities (0 critical, 15 high)", delay: scan }
+        - { text: "dhi.io/python:3.12-alpine  0 vulnerabilities (0 critical, 0 high)", delay: scan }
+        - { text: "node:22-alpine             17 vulnerabilities (0 critical, 7 high)", delay: scan }
+        - { text: "dhi.io/node:22-alpine      0 vulnerabilities (0 critical, 0 high)", delay: scan }
 
   - id: exec-no-mcp
     when:
@@ -1633,16 +1633,16 @@ scenarios:
         - "  Arguments:"
         - "    repository=python"
         - { text: "  Result:", delay: work }
-        - "    python: runtime tag 3.12 (Debian 13), 54 known CVEs. The -dev variants add pip and a shell."
+        - "    python: Alpine runtime tag 3.12-alpine, 0 known CVEs. The -dev variants add pip and a shell."
         - ""
         - "→ Calling MCP tool: mcp-gateway-dhi_get_repository"
         - "  Arguments:"
         - "    repository=node"
         - { text: "  Result:", delay: work }
-        - "    node: runtime tag 22-alpine, 0 known CVEs. The -dev variants add npm and a shell."
+        - "    node: Alpine runtime tag 22-alpine, 0 known CVEs. The -dev variants add npm and a shell."
         - ""
-        - "Runtime hardened images (not -dev):"
-        - "  backend   python:3.12-slim  ->  dhi.io/python:3.12        54 known CVEs"
+        - "Alpine runtime hardened images (not -dev):"
+        - "  backend   python:3.12-slim  ->  dhi.io/python:3.12-alpine  0 known CVEs"
         - "  frontend  node:22-alpine    ->  dhi.io/node:22-alpine      0 known CVEs"
         - ""
         - "Tools I called: mcp-gateway-dhi_get_repository (x2). I did not call any tool that changes your organization."

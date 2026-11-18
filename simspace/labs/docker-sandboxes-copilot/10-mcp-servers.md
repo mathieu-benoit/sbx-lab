@@ -97,12 +97,12 @@ graph LR
     Then give it this prompt:
 
     ```prompt id=sandbox terminal-id=t2
-    For both the frontend and the backend app, from their Dockerfiles, find the runtime Docker Hardened Image (not a -dev variant) that matches it and how many known CVEs it has. At the end, list the tools you called.
+    For both the frontend and the backend app, from their Dockerfiles, find the Alpine-based runtime Docker Hardened Image (not a -dev variant) that matches it and how many known CVEs it has. At the end, list the tools you called.
     ```
 
-    The agent reads both Dockerfiles, calls `dhi` tools such as `dhi_get_repository` (Copilot lists them with the gateway's prefix, `mcp-gateway-dhi_get_repository`), and suggests the hardened Python 3.12 image for the backend and the hardened Node 22 Alpine image for the frontend, each with its CVE count. In the real lab the exact tags it names vary from one run to the next: the images you scan below are `dhi.io/python:3.12` and `dhi.io/node:22-alpine`.
+    The agent reads both Dockerfiles, calls `dhi` tools such as `dhi_get_repository` (Copilot lists them with the gateway's prefix, `mcp-gateway-dhi_get_repository`), and suggests the hardened Python 3.12 Alpine image for the backend and the hardened Node 22 Alpine image for the frontend, each with its CVE count. The prompt asks for Alpine even for the backend, whose `python:3.12-slim` is based on Debian: the Alpine hardened images are smaller and have fewer packages that can carry CVEs. In the real lab the exact tags it names vary from one run to the next: the images you scan below are `dhi.io/python:3.12-alpine` and `dhi.io/node:22-alpine`.
 
-    > **Note:** most hardened images come in two variants. The **runtime** image is minimal: no shell, no package manager. The **`-dev`** variant adds them (pip, npm, a shell…) for building, and is meant for the build stage of a multi-stage Dockerfile. Because DevBoard's Dockerfiles install packages, an agent left to choose tends to pick the `-dev` variants, which is why the prompt asks for the runtime image. The difference shows in a scan: `dhi.io/python:3.12-debian13-dev` had 414 vulnerabilities in a test run, against 54 for `dhi.io/python:3.12`.
+    > **Note:** most hardened images come in two variants. The **runtime** image is minimal: no shell, no package manager. The **`-dev`** variant adds them (pip, npm, a shell…) for building, and is meant for the build stage of a multi-stage Dockerfile. Because DevBoard's Dockerfiles install packages, an agent left to choose tends to pick the `-dev` variants, which is why the prompt asks for the runtime image. The difference shows in a scan of the Debian-based images: `dhi.io/python:3.12-debian13-dev` had 414 vulnerabilities in a test run, against 54 for `dhi.io/python:3.12`.
 
     > **Note:** the CVE counts the agent reports come from the DHI catalog's scan summary (read through the MCP server), so they won't match the Trivy numbers below, which come from scanning the images yourself with Trivy's database and the VEX statements. Compare the hardened image with the original within one source, not across them.
 
@@ -129,12 +129,12 @@ Before switching DevBoard's Dockerfiles to the hardened images, measure what you
 1. Scan the two current base images and the two hardened images the agent suggested, with the kit's `scan-images` helper:
 
     ```bash id=host terminal-id=t2
-    sbx exec mcp scan-images python:3.12-slim dhi.io/python:3.12 node:22-alpine dhi.io/node:22-alpine
+    sbx exec mcp scan-images python:3.12-slim dhi.io/python:3.12-alpine node:22-alpine dhi.io/node:22-alpine
     ```
 
     For each image, the helper runs `trivy image --image-src remote --scanners vuln --vex repo`: Trivy reads the image straight from its registry and applies the VEX statements, which mark the CVEs that don't affect the image. The first scan also downloads Trivy's vulnerability database, about 130 MB, and the VEX statements.
 
-    The numbers change as new vulnerabilities are published, so yours will differ by a few in the real lab. Without the VEX statements, Trivy reports 218, 96, 24 and 0: it counts every published CVE that matches a package version, whether or not it affects the image.
+    The numbers change as new vulnerabilities are published, so yours will differ by a few in the real lab. Without the VEX statements, Trivy reports 226, 0, 25 and 0: it counts every published CVE that matches a package version, whether or not it affects the image.
 
 2. See what the scanner reached:
 

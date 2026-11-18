@@ -11,7 +11,7 @@ if [ ! -f "$HOME/.trivy/vex/repository.yaml" ]; then
 fi
 
 for image in "$@"; do
-  printf '%-24s ' "$image"
+  printf '%-26s ' "$image"
   trivy image --image-src remote --scanners vuln --vex repo --no-progress --quiet \
     --format template --template '
 {{- $total := 0 }}{{ $critical := 0 }}{{ $high := 0 }}
