@@ -22,7 +22,7 @@
   content: "draft";
 }
 
-/* A Dockerfile gets the Docker whale: the site's own docker.svg (the header logo, next to this
+/* A Dockerfile gets the Docker logo: the site's own docker.svg (the header logo, next to this
    file), as a mask painted in the icon's colour. Last, so it wins over the rules above. */
 .code-block:has(code.language-dockerfile) .code-block-label > .code-block-label-icon {
   font-size: 0;
