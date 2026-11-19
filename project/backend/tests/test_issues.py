@@ -141,10 +141,6 @@ def test_pagination_second_page(client, auth_headers, project):
 # ── Search (not yet implemented) ──────────────────────────────────────────────
 
 
-@pytest.mark.xfail(
-    reason="Search is not implemented yet (the endpoint returns 501) — see prompts/implement-search.txt",
-    strict=False,
-)
 def test_search_finds_matching_issues(client, auth_headers, project):
     """
     TODO TEST: expected to fail until GET /projects/{id}/issues/search is implemented.
