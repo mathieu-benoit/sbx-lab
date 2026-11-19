@@ -1155,6 +1155,20 @@ scenarios:
     then:
       output: ["Python 3.13.5"]
 
+  - id: exec-os-release
+    when:
+      command: [sbx, exec, quickstart, cat]
+      state: { sandboxes.quickstart: true }
+    then:
+      output:
+        - 'NAME="Docker Hardened Images (Debian)"'
+        - 'ID="debian"'
+        - 'VERSION_ID="13"'
+        - 'VERSION_CODENAME="trixie"'
+        - 'PRETTY_NAME="Docker Hardened Images/Debian GNU/Linux 13 (trixie)"'
+        - 'HOME_URL="https://docker.com/products/hardened-images/"'
+        - 'BUG_REPORT_URL="https://docker.com/support/"'
+
   - id: exec-env-token
     completes: check-token
     when:
