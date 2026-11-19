@@ -789,6 +789,25 @@ scenarios:
         - "  Run Options:  --yolo"
         - "  Policies:     none"
 
+  # The built-in kits are OCI images on Docker Hub (optional step, abridged output)
+  - id: imagetools-inspect-copilot
+    when:
+      command: [docker, buildx, imagetools, inspect, "sbx/copilot:latest"]
+    then:
+      output:
+        - "Name:      docker.io/sbx/copilot:latest"
+        - "MediaType: application/vnd.oci.image.index.v1+json"
+        - "Digest:    sha256:47db4edda6a46b4c9fec0218994c013c4e713a73bc5151c9b3f7693464abedca"
+        - ""
+        - "Manifests:"
+        - "  Name:        docker.io/sbx/copilot:latest@sha256:3372d59e44e965c49bb2b48e31c342527fa48d9e2b0347915919694db1068a4f"
+        - "  MediaType:   application/vnd.oci.image.manifest.v1+json"
+        - "  Platform:    linux/arm64"
+        - ""
+        - "  Name:        docker.io/sbx/copilot:latest@sha256:38a67a896f63321ae2555a8a3234dbed890e949387542a7c5cb5c64c46c7cf14"
+        - "  MediaType:   application/vnd.oci.image.manifest.v1+json"
+        - "  Platform:    linux/amd64"
+
   - id: kit-inspect-claude
     completes: compare-claude-kit
     when:
