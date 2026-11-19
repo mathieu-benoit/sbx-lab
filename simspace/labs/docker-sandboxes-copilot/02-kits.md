@@ -8,14 +8,14 @@ There are two kinds of kits:
 
 | Kind | What it does | Example |
 |------|--------------|---------|
-| Agent kit (`kind: sandbox`) | Defines the agent: its image, entrypoint, default arguments, and what it needs | `sbx/copilot`, `sbx/claude` |
+| Agent kit (`kind: sandbox`) | Defines the agent: its image, entrypoint, default arguments, and what it needs | `sbx/shell`, `sbx/copilot`, `sbx/claude`, OCI images on Docker Hub |
 | Mixin | Extends an agent kit with a tool, a credential, a network rule, a file… | Added with `sbx create <agent> --kit <reference>` |
 
 ```mermaid
 graph LR
     subgraph Kits["Kits, written in YAML"]
         direction TB
-        AgentKit["Agent kit: sbx/copilot<br/>image, entrypoint, --yolo"]
+        AgentKit["Agent kit: sbx/copilot<br/>OCI image on Docker Hub<br/>entrypoint, --yolo"]
         PythonMixin["Mixin: kits/python<br/>install step, network rules"]
         TrivyMixin["Mixin: kits/trivy<br/>files built ahead, network rules"]
     end
@@ -73,6 +73,26 @@ It's a small file, and it tells you a lot about the sandboxes you'll use in this
 | `entrypoint: copilot` | `sbx run` starts the Copilot CLI | *Agent sandbox* |
 | `command.default: --yolo` | Copilot runs without asking for confirmations; arguments you pass after `--` are added to it | *Agent sandbox*, *Clone mode and parallel agents* |
 | No policies (`Policies: none`) | The descriptor declares no network rules. `sbx` still allows Copilot's own core hosts for each Copilot sandbox, on top of the rules you added | *Agent sandbox*, with `sbx policy ls` |
+
+## The built-in agent kits are OCI images
+
+The agent kits that come with Docker Sandboxes are published on Docker Hub, in the `sbx` namespace, as regular **OCI images**: the same format as any container image, multi-platform (`linux/amd64` and `linux/arm64`), and built from Docker Hardened Images.
+
+| Kit | Agent | Docker Hub |
+|-----|-------|------------|
+| `sbx/shell` | A plain shell, no agent | [hub.docker.com/r/sbx/shell](https://hub.docker.com/r/sbx/shell) |
+| `sbx/copilot` | GitHub Copilot CLI | [hub.docker.com/r/sbx/copilot](https://hub.docker.com/r/sbx/copilot) |
+| `sbx/claude` | Claude Code | [hub.docker.com/r/sbx/claude](https://hub.docker.com/r/sbx/claude) |
+
+So the `image` you saw in the kit, `docker.io/sbx/copilot@sha256:47db4edd...`, is the image on [hub.docker.com/r/sbx/copilot](https://hub.docker.com/r/sbx/copilot), pinned by the digest of its image index. Kits are distributed, versioned, pinned and cached like images, through the same registries, which is also how you can share your own kits, with `sbx kit push` (see *Build your own kit*).
+
+If you have the Docker CLI on your host, you can see it for yourself (optional):
+
+```bash id=host
+docker buildx imagetools inspect sbx/copilot:latest
+```
+
+The digest of the `latest` tag is the one pinned in the kit, and the index holds one image per platform.
 
 ## Compare with another agent kit
 
