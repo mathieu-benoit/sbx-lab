@@ -22,10 +22,10 @@ capabilities:
     config:
       runtime:
         allow:
-          - mirror.gcr.io
-          - ghcr.io
-          - pkg-containers.githubusercontent.com
-          - github.com
-          - api.github.com
-          - codeload.github.com
-          - raw.githubusercontent.com
+          - mirror.gcr.io:443
+          - ghcr.io:443
+          - pkg-containers.githubusercontent.com:443
+          - github.com:443
+          - api.github.com:443
+          - codeload.github.com:443
+          - raw.githubusercontent.com:443

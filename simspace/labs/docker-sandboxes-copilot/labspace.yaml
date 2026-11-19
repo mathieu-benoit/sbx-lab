@@ -236,9 +236,9 @@ files:
       - type: com.docker.sandbox/network-policy@1
         config:
           install:
-            allow: [deb.debian.org, dhi.io]
+            allow: [deb.debian.org:80, dhi.io:80]
           runtime:
-            allow: [pypi.org, files.pythonhosted.org]
+            allow: [pypi.org:443, files.pythonhosted.org:443]
   project/kits/api-port/api-port.yaml: |
     # syntax=docker/sandbox-kit:3
     schemaVersion: "3"
@@ -276,13 +276,13 @@ files:
         config:
           runtime:
             allow:
-              - mirror.gcr.io
-              - ghcr.io
-              - pkg-containers.githubusercontent.com
-              - github.com
-              - api.github.com
-              - codeload.github.com
-              - raw.githubusercontent.com
+              - mirror.gcr.io:443
+              - ghcr.io:443
+              - pkg-containers.githubusercontent.com:443
+              - github.com:443
+              - api.github.com:443
+              - codeload.github.com:443
+              - raw.githubusercontent.com:443
   project/prompts/implement-search.txt: |
     Implement the issue search endpoint in project/backend/app/routers/issues.py.
 

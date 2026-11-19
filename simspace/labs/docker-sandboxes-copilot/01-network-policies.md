@@ -191,45 +191,45 @@ You keep the **Locked Down** policy for the rest of the lab: rather than trustin
 GitHub and GitHub Copilot, the agent itself:
 
 ```bash id=host
-sbx policy allow network "github.com,**.github.com,**.githubcopilot.com"
+sbx policy allow network "github.com:443,**.github.com:443,**.githubcopilot.com:443"
 ```
 
 Python for the backend tests, Debian packages and PyPI:
 
 ```bash id=host
-sbx policy allow network "deb.debian.org,dhi.io,pypi.org,files.pythonhosted.org"
+sbx policy allow network "deb.debian.org:80,dhi.io:80,dhi.io:443,pypi.org:443,files.pythonhosted.org:443"
 ```
 
 Docker Hub, to pull images:
 
 ```bash id=host
-sbx policy allow network "**.docker.io,production.cloudfront.docker.com"
+sbx policy allow network "**.docker.io:443,production.cloudfront.docker.com:443"
 ```
 
 Node.js, for the frontend's npm packages:
 
 ```bash id=host
-sbx policy allow network "registry.npmjs.org"
+sbx policy allow network "registry.npmjs.org:443"
 ```
 
 | Rule | Used by |
 |------|---------|
-| `github.com`, `**.github.com` | GitHub API, used by Copilot; also where Trivy downloads the VEX statements |
-| `**.githubcopilot.com` | Copilot service; the subdomain depends on your plan (`api.individual…`, `api.business…`, `api.enterprise…`), hence `**` |
-| `deb.debian.org`, `dhi.io` | The sandbox image's `apt` repositories, used to install Python. `dhi.io` is also the Docker Hardened Images registry, which Trivy reads later |
-| `pypi.org`, `files.pythonhosted.org` | Installing the backend's Python packages |
-| `**.docker.io`, `production.cloudfront.docker.com` | Pulling the `python`, `node` and `postgres` images, and the images Trivy scans |
-| `registry.npmjs.org` | Installing the frontend's npm packages |
+| `github.com:443`, `**.github.com:443` | GitHub API, used by Copilot; also where Trivy downloads the VEX statements |
+| `**.githubcopilot.com:443` | Copilot service; the subdomain depends on your plan (`api.individual…`, `api.business…`, `api.enterprise…`), hence `**` |
+| `deb.debian.org:80`, `dhi.io:80`, `dhi.io:443` | The sandbox image's `apt` repositories, used to install Python. `dhi.io` is also the Docker Hardened Images registry, which Trivy reads later |
+| `pypi.org:443`, `files.pythonhosted.org:443` | Installing the backend's Python packages |
+| `**.docker.io:443`, `production.cloudfront.docker.com:443` | Pulling the `python`, `node` and `postgres` images, and the images Trivy scans |
+| `registry.npmjs.org:443` | Installing the frontend's npm packages |
 
-A few more hosts are needed later, but you don't add them here: the kits that need them declare them, and those rules apply only to the sandboxes that use the kit. The hosts have no port suffix on purpose: `apt` downloads from Debian over HTTP (port 80).
+A few more hosts are needed later, but you don't add them here: the kits that need them declare them, and those rules apply only to the sandboxes that use the kit. Each rule ends with a **port**, so it allows that host on that port only. Everything is HTTPS (port 443), except the `apt` repositories: the sandbox image reads `deb.debian.org` and `dhi.io` over plain HTTP (port 80), so a `:443` rule alone would break `apt-get update`. `dhi.io` gets both ports, `:80` for its packages and `:443` for its image registry. A rule without a port would allow the host on any port.
 
-List the policies again: `local-policy` now has one network rule per host (10 in total).
+List the policies again: `local-policy` now has one network rule per host and port (11 in total).
 
 ```bash id=host
 sbx policy ls
 ```
 
-Check a few of them. The first two are `Allowed`, both by a wildcard rule: `api.github.com` by `**.github.com` and the Copilot host by `**.githubcopilot.com` (each `Rule` line shows a different ID). `docker.com` is still `Denied`, because you removed its rule above:
+Check a few of them. The first two are `Allowed`, both by a wildcard rule: `api.github.com` by `**.github.com:443` and the Copilot host by `**.githubcopilot.com:443` (each `Rule` line shows a different ID). A host without a port is checked on port 443. `docker.com` is still `Denied`, because you removed its rule above:
 
 ```bash id=host
 sbx policy check network api.github.com

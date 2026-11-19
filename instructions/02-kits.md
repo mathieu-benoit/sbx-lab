@@ -190,12 +190,12 @@ capabilities:
   - type: com.docker.sandbox/network-policy@1
     config:
       install:
-        allow: [deb.debian.org, dhi.io]
+        allow: [deb.debian.org:80, dhi.io:80]
       runtime:
-        allow: [pypi.org, files.pythonhosted.org]
+        allow: [pypi.org:443, files.pythonhosted.org:443]
 ```
 
-It declares two capabilities: a **lifecycle** hook that runs once when the sandbox is created, and a **network policy** that opens only the hosts this kit needs. For the install, that's the sandbox image's apt repositories, `deb.debian.org` and `dhi.io` (Docker Hardened Images), because `apt-get update` reads every configured source. At runtime, it's PyPI for `pip`. No Dockerfile is needed for this one.
+It declares two capabilities: a **lifecycle** hook that runs once when the sandbox is created, and a **network policy** that opens only the hosts this kit needs. For the install, that's the sandbox image's apt repositories, `deb.debian.org` and `dhi.io` (Docker Hardened Images), on port 80 because `apt` reads them over HTTP, and because `apt-get update` reads every configured source. At runtime, it's PyPI for `pip`, on port 443. No Dockerfile is needed for this one.
 
 > [!NOTE]
 > The `install` and `runtime` lists say when each host is needed. With `sbx` v0.54.0, though, the hosts listed under `install` **stay allowed after the install** too: `sbx policy inspect` shows them in the sandbox's kit policy, and the agent can still reach `deb.debian.org`. Count both lists as hosts the sandbox can reach.
@@ -251,13 +251,13 @@ capabilities:
     config:
       runtime:
         allow:
-          - mirror.gcr.io
-          - ghcr.io
-          - pkg-containers.githubusercontent.com
-          - github.com
-          - api.github.com
-          - codeload.github.com
-          - raw.githubusercontent.com
+          - mirror.gcr.io:443
+          - ghcr.io:443
+          - pkg-containers.githubusercontent.com:443
+          - github.com:443
+          - api.github.com:443
+          - codeload.github.com:443
+          - raw.githubusercontent.com:443
 ```
 
 The first three hosts serve Trivy's vulnerability database. The GitHub hosts serve [VEX](https://docs.docker.com/dhi/explore/security-concepts/vex/) statements, which mark the CVEs that don't affect an image, including those published for Docker Hardened Images.
