@@ -11,7 +11,7 @@ catalog:
 
 # Bump this whenever you add, remove or rename steps: stored progress is
 # namespaced per version, so stale completion records are cleared.
-version: "1.1.0"
+version: "1.2.0"
 
 # Command behaviour lives in simulator.yaml (relative to this file).
 simulator: simulator.yaml
@@ -182,7 +182,7 @@ sections:
       - id: register-dhi
         title: "Register the DHI MCP server"
       - id: create-mcp-sandbox
-        title: "Create a sandbox with the DHI server and the Trivy kit"
+        title: "Create a sandbox with the DHI server and the Trivy and Scout kits"
       - id: ask-dhi
         title: "Ask the agent for hardened images"
       - id: read-mcp-log
@@ -191,6 +191,10 @@ sections:
         title: "Scan the images with Trivy"
       - id: read-scan-log
         title: "See which hosts the scanner reached"
+      - id: compare-scout
+        title: "Compare the images with Docker Scout"
+      - id: read-scout-log
+        title: "See which hosts Docker Scout reached"
 
   - title: Wrap up
     contentPath: 11-wrap-up.md
