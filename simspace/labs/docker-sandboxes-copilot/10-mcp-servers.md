@@ -18,7 +18,7 @@ graph LR
         Proxy["Proxy<br/>your rules + the kit's rules"]
     end
 
-    subgraph Sandbox["Sandbox: mcp"]
+    subgraph Sandbox["Sandbox: dhi"]
         direction TB
         Agent["Copilot agent<br/>network still locked down"]
         Trivy["trivy and scan-images<br/>from the kit"]
@@ -68,30 +68,30 @@ graph LR
     sbx mcp ls
     ```
 
-3. From the `project` directory, create a dedicated sandbox named `mcp`, with the DHI server and the Trivy kit:
+3. From the `project` directory, create a dedicated sandbox, `dhi`, named after the DHI server it gets, with that server and the Trivy kit:
 
     ```bash id=host terminal-id=t2
     cd project
     ```
 
     ```bash id=host terminal-id=t2
-    sbx create --name mcp --static-mcp dhi --kit ./kits/trivy copilot .
+    sbx create --name dhi --static-mcp dhi --kit ./kits/trivy copilot .
     ```
 
-    `--static-mcp dhi` starts the sandbox's MCP gateway with **exactly this server**, and without the discovery tools an agent could use to find and add servers by itself. You decide which servers it gets. `--kit ./kits/trivy` adds the Trivy kit, which you'll use at the end of this module. The first time, `sbx` builds the kit's image, which downloads and checks Trivy.
+    The sandbox and the server share the name `dhi`: `--name dhi` names the sandbox, and `--static-mcp dhi` starts the sandbox's MCP gateway with **exactly this server**, and without the discovery tools an agent could use to find and add servers by itself. You decide which servers it gets. `--kit ./kits/trivy` adds the Trivy kit, which you'll use at the end of this module. The first time, `sbx` builds the kit's image, which downloads and checks Trivy.
 
     Check what the gateway was given:
 
     ```bash id=host terminal-id=t2
-    sbx inspect mcp
+    sbx inspect dhi
     ```
 
     These lines describe this sandbox's gateway. `sbx mcp ls`, on the other hand, lists the servers registered on your host, whether or not a sandbox uses them.
 
-4. Start an agent in the `mcp` sandbox:
+4. Start an agent in the `dhi` sandbox:
 
     ```bash id=host terminal-id=t2
-    sbx run --name mcp
+    sbx run --name dhi
     ```
 
     Then give it this prompt:
@@ -115,7 +115,7 @@ graph LR
     ```
 
     ```bash id=host terminal-id=t2
-    sbx policy log mcp
+    sbx policy log dhi
     ```
 
     You'll find the Copilot and GitHub hosts, and the gateway itself (`mcp-gateway.docker.internal`, marked `<daemon-managed alias>`), but no request to the DHI server, and you didn't add any network rule: the agent only talks to the gateway, and the gateway reaches the MCP server from outside the sandbox.
@@ -124,12 +124,12 @@ graph LR
 
 ## Scan the images before and after
 
-Before switching DevBoard's Dockerfiles to the hardened images, measure what you'd gain. The Trivy kit you added to the `mcp` sandbox put Trivy and its `scan-images` helper in the agent's sandbox: the agent can run the scan for you.
+Before switching DevBoard's Dockerfiles to the hardened images, measure what you'd gain. The Trivy kit you added to the `dhi` sandbox put Trivy and its `scan-images` helper in the agent's sandbox: the agent can run the scan for you.
 
-1. Start the agent in the `mcp` sandbox again:
+1. Start the agent in the `dhi` sandbox again:
 
     ```bash id=host terminal-id=t2
-    sbx run --name mcp
+    sbx run --name dhi
     ```
 
     Then ask it to scan the two current base images and the two hardened images it suggested:
@@ -151,7 +151,7 @@ Before switching DevBoard's Dockerfiles to the hardened images, measure what you
     ```
 
     ```bash id=host terminal-id=t2
-    sbx policy log mcp
+    sbx policy log dhi
     ```
 
     Each host the scanner reached is allowed either by your own rules or by the Trivy kit's rules:
