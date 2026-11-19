@@ -75,7 +75,7 @@ Run the commands of this module from the root of the repository.
       Display:      GitHub Copilot
       Description:  GitHub Copilot CLI, GitHub's agentic coding CLI.
       Binary:       copilot
-      Template:     docker.io/sbx/copilot@sha256:f9c2331f...
+      Template:     docker.io/sbx/copilot@sha256:47db4edd...
       Run Options:  --yolo
       Policies:     none
     ```
@@ -96,7 +96,7 @@ Run the commands of this module from the root of the repository.
     licenses:
     - LicenseRef-Proprietary
     sandbox:
-      image: docker.io/sbx/copilot@sha256:f9c2331f...
+      image: docker.io/sbx/copilot@sha256:47db4edd...
       entrypoint:
       - copilot
       command:
