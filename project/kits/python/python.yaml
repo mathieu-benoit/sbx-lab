@@ -15,11 +15,10 @@ capabilities:
 
   # Only the hosts this kit needs. For the install: the sandbox image's apt
   # repositories (Debian and Docker Hardened Images), which apt-get update reads.
-  # At runtime: PyPI, for pip. (With sbx v0.53.0, the install hosts also stay
-  # allowed once the sandbox runs.)
+  # At runtime: PyPI, for pip.
   - type: com.docker.sandbox/network-policy@1
     config:
       install:
-        allow: [deb.debian.org, dhi.io]
+        allow: [deb.debian.org:80, dhi.io:80]
       runtime:
-        allow: [pypi.org, files.pythonhosted.org]
+        allow: [pypi.org:443, files.pythonhosted.org:443]

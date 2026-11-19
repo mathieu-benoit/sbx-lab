@@ -185,20 +185,19 @@ capabilities:
 
   # Only the hosts this kit needs. For the install: the sandbox image's apt
   # repositories (Debian and Docker Hardened Images), which apt-get update reads.
-  # At runtime: PyPI, for pip. (With sbx v0.54.0, the install hosts also stay
-  # allowed once the sandbox runs.)
+  # At runtime: PyPI, for pip.
   - type: com.docker.sandbox/network-policy@1
     config:
       install:
-        allow: [deb.debian.org, dhi.io]
+        allow: [deb.debian.org:80, dhi.io:80]
       runtime:
-        allow: [pypi.org, files.pythonhosted.org]
+        allow: [pypi.org:443, files.pythonhosted.org:443]
 ```
 
-It declares two capabilities: a **lifecycle** hook that runs once when the sandbox is created, and a **network policy** that opens only the hosts this kit needs. For the install, that's the sandbox image's apt repositories, `deb.debian.org` and `dhi.io` (Docker Hardened Images), because `apt-get update` reads every configured source. At runtime, it's PyPI for `pip`. No Dockerfile is needed for this one.
+It declares two capabilities: a **lifecycle** hook that runs once when the sandbox is created, and a **network policy** that opens only the hosts this kit needs. For the install, that's the sandbox image's apt repositories, `deb.debian.org` and `dhi.io` (Docker Hardened Images), on port 80 because `apt` reads them over HTTP, and because `apt-get update` reads every configured source. At runtime, it's PyPI for `pip`, on port 443. No Dockerfile is needed for this one.
 
 > [!NOTE]
-> The `install` and `runtime` lists say when each host is needed. With `sbx` v0.54.0, though, the hosts listed under `install` **stay allowed after the install** too: `sbx policy inspect` shows them in the sandbox's kit policy, and the agent can still reach `deb.debian.org`. Count both lists as hosts the sandbox can reach.
+> The `install` and `runtime` lists say when each host is needed. Once the sandbox runs, `sbx policy inspect` shows only the `runtime` hosts, `pypi.org:443` and `files.pythonhosted.org:443`, in its kit policy. In a Copilot sandbox the kit policy also lists `deb.debian.org:80` and `dhi.io:80`: they come from the Copilot agent, not from this kit. The sandbox can reach both hosts anyway, because the global rules you added in [Allow only what the lab needs](01-network-policies.md#allow-only-what-the-lab-needs) allow them.
 
 1. Check that the kit is valid:
 
@@ -251,13 +250,13 @@ capabilities:
     config:
       runtime:
         allow:
-          - mirror.gcr.io
-          - ghcr.io
-          - pkg-containers.githubusercontent.com
-          - github.com
-          - api.github.com
-          - codeload.github.com
-          - raw.githubusercontent.com
+          - mirror.gcr.io:443
+          - ghcr.io:443
+          - pkg-containers.githubusercontent.com:443
+          - github.com:443
+          - api.github.com:443
+          - codeload.github.com:443
+          - raw.githubusercontent.com:443
 ```
 
 The first three hosts serve Trivy's vulnerability database. The GitHub hosts serve [VEX](https://docs.docker.com/dhi/explore/security-concepts/vex/) statements, which mark the CVEs that don't affect an image, including those published for Docker Hardened Images.
@@ -304,7 +303,7 @@ Compared with the Python kit, both are mixins, but:
 |---|---|---|
 | Installs its tool | When the sandbox is created (`lifecycle` hook running `apt-get`) | When the kit is built (`trivy.dockerfile`), pinned by version and SHA256 |
 | Adds to the sandbox | Packages, installed inside each new sandbox | A layer of files, laid over the agent's image |
-| Network policy | Debian hosts for the install, PyPI at runtime (the Debian hosts stay open: see the note above) | Trivy's vulnerability database and the VEX statements, at runtime only |
+| Network policy | Debian hosts for the install, PyPI at runtime | Trivy's vulnerability database and the VEX statements, at runtime only |
 
 Why put a scanner in a sandbox? It reads all your code, and it's a supply-chain target like any other tool: Trivy's own releases were compromised in March 2026. In a sandbox, it sees the workspace but not your `~/.ssh` or `~/.docker/config.json`, and it can reach its database, the VEX statements and the hosts you allowed, nothing else.
 

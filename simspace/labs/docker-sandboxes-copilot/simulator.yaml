@@ -289,7 +289,7 @@ scenarios:
       output:
         - "POLICY             SOURCE   APPLIES TO           SUMMARY"
         - "default-deny-all   local    all                  network: deny when no rule decides"
-        - "local-policy       local    all                  network: 10 allow; filesystem read: 1 allow; filesystem write: 1 allow"
+        - "local-policy       local    all                  network: 11 allow; filesystem read: 1 allow; filesystem write: 1 allow"
         - "kit-quickstart     kit      sandbox:quickstart   network: the Copilot hosts, plus the Python kit's"
         - "kit-mcp            kit      sandbox:mcp          network: the Copilot hosts, plus the Trivy kit's"
 
@@ -307,7 +307,7 @@ scenarios:
       output:
         - "POLICY             SOURCE   APPLIES TO           SUMMARY"
         - "default-deny-all   local    all                  network: deny when no rule decides"
-        - "local-policy       local    all                  network: 10 allow; filesystem read: 1 allow; filesystem write: 1 allow"
+        - "local-policy       local    all                  network: 11 allow; filesystem read: 1 allow; filesystem write: 1 allow"
         - "kit-quickstart     kit      sandbox:quickstart   network: the Copilot hosts, plus the Python kit's"
 
   - id: policy-ls-lab
@@ -323,7 +323,7 @@ scenarios:
       output:
         - "POLICY             SOURCE   APPLIES TO   SUMMARY"
         - "default-deny-all   local    all          network: deny when no rule decides"
-        - "local-policy       local    all          network: 10 allow; filesystem read: 1 allow; filesystem write: 1 allow"
+        - "local-policy       local    all          network: 11 allow; filesystem read: 1 allow; filesystem write: 1 allow"
 
   - id: policy-ls-locked
     when:
@@ -498,50 +498,51 @@ scenarios:
     when:
       command: [sbx, policy, allow, network]
       args:
-        0: "github.com,**.github.com,**.githubcopilot.com"
+        0: "github.com:443,**.github.com:443,**.githubcopilot.com:443"
     then:
       state: { rules.github: true }
       output:
-        - "  Added rule dda4bd8b-3f33-4d3b-97a8-b19796285f2c to policy local (scope: global): github.com [tcp]"
-        - "  Added rule c2185734-ea42-4f5d-b083-a2266ca721a5 to policy local (scope: global): **.github.com [tcp]"
-        - "  Added rule b9b155c9-49aa-4131-96b1-bc2d7e2ac1b1 to policy local (scope: global): **.githubcopilot.com [tcp]"
+        - "  Added rule dda4bd8b-3f33-4d3b-97a8-b19796285f2c to policy local (scope: global): github.com:443 [tcp]"
+        - "  Added rule c2185734-ea42-4f5d-b083-a2266ca721a5 to policy local (scope: global): **.github.com:443 [tcp]"
+        - "  Added rule b9b155c9-49aa-4131-96b1-bc2d7e2ac1b1 to policy local (scope: global): **.githubcopilot.com:443 [tcp]"
 
   - id: policy-allow-python
     completes: allow-python
     when:
       command: [sbx, policy, allow, network]
       args:
-        0: "deb.debian.org,dhi.io,pypi.org,files.pythonhosted.org"
+        0: "deb.debian.org:80,dhi.io:80,dhi.io:443,pypi.org:443,files.pythonhosted.org:443"
     then:
       state: { rules.python: true }
       output:
-        - "  Added rule ddbffc51-658f-4440-9b21-04fe6d64e05c to policy local (scope: global): deb.debian.org [tcp]"
-        - "  Added rule 65162871-96bf-4d91-ac62-13790f32214d to policy local (scope: global): dhi.io [tcp]"
-        - "  Added rule 49133bd8-43e7-4195-bb9e-59294b13a0df to policy local (scope: global): pypi.org [tcp]"
-        - "  Added rule 5e799db9-4b4a-4ea0-9a46-912847ccb08c to policy local (scope: global): files.pythonhosted.org [tcp]"
+        - "  Added rule ddbffc51-658f-4440-9b21-04fe6d64e05c to policy local (scope: global): deb.debian.org:80 [tcp]"
+        - "  Added rule 65162871-96bf-4d91-ac62-13790f32214d to policy local (scope: global): dhi.io:80 [tcp]"
+        - "  Added rule 3a1f6c0e-8d2b-4f57-9e64-2c7b1d9a5e83 to policy local (scope: global): dhi.io:443 [tcp]"
+        - "  Added rule 49133bd8-43e7-4195-bb9e-59294b13a0df to policy local (scope: global): pypi.org:443 [tcp]"
+        - "  Added rule 5e799db9-4b4a-4ea0-9a46-912847ccb08c to policy local (scope: global): files.pythonhosted.org:443 [tcp]"
 
   - id: policy-allow-docker-hub
     completes: allow-docker-hub
     when:
       command: [sbx, policy, allow, network]
       args:
-        0: "**.docker.io,production.cloudfront.docker.com"
+        0: "**.docker.io:443,production.cloudfront.docker.com:443"
     then:
       state: { rules.dockerhub: true }
       output:
-        - "  Added rule 0f8cabf0-64bd-4c9d-aee6-d5d18d205f8f to policy local (scope: global): **.docker.io [tcp]"
-        - "  Added rule e09d8452-9f1f-49a9-a8ed-09bf90606714 to policy local (scope: global): production.cloudfront.docker.com [tcp]"
+        - "  Added rule 0f8cabf0-64bd-4c9d-aee6-d5d18d205f8f to policy local (scope: global): **.docker.io:443 [tcp]"
+        - "  Added rule e09d8452-9f1f-49a9-a8ed-09bf90606714 to policy local (scope: global): production.cloudfront.docker.com:443 [tcp]"
 
   - id: policy-allow-npm
     completes: allow-npm
     when:
       command: [sbx, policy, allow, network]
       args:
-        0: "registry.npmjs.org"
+        0: "registry.npmjs.org:443"
     then:
       state: { rules.npm: true }
       output:
-        - "  Added rule 9f487778-51f3-45e9-b154-0a75b3118ff3 to policy local (scope: global): registry.npmjs.org [tcp]"
+        - "  Added rule 9f487778-51f3-45e9-b154-0a75b3118ff3 to policy local (scope: global): registry.npmjs.org:443 [tcp]"
 
   - id: policy-allow-any
     when:

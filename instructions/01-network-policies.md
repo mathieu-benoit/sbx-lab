@@ -270,32 +270,32 @@ Add these four rules:
 
 ```bash id=host
 # GitHub and GitHub Copilot: the agent itself
-sbx policy allow network "github.com,**.github.com,**.githubcopilot.com"
+sbx policy allow network "github.com:443,**.github.com:443,**.githubcopilot.com:443"
 
 # Python for the backend tests: Debian packages and PyPI
-sbx policy allow network "deb.debian.org,dhi.io,pypi.org,files.pythonhosted.org"
+sbx policy allow network "deb.debian.org:80,dhi.io:80,dhi.io:443,pypi.org:443,files.pythonhosted.org:443"
 
 # Docker: pulling images from Docker Hub
-sbx policy allow network "**.docker.io,production.cloudfront.docker.com"
+sbx policy allow network "**.docker.io:443,production.cloudfront.docker.com:443"
 
 # Node.js: installing the frontend's npm packages
-sbx policy allow network "registry.npmjs.org"
+sbx policy allow network "registry.npmjs.org:443"
 ```
 
 | Rule | Used by | Module |
 |------|---------|--------|
-| `github.com`, `**.github.com` | GitHub API, used by Copilot; also where Trivy downloads the VEX statements | all agent modules, [MCP servers](10-mcp-servers.md) |
-| `**.githubcopilot.com` | Copilot service; the subdomain depends on your plan (`api.individual…`, `api.business…`, `api.enterprise…`), hence `**` | all agent modules |
-| `deb.debian.org`, `dhi.io` | The sandbox image's `apt` repositories (Debian and Docker Hardened Images), used to install Python, which the image doesn't include. The Python kit you'll build in the next module declares them too, for the sandboxes that use it. `dhi.io` is also the Docker Hardened Images registry, where Trivy reads the hardened images it scans | [Kits](02-kits.md), [Run in direct mode](06-run-in-direct-mode.md), MCP servers |
-| `pypi.org`, `files.pythonhosted.org` | Installing the backend's Python packages | Run in direct mode, Clone mode, [Docker inside the sandbox](08-docker-inside-the-sandbox.md) |
-| `**.docker.io`, `production.cloudfront.docker.com` | Pulling the `python`, `node` and `postgres` images from Docker Hub, and reading the Docker Hub images that Trivy scans | Docker inside the sandbox, MCP servers |
-| `registry.npmjs.org` | Installing the frontend's npm packages | Docker inside the sandbox |
+| `github.com:443`, `**.github.com:443` | GitHub API, used by Copilot; also where Trivy downloads the VEX statements | all agent modules, [MCP servers](10-mcp-servers.md) |
+| `**.githubcopilot.com:443` | Copilot service; the subdomain depends on your plan (`api.individual…`, `api.business…`, `api.enterprise…`), hence `**` | all agent modules |
+| `deb.debian.org:80`, `dhi.io:80`, `dhi.io:443` | The sandbox image's `apt` repositories (Debian and Docker Hardened Images), used to install Python, which the image doesn't include, over HTTP (port 80). The Python kit you'll build in the next module declares them too, for the sandboxes that use it. `dhi.io` is also the Docker Hardened Images registry, where Trivy reads the hardened images it scans, over HTTPS (port 443) | [Kits](02-kits.md), [Run in direct mode](06-run-in-direct-mode.md), MCP servers |
+| `pypi.org:443`, `files.pythonhosted.org:443` | Installing the backend's Python packages | Run in direct mode, Clone mode, [Docker inside the sandbox](08-docker-inside-the-sandbox.md) |
+| `**.docker.io:443`, `production.cloudfront.docker.com:443` | Pulling the `python`, `node` and `postgres` images from Docker Hub, and reading the Docker Hub images that Trivy scans | Docker inside the sandbox, MCP servers |
+| `registry.npmjs.org:443` | Installing the frontend's npm packages | Docker inside the sandbox |
 
 A few more hosts are needed later, but you don't add them here: the kits that need them declare them, and those rules apply only to the sandboxes that use the kit. The Trivy kit, in [MCP servers](10-mcp-servers.md), adds `mirror.gcr.io` (Trivy's vulnerability database) and `raw.githubusercontent.com` (part of the VEX statements) for its sandbox only. You'll see the difference in that sandbox's network log.
 
-The hosts have no port suffix on purpose: `apt` downloads from Debian over HTTP (port 80).
+Each rule ends with a **port**, so it allows that host on that port only. Everything is HTTPS (port 443), except the `apt` repositories: the sandbox image reads `deb.debian.org` and `dhi.io` over plain HTTP (port 80), so a `:443` rule alone would break `apt-get update`. `dhi.io` gets both ports, `:80` for its packages and `:443` for its image registry. A rule without a port would allow the host on any port.
 
-List the policies again: `local-policy` now has one network rule per host.
+List the policies again: `local-policy` now has one network rule per host and port.
 
 ```bash id=host
 sbx policy ls
@@ -304,7 +304,7 @@ sbx policy ls
 ```none id=host
 POLICY             SOURCE   APPLIES TO   SUMMARY
 default-deny-all   local    all          network: deny when no rule decides
-local-policy       local    all          network: 10 allow; filesystem read: 1 allow; filesystem write: 1 allow
+local-policy       local    all          network: 11 allow; filesystem read: 1 allow; filesystem write: 1 allow
 ```
 
 Check a few of them:
@@ -315,7 +315,7 @@ sbx policy check network api.individual.githubcopilot.com
 sbx policy check network docker.com
 ```
 
-The first two are `Allowed`, both by a wildcard rule: `api.github.com` by `**.github.com` and the Copilot host by `**.githubcopilot.com` (each `Rule` line shows a different ID). `docker.com` is still `Denied`, because you removed its rule above.
+The first two are `Allowed`, both by a wildcard rule: `api.github.com` by `**.github.com:443` and the Copilot host by `**.githubcopilot.com:443` (each `Rule` line shows a different ID). A host without a port is checked on port 443. `docker.com` is still `Denied`, because you removed its rule above.
 
 > [!TIP]
 > If an agent later fails to download something, run `sbx policy log` to see the blocked host, then allow it with `sbx policy allow network <host>`.

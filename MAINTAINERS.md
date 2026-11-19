@@ -63,7 +63,8 @@ This repository is the **Docker Sandboxes with GitHub Copilot Lab**: a guided la
 
 - Modules 00 to 11 ran end to end, with Copilot in prompt mode (`sbx run --name <name> -- -p "..."`) instead of interactive sessions. Not run: the TUI (module 05), and the `paste.rs` upload in module 04, which the test harness refused to send.
 - Output changes: `sbx policy check network` prints a `Rule: <id>` line for allowed targets (module 01); `sbx inspect` shows `MCP mode` and `MCP servers` (module 10); Copilot names MCP tools with the gateway prefix (`mcp-gateway-dhi_get_repository`).
-- Unchanged: the kit outputs (module 02), the Python kit's install hosts staying allowed at runtime, the tokens shown as `proxy-managed`, the test baseline (3 failed, 12 passed, 1 xfailed) and the final 20 passed after merging the three agents.
+- Unchanged: the kit outputs (module 02), the tokens shown as `proxy-managed`, the test baseline (3 failed, 12 passed, 1 xfailed) and the final 20 passed after merging the three agents.
+- Corrected later: the Python kit's `install` hosts do **not** stay in the kit policy at runtime (a `shell` sandbox lists only `pypi.org` and `files.pythonhosted.org`). The `deb.debian.org:80` and `dhi.io:80` rules in a Copilot sandbox's kit policy come from the Copilot agent, and the lab's global rules allow both hosts anyway.
 - `sbx` v0.54 writes an empty `shim-start.lock` in the current folder each time the daemon starts (`sbx policy reset`, `sbx daemon restart`, or the first `sbx` command after a stop). The root `.gitignore` ignores it so that module 06's `git add -A` doesn't commit it; worth reporting upstream.
 - Once, `sbx daemon restart` left the daemon unable to start (`remove ...\containerd\containerd.sock.ttrpc: The file cannot be accessed by the system.`); starting it from the user's own terminal fixed it. Not reproduced.
 - Trivy counts with VEX: 83, 49, 16, 0; without: 217, 96, 24, 0.
