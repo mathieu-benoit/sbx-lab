@@ -54,3 +54,5 @@ services:
       # The look of the simulated lab (simspace/): the image's index.html, which also loads theme.css
       # and the header and milestones of labspace-ui.js, served from .content (content-init)
       - ./.ui/index.html:/usr/local/app/public/index.html:ro
+      # Docker's current logo, in place of the image's (favicon, header logo, Dockerfile icon)
+      - ./docker.svg:/usr/local/app/public/docker.svg:ro

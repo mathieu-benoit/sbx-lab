@@ -104,7 +104,7 @@
   // labspace-ui.json lists them in the same order. Added last and shown first (order: -1), so the
   // interface's own first child keeps its styles.
   // Material Symbols: a box for the sandbox, a file for a yaml file, a terminal otherwise; a
-  // Dockerfile gets the Docker whale instead (theme.css draws it from docker.svg)
+  // Dockerfile gets the Docker logo instead (theme.css draws it from docker.svg)
   const icon = (info) => (info.id === "sandbox" ? "deployed_code" : info.language === "yaml" ? "draft" : "terminal");
   const iconElement = (info) =>
     info.language === "dockerfile"

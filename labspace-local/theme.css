@@ -248,7 +248,7 @@ body {
   color: rgba(255, 255, 255, 0.4);
 }
 
-/* A Dockerfile's icon: the Docker whale, docker.svg (the header logo, served next to this file)
+/* A Dockerfile's icon: the Docker logo, docker.svg (the header logo, served next to this file)
    as a mask painted in the icon's colour (as in .github/pages/code-blocks.css) */
 .workshop-body .code-block > .lsui-code-label .lsui-code-label-docker {
   display: inline-block;

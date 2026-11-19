@@ -111,6 +111,9 @@ patch(indexFile, '<script type="module"', `${shimTag}\n    <script type="module"
 // with its header and milestones
 fs.copyFileSync(path.join(here, "..", "theme.css"), path.join(out, "labspace-theme.css"));
 fs.copyFileSync(path.join(here, "..", "labspace-ui.js"), path.join(out, "labspace-ui.js"));
+// Docker's current logo, in place of the one in the interface image (the favicon, the header
+// logo and the Dockerfile icon all use docker.svg)
+fs.copyFileSync(path.join(here, "..", "docker.svg"), path.join(out, "docker.svg"));
 fs.writeFileSync(
   path.join(out, "labspace-ui.json"),
   JSON.stringify(uiConfig(fs.readFileSync(path.join(instructionsDir, "labspace.yaml"), "utf8"), parse)),
