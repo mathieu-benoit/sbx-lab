@@ -96,7 +96,25 @@ graph LR
     Python 3.13.5
     ```
 
-5. Look at the policies:
+5. The sandbox runs on a **Docker Hardened Image**. Look at its operating system:
+
+    ```bash id=host
+    sbx exec quickstart cat /etc/os-release
+    ```
+
+    ```none id=host
+    NAME="Docker Hardened Images (Debian)"
+    ID="debian"
+    VERSION_ID="13"
+    VERSION_CODENAME="trixie"
+    PRETTY_NAME="Docker Hardened Images/Debian GNU/Linux 13 (trixie)"
+    HOME_URL="https://docker.com/products/hardened-images/"
+    BUG_REPORT_URL="https://docker.com/support/"
+    ```
+
+    It's Debian 13 (trixie), rebuilt and maintained by Docker as a [Docker Hardened Image](https://docs.docker.com/dhi/): the `sourceURL` you saw in the Copilot kit in [Kits](02-kits.md). The image is minimal and kept patched, and it ships its own SBOM (`/opt/docker/sbom`). That's also why `apt-get update` reads `dhi.io`, the hardened images' package repository, next to `deb.debian.org`.
+
+6. Look at the policies:
 
     ```bash id=host
     sbx policy ls
