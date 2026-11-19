@@ -36,7 +36,7 @@ graph LR
     Agent -->|tool calls| Gateway
     Gateway -->|"calls, no network rule needed"| Dhi
     TrivyKit -->|"--kit, at sbx create"| Trivy
-    You -->|"sbx exec mcp scan-images"| Trivy
+    Agent -->|"runs scan-images"| Trivy
     Trivy -->|every request| Proxy
     Proxy -->|"kit's rules"| TrivySources
     Proxy -->|"your rules"| Registries
@@ -124,19 +124,31 @@ graph LR
 
 ## Scan the images before and after
 
-Before switching DevBoard's Dockerfiles to the hardened images, measure what you'd gain. The Trivy kit you added to the `mcp` sandbox can scan the current base images and their DHI equivalents.
+Before switching DevBoard's Dockerfiles to the hardened images, measure what you'd gain. The Trivy kit you added to the `mcp` sandbox put Trivy and its `scan-images` helper in the agent's sandbox: the agent can run the scan for you.
 
-1. Scan the two current base images and the two hardened images the agent suggested, with the kit's `scan-images` helper:
+1. Start the agent in the `mcp` sandbox again:
 
     ```bash id=host terminal-id=t2
-    sbx exec mcp scan-images python:3.12-slim dhi.io/python:3.12-alpine node:22-alpine dhi.io/node:22-alpine
+    sbx run --name mcp
     ```
 
-    For each image, the helper runs `trivy image --image-src remote --scanners vuln --vex repo`: Trivy reads the image straight from its registry and applies the VEX statements, which mark the CVEs that don't affect the image. The first scan also downloads Trivy's vulnerability database, about 130 MB, and the VEX statements.
+    Then ask it to scan the two current base images and the two hardened images it suggested:
 
-    The numbers change as new vulnerabilities are published, so yours will differ by a few in the real lab. Without the VEX statements, Trivy reports 226, 0, 25 and 0: it counts every published CVE that matches a package version, whether or not it affects the image.
+    ```prompt id=sandbox terminal-id=t2
+    Use the scan-images command to scan the current base images of the backend and the frontend, python:3.12-slim and node:22-alpine, and their Docker Hardened Images, dhi.io/python:3.12-alpine and dhi.io/node:22-alpine. Show the results in a table and tell me what switching to the hardened images would gain. Don't change any file.
+    ```
 
-2. See what the scanner reached:
+    The agent runs `scan-images` on the four images. For each one, the helper runs `trivy image --image-src remote --scanners vuln --vex repo`: Trivy reads the image straight from its registry and applies the VEX statements, which mark the CVEs that don't affect the image. The first scan also downloads Trivy's vulnerability database, about 130 MB, and the VEX statements.
+
+    The agent words its answer differently each time in the real lab, but the numbers come from Trivy, and they change as new vulnerabilities are published. Without the VEX statements, Trivy reports 238, 0, 34 and 0: it counts every published CVE that matches a package version, whether or not it affects the image.
+
+    The agent may also point out that moving the backend from `python:3.12-slim` (Debian) to an Alpine image changes the C library (glibc to musl): check that the backend's Python packages still install and run before you switch.
+
+2. Exit the session, then see what the scanner reached:
+
+    ```prompt id=sandbox terminal-id=t2
+    /exit
+    ```
 
     ```bash id=host terminal-id=t2
     sbx policy log mcp
@@ -154,4 +166,4 @@ Before switching DevBoard's Dockerfiles to the hardened images, measure what you
 
     One request is blocked: `check.trivy.dev`, Trivy's check for a newer version. Neither your rules nor the kit allow it, and the scan doesn't need it.
 
-The scanner read the images, not your machine: it never had your Docker credentials, your `~/.ssh` folder or any host outside its rules. And because Trivy is now in the agent's sandbox, the agent can use it too: next time, you could ask it to scan the images it suggests. Check which variant it picked first: a `-dev` image scores far worse than its runtime image.
+The scanner read the images, not your machine: the agent ran it inside its sandbox, under the same rules, and it never had your Docker credentials, your `~/.ssh` folder or any host outside its rules. Next time, ask the agent to scan any image it suggests before you switch to it, and check which variant it picked: a `-dev` image scores far worse than its runtime image.

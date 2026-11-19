@@ -68,6 +68,7 @@ This repository is the **Docker Sandboxes with GitHub Copilot Lab**: a guided la
 - `sbx` v0.54 writes an empty `shim-start.lock` in the current folder each time the daemon starts (`sbx policy reset`, `sbx daemon restart`, or the first `sbx` command after a stop). The root `.gitignore` ignores it so that module 06's `git add -A` doesn't commit it; worth reporting upstream.
 - Once, `sbx daemon restart` left the daemon unable to start (`remove ...\containerd\containerd.sock.ttrpc: The file cannot be accessed by the system.`); starting it from the user's own terminal fixed it. Not reproduced.
 - Trivy counts with VEX: 83, 49, 16, 0; without: 217, 96, 24, 0.
+- Module 10's scan is now an agent prompt instead of `sbx exec mcp scan-images`. Tested on 2026-11-19 in a Copilot sandbox with the Trivy kit, with the module's prompt in prompt mode (`sbx run --name <name> -- -p "..."`, about 9 AI Credits, 2 minutes): Copilot ran `scan-images` on the four images, answered with a table, flagged the glibc-to-musl change for the backend, and changed no file. Counts with VEX: `python:3.12-slim` 104 (15 high), `dhi.io/python:3.12-alpine` 0, `node:22-alpine` 25 (6 high), `dhi.io/node:22-alpine` 0; without VEX: 238, 0, 34, 0. The network log matched the module's table (ports now shown, `:443`), with `check.trivy.dev:443` blocked.
 
 ## Roadmap ideas
 

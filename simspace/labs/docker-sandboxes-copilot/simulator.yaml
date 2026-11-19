@@ -1246,20 +1246,6 @@ scenarios:
     then:
       state: { ports.demoServer: true }
 
-  - id: exec-scan-images
-    completes: scan-images
-    when:
-      command: [sbx, exec, mcp, scan-images]
-      state: { sandboxes.mcp: true }
-    then:
-      state: { scan.done: true }
-      output:
-        - "Downloading the vulnerability database (about 130 MB) and the VEX statements..."
-        - { text: "python:3.12-slim           92 vulnerabilities (0 critical, 15 high)", delay: scan }
-        - { text: "dhi.io/python:3.12-alpine  0 vulnerabilities (0 critical, 0 high)", delay: scan }
-        - { text: "node:22-alpine             17 vulnerabilities (0 critical, 7 high)", delay: scan }
-        - { text: "dhi.io/node:22-alpine      0 vulnerabilities (0 critical, 0 high)", delay: scan }
-
   - id: exec-no-mcp
     when:
       command: [sbx, exec, mcp]
@@ -1680,6 +1666,35 @@ scenarios:
         - "  frontend  node:22-alpine    ->  dhi.io/node:22-alpine      0 known CVEs"
         - ""
         - "Tools I called: mcp-gateway-dhi_get_repository (x2). I did not call any tool that changes your organization."
+
+  # Module 10: the agent runs the Trivy kit's scan-images helper (abridged, from a real run)
+  - id: agent-scan
+    completes: scan-images
+    when:
+      agent: true
+      promptContains: [scan-images]
+    then:
+      state: { scan.done: true }
+      output:
+        - "● $ scan-images python:3.12-slim dhi.io/python:3.12-alpine node:22-alpine dhi.io/node:22-alpine"
+        - "  Downloading the vulnerability database (about 130 MB) and the VEX statements..."
+        - { text: "  python:3.12-slim           104 vulnerabilities (0 critical, 15 high)", delay: scan }
+        - { text: "  dhi.io/python:3.12-alpine  0 vulnerabilities (0 critical, 0 high)", delay: scan }
+        - { text: "  node:22-alpine             25 vulnerabilities (0 critical, 6 high)", delay: scan }
+        - { text: "  dhi.io/node:22-alpine      0 vulnerabilities (0 critical, 0 high)", delay: scan }
+        - ""
+        - "| Image                     | Role                | Vulnerabilities | Critical | High |"
+        - "|---------------------------|---------------------|-----------------|----------|------|"
+        - "| python:3.12-slim          | backend (current)   | 104             | 0        | 15   |"
+        - "| dhi.io/python:3.12-alpine | backend (hardened)  | 0               | 0        | 0    |"
+        - "| node:22-alpine            | frontend (current)  | 25              | 0        | 6    |"
+        - "| dhi.io/node:22-alpine     | frontend (hardened) | 0               | 0        | 0    |"
+        - ""
+        - "What switching would gain: the backend goes from 104 to 0 known vulnerabilities (15 high),"
+        - "the frontend from 25 to 0 (6 high): a smaller attack surface and less noise in future scans."
+        - ""
+        - "Caveat: python:3.12-slim (Debian) to Alpine changes the C library (glibc to musl). Check that"
+        - "the backend's Python packages still install and run before switching. I didn't change any file."
 
   # ════════════════════════════════════════════════════════════════════════
   # Module 05: the TUI dashboard
