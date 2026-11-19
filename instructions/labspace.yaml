@@ -97,9 +97,9 @@ sections:
     contentPath: 10-mcp-servers.md
     steps:
       - { title: "Register the DHI MCP server", match: "sbx mcp add dhi" }
-      - { title: "Create a sandbox with the DHI server and the Trivy kit", match: "sbx create --name mcp" }
+      - { title: "Create a sandbox with the DHI server and the Trivy kit", match: "sbx create --name dhi" }
       - { title: "Ask the agent for hardened images", match: "Docker Hardened Image" }
-      - { title: "Check that no network rule was needed", match: "sbx policy log mcp" }
+      - { title: "Check that no network rule was needed", match: "sbx policy log dhi" }
       - { title: "Scan the images with Trivy", match: "scan-images" }
   - title: Wrap up
     contentPath: 11-wrap-up.md

@@ -18,7 +18,7 @@ graph LR
         Proxy["Proxy<br/>your rules + the kit's rules"]
     end
 
-    subgraph Sandbox["Sandbox: mcp"]
+    subgraph Sandbox["Sandbox: dhi"]
         direction TB
         Agent["Copilot agent<br/>network still locked down"]
         Trivy["trivy and scan-images<br/>from the kit"]
@@ -36,7 +36,7 @@ graph LR
     Agent -->|tool calls| Gateway
     Gateway -->|"calls, no network rule needed"| Dhi
     TrivyKit -->|"--kit, at sbx create"| Trivy
-    You -->|"sbx exec mcp scan-images"| Trivy
+    Agent -->|"runs scan-images"| Trivy
     Trivy -->|every request| Proxy
     Proxy -->|"kit's rules"| TrivySources
     Proxy -->|"your rules"| Registries
@@ -84,18 +84,18 @@ graph LR
     dhi    remote http   ready    LOCAL, managed by you
     ```
 
-3. From the `project` directory, create a dedicated sandbox named `mcp`, with the DHI server and the Trivy kit:
+3. From the `project` directory, create a dedicated sandbox, `dhi`, named after the DHI server it gets, with that server and the Trivy kit:
 
     ```bash id=host terminal-id=terminal-2
-    sbx create --name mcp --static-mcp dhi --kit ./kits/trivy copilot .
+    sbx create --name dhi --static-mcp dhi --kit ./kits/trivy copilot .
     ```
 
-    `--static-mcp dhi` starts the sandbox's MCP gateway with **exactly this server**, and without the discovery tools an agent could use to find and add servers by itself. You decide which servers it gets. `--kit ./kits/trivy` adds the [Trivy kit](02-kits.md#a-kit-with-its-own-image-trivy) from the Kits module, which you'll use at the end of this module. The first time, `sbx` builds the kit's image, which downloads and checks Trivy (about a minute).
+    The sandbox and the server share the name `dhi`: `--name dhi` names the sandbox, and `--static-mcp dhi` starts the sandbox's MCP gateway with **exactly this server**, and without the discovery tools an agent could use to find and add servers by itself. You decide which servers it gets. `--kit ./kits/trivy` adds the [Trivy kit](02-kits.md#a-kit-with-its-own-image-trivy) from the Kits module, which you'll use at the end of this module. The first time, `sbx` builds the kit's image, which downloads and checks Trivy (about a minute).
 
     Check what the gateway was given:
 
     ```bash id=host terminal-id=terminal-2
-    sbx inspect mcp
+    sbx inspect dhi
     ```
 
     ```none id=host
@@ -106,10 +106,10 @@ graph LR
 
     These lines describe this sandbox's gateway. `sbx mcp ls`, on the other hand, lists the servers registered on your host, whether or not a sandbox uses them.
 
-4. Start an agent in the `mcp` sandbox:
+4. Start an agent in the `dhi` sandbox:
 
     ```bash id=host terminal-id=terminal-2
-    sbx run --name mcp
+    sbx run --name dhi
     ```
 
     Then give it this prompt:
@@ -132,7 +132,7 @@ graph LR
 5. Exit the session (press **`Ctrl-C` twice**), then look at the sandbox's network activity:
 
     ```bash id=host terminal-id=terminal-2
-    sbx policy log mcp
+    sbx policy log dhi
     ```
 
     You'll find the Copilot and GitHub hosts, and the gateway itself (`mcp-gateway.docker.internal`, marked `<daemon-managed alias>`), but no request to the DHI server, and you didn't add any network rule: the agent only talks to the gateway, and the gateway reaches the MCP server from outside the sandbox.
@@ -142,31 +142,41 @@ graph LR
 
 ## Scan the images before and after
 
-Before switching DevBoard's Dockerfiles to the hardened images, measure what you'd gain. The Trivy kit you added to the `mcp` sandbox can scan the current base images and their DHI equivalents.
+Before switching DevBoard's Dockerfiles to the hardened images, measure what you'd gain. The Trivy kit you added to the `dhi` sandbox put Trivy and its `scan-images` helper in the agent's sandbox: the agent can run the scan for you.
 
-1. Scan the two current base images and the two hardened images the agent suggested, with the kit's `scan-images` helper. `sbx exec` starts the sandbox again if it's stopped:
-
-    ```bash id=host terminal-id=terminal-2
-    sbx exec mcp scan-images python:3.12-slim dhi.io/python:3.12-alpine node:22-alpine dhi.io/node:22-alpine
-    ```
-
-    For each image, the helper runs `trivy image --image-src remote --scanners vuln --vex repo`: Trivy reads the image straight from its registry and applies the [VEX](https://docs.docker.com/dhi/explore/security-concepts/vex/) statements, which mark the CVEs that don't affect the image. The first scan also downloads Trivy's vulnerability database, about 130 MB, and the VEX statements, so it takes a minute or two.
-
-    The numbers change as new vulnerabilities are published, so yours will differ by a few. At the time of writing:
-
-    ```none id=host
-    python:3.12-slim           92 vulnerabilities (0 critical, 15 high)
-    dhi.io/python:3.12-alpine  0 vulnerabilities (0 critical, 0 high)
-    node:22-alpine             17 vulnerabilities (0 critical, 7 high)
-    dhi.io/node:22-alpine      0 vulnerabilities (0 critical, 0 high)
-    ```
-
-    Without the VEX statements, Trivy reports 226, 0, 25 and 0: it counts every published CVE that matches a package version, whether or not it affects the image.
-
-2. See what the scanner reached:
+1. Start the agent in the `dhi` sandbox again:
 
     ```bash id=host terminal-id=terminal-2
-    sbx policy log mcp
+    sbx run --name dhi
+    ```
+
+    Then ask it to scan the two current base images and the two hardened images it suggested:
+
+    ```console id=sandbox terminal-id=terminal-2
+    Use the scan-images command to scan the current base images of the backend and the frontend, python:3.12-slim and node:22-alpine, and their Docker Hardened Images, dhi.io/python:3.12-alpine and dhi.io/node:22-alpine. Show the results in a table and tell me what switching to the hardened images would gain. Don't change any file.
+    ```
+
+    The agent runs `scan-images` on the four images. For each one, the helper runs `trivy image --image-src remote --scanners vuln --vex repo`: Trivy reads the image straight from its registry and applies the [VEX](https://docs.docker.com/dhi/explore/security-concepts/vex/) statements, which mark the CVEs that don't affect the image. The first scan also downloads Trivy's vulnerability database, about 130 MB, and the VEX statements, so it takes a minute or two.
+
+    The agent words its answer differently each time, but the numbers come from Trivy. They change as new vulnerabilities are published, so yours will differ by a few. At the time of writing:
+
+    ```none id=sandbox
+    | Image                     | Vulnerabilities | Critical | High |
+    |---------------------------|-----------------|----------|------|
+    | python:3.12-slim          | 104             | 0        | 15   |
+    | dhi.io/python:3.12-alpine | 0               | 0        | 0    |
+    | node:22-alpine            | 25              | 0        | 6    |
+    | dhi.io/node:22-alpine     | 0               | 0        | 0    |
+    ```
+
+    Without the VEX statements, Trivy reports 238, 0, 34 and 0: it counts every published CVE that matches a package version, whether or not it affects the image.
+
+    The agent may also point out that moving the backend from `python:3.12-slim` (Debian) to an Alpine image changes the C library (glibc to musl): check that the backend's Python packages still install and run before you switch.
+
+2. Exit the session (press **`Ctrl-C` twice**), then see what the scanner reached:
+
+    ```bash id=host terminal-id=terminal-2
+    sbx policy log dhi
     ```
 
     Each host the scanner reached is allowed either by your own rules or by the Trivy kit's rules:
@@ -181,6 +191,6 @@ Before switching DevBoard's Dockerfiles to the hardened images, measure what you
 
     One request is blocked: `check.trivy.dev`, Trivy's check for a newer version. Neither your rules nor the kit allow it, and the scan doesn't need it.
 
-The scanner read the images, not your machine: it never had your Docker credentials, your `~/.ssh` folder or any host outside its rules. And because Trivy is now in the agent's sandbox, the agent can use it too: next time, you could ask it to scan the images it suggests. Check which variant it picked first: a `-dev` image scores far worse than its runtime image.
+The scanner read the images, not your machine: the agent ran it inside its sandbox, under the same rules, and it never had your Docker credentials, your `~/.ssh` folder or any host outside its rules. Next time, ask the agent to scan any image it suggests before you switch to it, and check which variant it picked: a `-dev` image scores far worse than its runtime image.
 
 [[<< Previous: Port forwarding](09-port-forwarding.md) | [Next >> Wrap up](11-wrap-up.md)]

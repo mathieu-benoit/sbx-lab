@@ -291,7 +291,7 @@ scenarios:
         - "default-deny-all   local    all                  network: deny when no rule decides"
         - "local-policy       local    all                  network: 11 allow; filesystem read: 1 allow; filesystem write: 1 allow"
         - "kit-quickstart     kit      sandbox:quickstart   network: the Copilot hosts, plus the Python kit's"
-        - "kit-mcp            kit      sandbox:mcp          network: the Copilot hosts, plus the Trivy kit's"
+        - "kit-dhi            kit      sandbox:dhi          network: the Copilot hosts, plus the Trivy kit's"
 
   - id: policy-ls-lab-quickstart
     completes: verify-rules
@@ -627,41 +627,41 @@ scenarios:
     when:
       command: [sbx, policy, log]
       args:
-        0: "mcp"
+        0: "dhi"
       state: { scan.done: true }
     then:
       output:
         - "  ALLOWED REQUESTS"
         - "  SANDBOX   HOST                                 ALLOWED BY               COUNT"
-        - "  mcp       api.individual.githubcopilot.com     your rules               18"
-        - "  mcp       api.github.com                       your rules + kit         24"
-        - "  mcp       github.com                           your rules + kit         6"
-        - "  mcp       codeload.github.com                  your rules + kit         2"
-        - "  mcp       raw.githubusercontent.com            kit (this sandbox only)  3"
-        - "  mcp       mirror.gcr.io                        kit (this sandbox only)  4"
-        - "  mcp       index.docker.io                      your rules               4"
-        - "  mcp       auth.docker.io                       your rules               4"
-        - "  mcp       production.cloudfront.docker.com     your rules               9"
-        - "  mcp       dhi.io                               your rules               8"
-        - "  mcp       mcp-gateway.docker.internal          <daemon-managed alias>   6"
+        - "  dhi       api.individual.githubcopilot.com     your rules               18"
+        - "  dhi       api.github.com                       your rules + kit         24"
+        - "  dhi       github.com                           your rules + kit         6"
+        - "  dhi       codeload.github.com                  your rules + kit         2"
+        - "  dhi       raw.githubusercontent.com            kit (this sandbox only)  3"
+        - "  dhi       mirror.gcr.io                        kit (this sandbox only)  4"
+        - "  dhi       index.docker.io                      your rules               4"
+        - "  dhi       auth.docker.io                       your rules               4"
+        - "  dhi       production.cloudfront.docker.com     your rules               9"
+        - "  dhi       dhi.io                               your rules               8"
+        - "  dhi       mcp-gateway.docker.internal          <daemon-managed alias>   6"
         - ""
         - "  BLOCKED REQUESTS"
         - "  SANDBOX   HOST               REASON                                  COUNT"
-        - "  mcp       check.trivy.dev    No matching allow rule (default deny)   4"
+        - "  dhi       check.trivy.dev    No matching allow rule (default deny)   4"
 
   - id: policy-log-mcp
     completes: read-mcp-log
     when:
       command: [sbx, policy, log]
       args:
-        0: "mcp"
+        0: "dhi"
     then:
       output:
         - "  ALLOWED REQUESTS"
         - "  SANDBOX   HOST                                 ALLOWED BY               COUNT"
-        - "  mcp       api.individual.githubcopilot.com     your rules               18"
-        - "  mcp       api.github.com                       your rules               11"
-        - "  mcp       mcp-gateway.docker.internal          <daemon-managed alias>   6"
+        - "  dhi       api.individual.githubcopilot.com     your rules               18"
+        - "  dhi       api.github.com                       your rules               11"
+        - "  dhi       mcp-gateway.docker.internal          <daemon-managed alias>   6"
         - ""
         - "  (No request to the DHI server, and no network rule for it: the agent only"
         - "   talks to the gateway, which reaches the MCP server from outside the sandbox.)"
@@ -1000,11 +1000,11 @@ scenarios:
     when:
       command: [sbx, create, copilot]
       args:
-        --name: "mcp"
+        --name: "dhi"
       state: { sandboxes.mcp: true }
     then:
       stderr:
-        - 'Error: sandbox "mcp" already exists. Remove it with: sbx rm mcp'
+        - 'Error: sandbox "dhi" already exists. Remove it with: sbx rm dhi'
       exit: 1
 
   - id: create-mcp
@@ -1012,7 +1012,7 @@ scenarios:
     when:
       command: [sbx, create, copilot]
       args:
-        --name: "mcp"
+        --name: "dhi"
         --static-mcp: "dhi"
     then:
       state: { sandboxes.mcp: true }
@@ -1025,7 +1025,7 @@ scenarios:
         - "      sbx-kit-src:trivy-767e12c61bd2"
         - ""
         - "SANDBOX"
-        - "  Name:       mcp"
+        - "  Name:       dhi"
         - "  Agent:      copilot"
         - "  Kits:       docker.io/sbx/copilot@sha256:47db4edda6a46b4c9fec0218994c013c4e713a73bc5151c9b3f7693464abedca"
         - "              ./kits/trivy"
@@ -1058,17 +1058,17 @@ scenarios:
         - "      ○ Register the sandbox MCP gateway in ~/.copilot/mcp-config.j… (kit=copilot, user=agent)"
         - "      view startup log: cat /var/log/sbx-kit-startup.log"
         - ""
-        - "  ✓ Created sandbox mcp"
-        - "      try: sbx run --name mcp"
+        - "  ✓ Created sandbox dhi"
+        - "      try: sbx run --name dhi"
 
   # Abridged: the real `sbx inspect` prints about 25 lines; the module shows only the MCP ones.
   - id: inspect-mcp
     when:
-      command: [sbx, inspect, mcp]
+      command: [sbx, inspect, dhi]
       state: { sandboxes.mcp: true }
     then:
       output:
-        - "  Name:                    mcp"
+        - "  Name:                    dhi"
         - "  Agent:                   copilot"
         - "  ..."
         - "  MCP gateway:             configured"
@@ -1139,7 +1139,7 @@ scenarios:
         - "fix-bugs     copilot   running   /Users/you/sbx-lab (clone)"
         - "add-search   copilot   running   /Users/you/sbx-lab (clone)"
         - "add-notif    copilot   running   /Users/you/sbx-lab (clone)"
-        - "mcp          copilot   running   /Users/you/sbx-lab/project"
+        - "dhi          copilot   running   /Users/you/sbx-lab/project"
         - "shell-demo   shell     stopped   /Users/you/sbx-lab"
 
   - id: ls-quickstart
@@ -1246,27 +1246,13 @@ scenarios:
     then:
       state: { ports.demoServer: true }
 
-  - id: exec-scan-images
-    completes: scan-images
-    when:
-      command: [sbx, exec, mcp, scan-images]
-      state: { sandboxes.mcp: true }
-    then:
-      state: { scan.done: true }
-      output:
-        - "Downloading the vulnerability database (about 130 MB) and the VEX statements..."
-        - { text: "python:3.12-slim           92 vulnerabilities (0 critical, 15 high)", delay: scan }
-        - { text: "dhi.io/python:3.12-alpine  0 vulnerabilities (0 critical, 0 high)", delay: scan }
-        - { text: "node:22-alpine             17 vulnerabilities (0 critical, 7 high)", delay: scan }
-        - { text: "dhi.io/node:22-alpine      0 vulnerabilities (0 critical, 0 high)", delay: scan }
-
   - id: exec-no-mcp
     when:
-      command: [sbx, exec, mcp]
+      command: [sbx, exec, dhi]
       state: { sandboxes.mcp: false }
     then:
       stderr:
-        - 'Error: sandbox "mcp" not found. Create it first (see "MCP servers").'
+        - 'Error: sandbox "dhi" not found. Create it first (see "MCP servers").'
       exit: 1
 
   # ── Starting an agent session ────────────────────────────────────────────
@@ -1401,15 +1387,15 @@ scenarios:
     when:
       command: [sbx, run]
       args:
-        --name: "mcp"
+        --name: "dhi"
       state: { sandboxes.mcp: true }
     then:
       output:
-        - "Attaching to sandbox 'mcp'..."
+        - "Attaching to sandbox 'dhi'..."
       session:
-        prompt: "copilot (mcp)> "
+        prompt: "copilot (dhi)> "
         intro:
-          - "GitHub Copilot CLI (scripted) · sandbox 'mcp' · MCP gateway with: dhi"
+          - "GitHub Copilot CLI (scripted) · sandbox 'dhi' · MCP gateway with: dhi"
           - "Running with --yolo. Type /exit to leave."
         outro:
           - "Session ended."
@@ -1680,6 +1666,35 @@ scenarios:
         - "  frontend  node:22-alpine    ->  dhi.io/node:22-alpine      0 known CVEs"
         - ""
         - "Tools I called: mcp-gateway-dhi_get_repository (x2). I did not call any tool that changes your organization."
+
+  # Module 10: the agent runs the Trivy kit's scan-images helper (abridged, from a real run)
+  - id: agent-scan
+    completes: scan-images
+    when:
+      agent: true
+      promptContains: [scan-images]
+    then:
+      state: { scan.done: true }
+      output:
+        - "● $ scan-images python:3.12-slim dhi.io/python:3.12-alpine node:22-alpine dhi.io/node:22-alpine"
+        - "  Downloading the vulnerability database (about 130 MB) and the VEX statements..."
+        - { text: "  python:3.12-slim           104 vulnerabilities (0 critical, 15 high)", delay: scan }
+        - { text: "  dhi.io/python:3.12-alpine  0 vulnerabilities (0 critical, 0 high)", delay: scan }
+        - { text: "  node:22-alpine             25 vulnerabilities (0 critical, 6 high)", delay: scan }
+        - { text: "  dhi.io/node:22-alpine      0 vulnerabilities (0 critical, 0 high)", delay: scan }
+        - ""
+        - "| Image                     | Role                | Vulnerabilities | Critical | High |"
+        - "|---------------------------|---------------------|-----------------|----------|------|"
+        - "| python:3.12-slim          | backend (current)   | 104             | 0        | 15   |"
+        - "| dhi.io/python:3.12-alpine | backend (hardened)  | 0               | 0        | 0    |"
+        - "| node:22-alpine            | frontend (current)  | 25              | 0        | 6    |"
+        - "| dhi.io/node:22-alpine     | frontend (hardened) | 0               | 0        | 0    |"
+        - ""
+        - "What switching would gain: the backend goes from 104 to 0 known vulnerabilities (15 high),"
+        - "the frontend from 25 to 0 (6 high): a smaller attack surface and less noise in future scans."
+        - ""
+        - "Caveat: python:3.12-slim (Debian) to Alpine changes the C library (glibc to musl). Check that"
+        - "the backend's Python packages still install and run before switching. I didn't change any file."
 
   # ════════════════════════════════════════════════════════════════════════
   # Module 05: the TUI dashboard
@@ -2351,7 +2366,7 @@ scenarios:
       command: [sbx, rm]
       args:
         0: "quickstart"
-        4: "mcp"
+        4: "dhi"
     then:
       state:
         sandboxes.quickstart: false
@@ -2367,7 +2382,7 @@ scenarios:
         - "✓ Removed sandbox 'fix-bugs' (fetched branches stay under refs/sandboxes/fix-bugs/*)"
         - "✓ Removed sandbox 'add-search' (fetched branches stay under refs/sandboxes/add-search/*)"
         - "✓ Removed sandbox 'add-notif' (fetched branches stay under refs/sandboxes/add-notif/*)"
-        - "✓ Removed sandbox 'mcp'"
+        - "✓ Removed sandbox 'dhi'"
 
   - id: rm-quickstart
     when:

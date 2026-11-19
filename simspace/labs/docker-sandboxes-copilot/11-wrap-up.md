@@ -22,7 +22,7 @@ graph LR
 
     subgraph Lab["What the lab left on your machine"]
         direction TB
-        Sandboxes["Sandboxes<br/>quickstart, fix-bugs, add-search, add-notif, mcp, shell-demo"]
+        Sandboxes["Sandboxes<br/>quickstart, fix-bugs, add-search, add-notif, dhi, shell-demo"]
         McpRegistration["DHI MCP registration"]
         Secrets["github and copilot secrets"]
         Policy["Locked Down policy<br/>and the lab's rules"]
@@ -54,7 +54,7 @@ sbx ls
 ```
 
 ```bash id=host
-sbx rm quickstart fix-bugs add-search add-notif mcp
+sbx rm quickstart fix-bugs add-search add-notif dhi
 ```
 
 `shell-demo` is the sandbox from the network policies module:

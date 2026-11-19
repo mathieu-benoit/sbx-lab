@@ -20,7 +20,7 @@ graph LR
 
     subgraph Lab["What the lab left on your machine"]
         direction TB
-        Sandboxes["Sandboxes<br/>quickstart, fix-bugs, add-search, add-notif, mcp, shell-demo"]
+        Sandboxes["Sandboxes<br/>quickstart, fix-bugs, add-search, add-notif, dhi, shell-demo"]
         McpRegistration["DHI MCP registration"]
         Secrets["github and copilot secrets"]
         Policy["Locked Down policy<br/>and the lab's rules"]
@@ -48,7 +48,7 @@ Remove the sandboxes created during the lab, along with everything inside them (
 
 ```bash id=host terminal-id=terminal-2
 sbx ls
-sbx rm quickstart fix-bugs add-search add-notif mcp
+sbx rm quickstart fix-bugs add-search add-notif dhi
 ```
 
 ```bash id=host terminal-id=terminal-2
