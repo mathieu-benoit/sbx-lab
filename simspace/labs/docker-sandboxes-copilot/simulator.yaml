@@ -622,6 +622,36 @@ scenarios:
     then:
       output: ["No requests recorded for sandbox 'quickstart' yet."]
 
+  # After the Docker Scout comparison (listed first: first match wins)
+  - id: policy-log-dhi-scout
+    completes: read-scout-log
+    when:
+      command: [sbx, policy, log]
+      args:
+        0: "dhi"
+      state: { scout.done: true }
+    then:
+      output:
+        - "  ALLOWED REQUESTS"
+        - "  SANDBOX   HOST                                 ALLOWED BY               COUNT"
+        - "  dhi       api.individual.githubcopilot.com     your rules               27"
+        - "  dhi       api.github.com                       your rules + kit         25"
+        - "  dhi       github.com                           your rules + kit         6"
+        - "  dhi       codeload.github.com                  your rules + kit         2"
+        - "  dhi       raw.githubusercontent.com            kit (this sandbox only)  3"
+        - "  dhi       mirror.gcr.io                        kit (this sandbox only)  4"
+        - "  dhi       api.dso.docker.com                   kit (this sandbox only)  2"
+        - "  dhi       index.docker.io                      your rules               6"
+        - "  dhi       auth.docker.io                       your rules               6"
+        - "  dhi       production.cloudfront.docker.com     your rules               13"
+        - "  dhi       dhi.io                               your rules               10"
+        - "  dhi       mcp-gateway.docker.internal          <daemon-managed alias>   8"
+        - ""
+        - "  BLOCKED REQUESTS"
+        - "  SANDBOX   HOST                        REASON                                  COUNT"
+        - "  dhi       check.trivy.dev             No matching allow rule (default deny)   4"
+        - "  dhi       registry.scout.docker.com   No matching allow rule (default deny)   6"
+
   - id: policy-log-mcp-scanned
     completes: read-scan-log
     when:
@@ -1029,6 +1059,7 @@ scenarios:
         - "  Agent:      copilot"
         - "  Kits:       docker.io/sbx/copilot@sha256:47db4edda6a46b4c9fec0218994c013c4e713a73bc5151c9b3f7693464abedca"
         - "              ./kits/trivy"
+        - "              sbx/scout-cli"
         - "  MCP:        dhi (static)"
         - "  Workspace:  ~/sbx-lab/project (rw)"
         - "  Skills:     0 entries · linked, read-only"
@@ -1042,12 +1073,13 @@ scenarios:
         - { text: "  ✓ image — ready", delay: pull }
         - ""
         - "AGENT"
-        - "    assembling kit image from 2 kits"
+        - "    assembling kit image from 3 kits"
         - "    loading kit image docker.io/sbx/copilot@sha256:47db4edda6a46b4c9fec0218994c013c4e713a73bc5151c9b3f7693464abedca"
         - "    loading kit image ~/sbx-lab/project/kits/trivy"
+        - "    loading kit image docker.io/sbx/scout-cli:1.30.0-0"
         - "  ✓ assembled kit image (6 layers)"
-        - "    setting 2 environment variables"
-        - "      +COPILOT_GITHUB_TOKEN +GH_TOKEN"
+        - "    setting 3 environment variables"
+        - "      +COPILOT_GITHUB_TOKEN +DOCKER_SCOUT_HUB_TOKEN +GH_TOKEN"
         - "    running 2 install commands"
         - "      $ Ensure .copilot is owned by agent before bind mounts and th… (kit=copilot, user=0)"
         - "      ✓ Ensure .copilot is owned by agent before bind mounts and th… (kit=copilot, user=0, 5ms)"
@@ -1666,6 +1698,46 @@ scenarios:
         - "  frontend  node:22-alpine    ->  dhi.io/node:22-alpine      0 known CVEs"
         - ""
         - "Tools I called: mcp-gateway-dhi_get_repository (x2). I did not call any tool that changes your organization."
+
+  # Module 10: the agent runs docker scout compare, from the Scout kit (abridged, from a real run)
+  - id: agent-scout
+    completes: compare-scout
+    when:
+      agent: true
+      promptContains: [docker scout compare]
+    then:
+      state: { scout.done: true }
+      output:
+        - "● $ docker scout compare dhi.io/python:3.12-alpine --to python:3.12-slim"
+        - { text: "  ! 'docker scout compare' is experimental and its behaviour might change in the future", delay: work }
+        - "  ✓ SBOM obtained from attestation, 48 packages found"
+        - "  ✓ VEX statements obtained from attestation"
+        - { text: "  ✓ Pulled", delay: scan }
+        - ""
+        - "  ## Overview"
+        - ""
+        - "                     │       Analyzed Image        │    Comparison Image"
+        - "  ───────────────────┼─────────────────────────────┼─────────────────────────────"
+        - "   Target            │  dhi.io/python:3.12-alpine  │  python:3.12-slim"
+        - "     vulnerabilities │    0C     1H     0M     0L  │    0C     8H    13M    28L"
+        - "                     │           -7    -13    -28  │"
+        - "     size            │ 19 MB (-25 MB)              │ 43 MB"
+        - "     packages        │ 48 (-76)                    │ 124"
+        - "  ..."
+        - ""
+        - { text: "● $ docker scout compare dhi.io/node:22-alpine --to node:22-alpine", delay: scan }
+        - "  ..."
+        - ""
+        - "|                           | python:3.12-slim | dhi.io/python:3.12-alpine | node:22-alpine | dhi.io/node:22-alpine |"
+        - "|---------------------------|------------------|---------------------------|----------------|-----------------------|"
+        - "| Vulnerabilities (C/H/M/L) | 0/8/13/28        | 0/1/0/0                   | 1/15/13/1      | 0/0/0/0               |"
+        - "| Size                      | 43 MB            | 19 MB (-25 MB)            | 61 MB          | 38 MB (-24 MB)        |"
+        - "| Packages                  | 124              | 48 (-76)                  | 212            | 11 (-201)             |"
+        - ""
+        - "- Python: Debian packages (deb) give way to Alpine 3.24 ones (apk); one High remains in the hardened image."
+        - "- Node: the hardened image drops npm, yarn and busybox extras; the base image's Critical (in zlib) is gone."
+        - "- DevBoard: the hardened images have no package manager, and the Node one has no npm or yarn: the frontend's"
+        - "  build stage needs a -dev variant. I didn't change any file."
 
   # Module 10: the agent runs the Trivy kit's scan-images helper (abridged, from a real run)
   - id: agent-scan

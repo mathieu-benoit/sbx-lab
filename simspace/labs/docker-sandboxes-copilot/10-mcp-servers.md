@@ -15,6 +15,7 @@ graph LR
         McpRegistry["Registered MCP servers<br/>sbx mcp add dhi"]
         Gateway["MCP gateway"]
         TrivyKit["Trivy kit<br/>project/kits/trivy"]
+        ScoutKit["Scout kit<br/>sbx/scout-cli, from Docker Hub"]
         Proxy["Proxy<br/>your rules + the kit's rules"]
     end
 
@@ -22,12 +23,14 @@ graph LR
         direction TB
         Agent["Copilot agent<br/>network still locked down"]
         Trivy["trivy and scan-images<br/>from the kit"]
+        Scout["docker scout<br/>from the kit"]
     end
 
     subgraph Outside["Outside the sandbox"]
         direction TB
         Dhi["DHI MCP server<br/>dhi.io/mcp"]
         TrivySources["Trivy database and VEX<br/>mirror.gcr.io, GitHub"]
+        ScoutApi["Docker Scout service<br/>api.dso.docker.com"]
         Registries["Image registries<br/>Docker Hub, dhi.io"]
     end
 
@@ -39,6 +42,10 @@ graph LR
     Agent -->|"runs scan-images"| Trivy
     Trivy -->|every request| Proxy
     Proxy -->|"kit's rules"| TrivySources
+    ScoutKit -->|"--kit, at sbx create"| Scout
+    Agent -->|"runs docker scout compare"| Scout
+    Scout -->|every request| Proxy
+    Proxy -->|"Scout kit's rules"| ScoutApi
     Proxy -->|"your rules"| Registries
 
     style Host fill:#E5F2FC,stroke:#1D63ED,color:#00084D
@@ -46,12 +53,15 @@ graph LR
     style Outside fill:#fff7f0,stroke:#d4915e,color:#00084D
     style McpRegistry fill:#fff,stroke:#0DB7ED,color:#384D54
     style TrivyKit fill:#fff,stroke:#0DB7ED,color:#384D54
+    style ScoutKit fill:#fff,stroke:#0DB7ED,color:#384D54
     style Gateway fill:#E5F2FC,stroke:#1D63ED,color:#00084D
     style Proxy fill:#E5F2FC,stroke:#1D63ED,color:#00084D
     style Agent fill:#e0f2e6,stroke:#6db88a,color:#384D54
     style Trivy fill:#e0f2e6,stroke:#6db88a,color:#384D54
+    style Scout fill:#e0f2e6,stroke:#6db88a,color:#384D54
     style Dhi fill:#fff0e5,stroke:#d4915e,color:#384D54
     style TrivySources fill:#fff0e5,stroke:#d4915e,color:#384D54
+    style ScoutApi fill:#fff0e5,stroke:#d4915e,color:#384D54
     style Registries fill:#fff0e5,stroke:#d4915e,color:#384D54
     style You fill:#fff,stroke:#1D63ED,color:#00084D
 ```
@@ -68,17 +78,17 @@ graph LR
     sbx mcp ls
     ```
 
-3. From the `project` directory, create a dedicated sandbox, `dhi`, named after the DHI server it gets, with that server and the Trivy kit:
+3. From the `project` directory, create a dedicated sandbox, `dhi`, named after the DHI server it gets, with that server and two scanners, the Trivy kit and the Docker Scout kit:
 
     ```bash id=host terminal-id=t2
     cd project
     ```
 
     ```bash id=host terminal-id=t2
-    sbx create --name dhi --static-mcp dhi --kit ./kits/trivy copilot .
+    sbx create --name dhi --static-mcp dhi --kit ./kits/trivy --kit sbx/scout-cli copilot .
     ```
 
-    The sandbox and the server share the name `dhi`: `--name dhi` names the sandbox, and `--static-mcp dhi` starts the sandbox's MCP gateway with **exactly this server**, and without the discovery tools an agent could use to find and add servers by itself. You decide which servers it gets. `--kit ./kits/trivy` adds the Trivy kit, which you'll use at the end of this module. The first time, `sbx` builds the kit's image, which downloads and checks Trivy.
+    The sandbox and the server share the name `dhi`: `--name dhi` names the sandbox, and `--static-mcp dhi` starts the sandbox's MCP gateway with **exactly this server**, and without the discovery tools an agent could use to find and add servers by itself. You decide which servers it gets. `--kit ./kits/trivy` adds the Trivy kit. The first time, `sbx` builds the kit's image, which downloads and checks Trivy. `--kit sbx/scout-cli` adds Docker's `sbx/scout-cli` kit, published on Docker Hub as an OCI image, like the built-in agent kits (*Kits*): the `docker scout` CLI plugin, and network rules for the Docker Scout service, for this sandbox only. You'll use both scanners at the end of this module.
 
     Check what the gateway was given:
 
@@ -167,3 +177,51 @@ Before switching DevBoard's Dockerfiles to the hardened images, measure what you
     One request is blocked: `check.trivy.dev`, Trivy's check for a newer version. Neither your rules nor the kit allow it, and the scan doesn't need it.
 
 The scanner read the images, not your machine: the agent ran it inside its sandbox, under the same rules, and it never had your Docker credentials, your `~/.ssh` folder or any host outside its rules. Next time, ask the agent to scan any image it suggests before you switch to it, and check which variant it picked: a `-dev` image scores far worse than its runtime image.
+
+## Compare the images with Docker Scout
+
+Docker Scout is another way to measure the gain, with Docker's own image analysis. The Scout kit you added to the `dhi` sandbox gives the agent the `docker scout` CLI, and `docker scout compare` puts two images side by side: what changes in vulnerabilities, size and packages from one to the other.
+
+1. Start the agent in the `dhi` sandbox again:
+
+    ```bash id=host terminal-id=t2
+    sbx run --name dhi
+    ```
+
+    Then ask it to compare each hardened image with the image it would replace:
+
+    ```prompt id=sandbox terminal-id=t2
+    Use docker scout compare to compare each Docker Hardened Image with the current base image it would replace: dhi.io/python:3.12-alpine with python:3.12-slim, and dhi.io/node:22-alpine with node:22-alpine. Summarize the differences in vulnerabilities, size and packages in a table. Don't change any file.
+    ```
+
+    The agent runs `docker scout compare <hardened image> --to <current image>` for each pair. For the backend, the overview of the comparison reads (abridged):
+
+    ```none id=sandbox
+                       │       Analyzed Image        │    Comparison Image
+    ───────────────────┼─────────────────────────────┼─────────────────────────────
+     Target            │  dhi.io/python:3.12-alpine  │  python:3.12-slim
+       vulnerabilities │    0C     1H     0M     0L  │    0C     8H    13M    28L
+                       │           -7    -13    -28  │
+       size            │ 19 MB (-25 MB)              │ 43 MB
+       packages        │ 48 (-76)                    │ 124
+    ```
+
+    In the real lab, the numbers change as new vulnerabilities are published, and the agent words its summary differently each time.
+
+    Beyond the numbers, the comparison lists the packages each image adds or removes. The agent may point out that the hardened Node image has no npm or yarn: building the frontend needs a `-dev` variant in the build stage, as the note on variants above says.
+
+    > **Note:** `docker scout compare` is marked experimental: its output may change. Scout's counts don't match Trivy's either, because Scout uses Docker's own vulnerability data. Compare the images within one tool, not across them.
+
+2. Exit the session, then look at the network log again:
+
+    ```prompt id=sandbox terminal-id=t2
+    /exit
+    ```
+
+    ```bash id=host terminal-id=t2
+    sbx policy log dhi
+    ```
+
+    Scout reached Docker Hub and `dhi.io` (your rules) to read the images, and `api.dso.docker.com`, the Docker Scout service (the Scout kit's rules, for this sandbox only). One host is blocked, `registry.scout.docker.com`: neither your rules nor the kit allow it, and the comparison doesn't need it.
+
+The two scanners work differently: Trivy matches the images' packages against a database it downloads into the sandbox, while Scout asks the Docker Scout service. Both ran inside the agent's sandbox, under the same rules, and each kit opened only the hosts its scanner needs.

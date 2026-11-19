@@ -216,12 +216,12 @@ sbx policy allow network "registry.npmjs.org:443"
 |------|---------|
 | `github.com:443`, `**.github.com:443` | GitHub API, used by Copilot; also where Trivy downloads the VEX statements |
 | `**.githubcopilot.com:443` | Copilot service; the subdomain depends on your plan (`api.individual…`, `api.business…`, `api.enterprise…`), hence `**` |
-| `deb.debian.org:80`, `dhi.io:80`, `dhi.io:443` | The sandbox image's `apt` repositories, used to install Python. `dhi.io` is also the Docker Hardened Images registry, which Trivy reads later |
+| `deb.debian.org:80`, `dhi.io:80`, `dhi.io:443` | The sandbox image's `apt` repositories, used to install Python. `dhi.io` is also the Docker Hardened Images registry, which Trivy and Docker Scout read later |
 | `pypi.org:443`, `files.pythonhosted.org:443` | Installing the backend's Python packages |
-| `**.docker.io:443`, `production.cloudfront.docker.com:443` | Pulling the `python`, `node` and `postgres` images, and the images Trivy scans |
+| `**.docker.io:443`, `production.cloudfront.docker.com:443` | Pulling the `python`, `node` and `postgres` images, and the images Trivy and Docker Scout analyze |
 | `registry.npmjs.org:443` | Installing the frontend's npm packages |
 
-A few more hosts are needed later, but you don't add them here: the kits that need them declare them, and those rules apply only to the sandboxes that use the kit. Each rule ends with a **port**, so it allows that host on that port only. Everything is HTTPS (port 443), except the `apt` repositories: the sandbox image reads `deb.debian.org` and `dhi.io` over plain HTTP (port 80), so a `:443` rule alone would break `apt-get update`. `dhi.io` gets both ports, `:80` for its packages and `:443` for its image registry. A rule without a port would allow the host on any port.
+A few more hosts are needed later, but you don't add them here: the kits that need them declare them, and those rules apply only to the sandboxes that use the kit: the Trivy kit adds `mirror.gcr.io` and `raw.githubusercontent.com`, and Docker's Scout kit `api.dso.docker.com` and `api.scout.docker.com`. Each rule ends with a **port**, so it allows that host on that port only. Everything is HTTPS (port 443), except the `apt` repositories: the sandbox image reads `deb.debian.org` and `dhi.io` over plain HTTP (port 80), so a `:443` rule alone would break `apt-get update`. `dhi.io` gets both ports, `:80` for its packages and `:443` for its image registry. A rule without a port would allow the host on any port.
 
 List the policies again: `local-policy` now has one network rule per host and port (11 in total).
 
