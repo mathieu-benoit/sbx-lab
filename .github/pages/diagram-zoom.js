@@ -1,7 +1,8 @@
 // Click-to-zoom for the Mermaid diagrams of the Pages site, like GitHub's diagram viewer: click a
 // diagram (or focus it and press Enter) to open it in a popup, then zoom with the buttons, the
 // mouse wheel or +/-, drag to pan, and close with Esc, the close button or a click outside.
-// pages.yaml adds it to the Simspace runtime's index.html, at the root and in simspace/.
+// pages.yaml adds it to the Simspace runtime's index.html, at the root and in simspace/; the Labspace
+// (labspace-local/content.mjs) loads it too, at home and in labspace/.
 (() => {
   const DIAGRAM = ".workshop-body svg[aria-roledescription]";
   const MIN = 0.5, MAX = 8, STEP = 1.25;
