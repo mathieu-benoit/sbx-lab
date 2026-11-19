@@ -197,7 +197,7 @@ capabilities:
 It declares two capabilities: a **lifecycle** hook that runs once when the sandbox is created, and a **network policy** that opens only the hosts this kit needs. For the install, that's the sandbox image's apt repositories, `deb.debian.org` and `dhi.io` (Docker Hardened Images), on port 80 because `apt` reads them over HTTP, and because `apt-get update` reads every configured source. At runtime, it's PyPI for `pip`, on port 443. No Dockerfile is needed for this one.
 
 > [!NOTE]
-> The `install` and `runtime` lists say when each host is needed. Once the sandbox runs, `sbx policy inspect` shows only the `runtime` hosts, `pypi.org` and `files.pythonhosted.org`, in its kit policy. In a Copilot sandbox the kit policy also lists `deb.debian.org:80` and `dhi.io:80`: they come from the Copilot agent, not from this kit. The sandbox can reach both hosts anyway, because the global rules you added in [Allow only what the lab needs](01-network-policies.md#allow-only-what-the-lab-needs) allow them.
+> The `install` and `runtime` lists say when each host is needed. Once the sandbox runs, `sbx policy inspect` shows only the `runtime` hosts, `pypi.org:443` and `files.pythonhosted.org:443`, in its kit policy. In a Copilot sandbox the kit policy also lists `deb.debian.org:80` and `dhi.io:80`: they come from the Copilot agent, not from this kit. The sandbox can reach both hosts anyway, because the global rules you added in [Allow only what the lab needs](01-network-policies.md#allow-only-what-the-lab-needs) allow them.
 
 1. Check that the kit is valid:
 
