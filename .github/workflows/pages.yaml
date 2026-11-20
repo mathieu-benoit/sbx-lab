@@ -105,6 +105,16 @@ jobs:
             grep -qF 'diagram-zoom.js' "$site/index.html"
           done
 
+          # / and simspace/ : the label above the lab's title, "Labspace" in the runtime: "Lab" at
+          # the root (the instructions only), "Simspace" for the simulated lab. labspace/ keeps its own.
+          label() { # <site dir> <label>
+            files="$(grep -lF 'eyebrow:"Labspace"' "$1"/assets/*.js)" || { echo "::error::the runtime has no eyebrow:\"Labspace\" any more: update the header label step"; exit 1; }
+            sed -i "s|eyebrow:\"Labspace\"|eyebrow:\"$2\"|" $files
+            grep -qF "eyebrow:\"$2\"" $files
+          }
+          label _site Lab
+          label _site/simspace Simspace
+
           # / and simspace/ : the icon of the code blocks labelled host or sandbox.
           for c in code-block-label code-block-label-icon; do
             grep -qF ".$c{" _site/assets/*.css || { echo "::error::the runtime has no .$c any more: update .github/pages/code-blocks.css"; exit 1; }
