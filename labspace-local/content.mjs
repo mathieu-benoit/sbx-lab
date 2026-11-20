@@ -127,6 +127,7 @@ export function withTheme(html, base = "/") {
   const tags = [
     `<link rel="stylesheet" href="${base}labspace-theme.css">`,
     `<script src="${base}labspace-ui.js" data-base="${base}" defer></script>`,
+    `<script src="${base}diagram-zoom.js" defer></script>`,
   ];
   return html.replace("</head>", `  ${tags.join("\n    ")}\n  </head>`);
 }
@@ -136,9 +137,14 @@ function yamlParser() {
   return createRequire(path.join(process.cwd(), "noop.js"))("yaml").parse;
 }
 
-// The theme and the header/milestones script, served with the content: the content is a mounted
-// folder, which follows edits, where a mounted single file keeps its first version.
-export const UI_FILES = { "theme.css": "labspace-theme.css", "labspace-ui.js": "labspace-ui.js" };
+// The theme, the header/milestones script and the click-to-zoom of the diagrams (shared with the
+// Pages site), served with the content: the content is a mounted folder, which follows edits, where
+// a mounted single file keeps its first version.
+export const UI_FILES = {
+  "theme.css": "labspace-theme.css",
+  "labspace-ui.js": "labspace-ui.js",
+  "../.github/pages/diagram-zoom.js": "diagram-zoom.js",
+};
 
 export function writeContent(outDir, parse = yamlParser()) {
   fs.mkdirSync(outDir, { recursive: true });

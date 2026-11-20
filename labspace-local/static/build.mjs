@@ -15,7 +15,7 @@ import os from "node:os";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-import { toLabspace, uiConfig, withTheme } from "../content.mjs";
+import { toLabspace, UI_FILES, uiConfig, withTheme } from "../content.mjs";
 
 const LABSPACE_INFRA = "https://github.com/dockersamples/labspace-infra.git";
 const LABSPACE_INFRA_COMMIT = "83f3c262cb68dfcf0d8b77066565fdb20d7ef2b1";
@@ -108,9 +108,8 @@ const indexFile = path.join(out, "index.html");
 const shimTag = `<script src="${base}labspace-shim.js" data-base="${base}"></script>`;
 patch(indexFile, '<script type="module"', `${shimTag}\n    <script type="module"`);
 // The look of the simulated lab (simspace/)
-// with its header and milestones
-fs.copyFileSync(path.join(here, "..", "theme.css"), path.join(out, "labspace-theme.css"));
-fs.copyFileSync(path.join(here, "..", "labspace-ui.js"), path.join(out, "labspace-ui.js"));
+// with its header and milestones, and the click-to-zoom of the diagrams
+for (const [from, to] of Object.entries(UI_FILES)) fs.copyFileSync(path.join(here, "..", from), path.join(out, to));
 // Docker's current logo, in place of the one in the interface image (the favicon, the header
 // logo and the Dockerfile icon all use docker.svg)
 fs.copyFileSync(path.join(here, "..", "docker.svg"), path.join(out, "docker.svg"));

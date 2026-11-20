@@ -81,7 +81,8 @@ graph LR
   **Milestones** card at the top of each section. The milestones are the `steps` of
   [`../instructions/labspace.yaml`](../instructions/labspace.yaml), the same as the simulated lab's: one checks itself
   when you click Run or Copy on a code block, or open a link, whose text contains its `match`, and you can click one to
-  check or uncheck it. Progress stays in your browser. `start.sh` adds both files to the image's own `index.html`
+  check or uncheck it. Progress stays in your browser. A click on a diagram opens it in a zoomable popup, with the
+  Pages site's [`diagram-zoom.js`](../.github/pages/diagram-zoom.js). `start.sh` adds these files to the image's own `index.html`
   (in `.ui/`, mounted in the container) and serves them from `.content/`; the static build adds them too. The bridge's
   terminal pane takes the look of the simulated lab's terminals.
 - **Bridge** ([`bridge/`](bridge)): a small Go server on your machine, one binary with no dependency. It serves the
