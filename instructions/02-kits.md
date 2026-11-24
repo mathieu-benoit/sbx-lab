@@ -377,6 +377,18 @@ kits:
 - Each component keeps its own content and rules: the Python kit still installs Python when the sandbox is created, and the Trivy kit still brings its files and its network rules for the vulnerability database and the VEX statements. The set only adds what the combination needs on top, with the same `capabilities:` as a mixin.
 - You build and publish a set with Docker Buildx, `docker buildx build ./copilot-tools -f ./copilot-tools/copilot-tools.yaml -t docker.io/<NAMESPACE>/copilot-tools:1.0.0 --push`, then run it like any agent: `sbx run docker.io/<NAMESPACE>/copilot-tools:1.0.0 --name quickstart`. No `--kit` needed.
 
+A sandbox created from a set is the same as one created from its kits. The set keeps its kits' layers as they are, so it downloads the same bytes and shares the same local cache, and the same install hooks run at create, and the same startup hooks at every start. What changes is when the work happens:
+
+| | Separate kits (one `--kit` each) | A kit set |
+|-|----------------------------------|-----------|
+| Checking that the kits fit together (`requires`, `conflicts`, arguments) | Each time a sandbox is created | Once, when the set is published: a combination that doesn't fit can't be published |
+| Looking up the kits | One lookup per kit | One reference |
+| Assembling the sandbox's image | By `sbx`, when the sandbox is created | When the set is published: the set is one image |
+| Versions | Each tag, such as `:latest`, resolves when the sandbox is created | Pinned by digest when the set is built |
+| Two kits that ship the same file | Creating the sandbox fails | The later layer wins, decided when the set is published |
+
+Creating a sandbox may be a little faster from a set, with one lookup, no check and no assembly. But that's metadata work, seconds at most: downloading the layers and starting the VM take most of the time, and they're the same both ways. Once the sandbox exists, every start is identical. So a set is about one reference and a combination checked and pinned once, not about speed.
+
 ## Describe a sandbox in an environment file
 
 A kit packages tools. An [environment file](https://docs.docker.com/ai/sandboxes/configuration/environment-files/) (`sbxenv.yaml`, experimental) describes a whole sandbox instead: the agent and its kits, the workspace, the secrets, the published ports, MCP servers, and commands to run on your host. Commit it with the project, and every contributor gets the same sandbox without retyping flags.

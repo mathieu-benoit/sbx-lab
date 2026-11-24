@@ -173,5 +173,5 @@ Why put a scanner in a sandbox? It reads all your code, and it's a supply-chain 
 
 You don't need to run these, and the rest of the lab doesn't use them. They're here so you know they exist; the [full lab](https://github.com/mathieu-benoit/sbx-lab/blob/main/instructions/02-kits.md) shows both in detail.
 
-- **A kit set** (Early Access) packages a combination of kits, such as Copilot + Python + Trivy, as a single kit, so your team runs one reference.
+- **A kit set** (Early Access) packages a combination of kits, such as Copilot + Python + Trivy, as a single kit, so your team runs one reference. A sandbox created from a set is the same as one created from its kits, and downloads the same layers; the difference is that the set is checked, assembled and pinned by digest once, when it's published, instead of each time a sandbox is created. It's about one reference you can trust, not speed.
 - **An environment file** (`sbxenv.yaml`, experimental) describes a whole sandbox: the agent and its kits, the workspace, the secrets, the published ports, MCP servers. Commit it with the project and every contributor gets the same sandbox. This very repository uses one: `sbx env run` starts the sandbox for authoring these simulated labs.
