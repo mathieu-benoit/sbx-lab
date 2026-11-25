@@ -203,10 +203,10 @@ sections:
         title: "Check your cloud access"
       - id: cloud-secret
         title: "Store the github secret in the cloud"
-      - id: cloud-create
-        title: "Create the cloud sandbox"
       - id: cloud-init
         title: "Set the account's default to deny-all"
+      - id: cloud-create
+        title: "Create the cloud sandbox"
       - id: cloud-allow
         title: "Allow a host for this sandbox only"
       - id: cloud-copy
