@@ -130,6 +130,7 @@ That one secret is enough for Copilot: in the cloud, it covers both `GH_TOKEN` a
     - There's **no `.`** at the end: a cloud sandbox has no workspace to mount, and passing a path is an error.
     - `--ttl 1h --on-timeout stop`: the sandbox stops after an hour unless you extend it. You'll come back to this below.
     - No `--cpus` or `--memory`: the default is 2 CPUs and 4 GiB, the `small` size. Sizes go from `micro` (1 CPU, 2 GiB) to `xl` (16 CPUs, 32 GiB).
+    - On a Mac with Apple silicon, add `--platform linux/arm64`: moving the sandbox to your machine, later in this module, needs the same CPU architecture on both sides.
 
     The first time, it takes about 3 minutes: `sbx` builds the kit's image and uploads it as a cloud template. The output ends with:
 
@@ -290,9 +291,97 @@ The cloud has its own policy: the Locked Down policy and the rules from the [net
 > [!WARNING]
 > Treat a published URL as a public endpoint: DevBoard's API lets anyone register. Protect the service itself, and unpublish the port when you no longer need it (you will, at the end of this module).
 
+## Move a sandbox between your machine and the cloud
+
+`sbx move` takes a snapshot of a sandbox's filesystem, carries it across, and creates a new sandbox from it on the other side: `--to local` brings a cloud sandbox to your machine, and `--to cloud` sends a local one to the cloud. The command spans both sides, so it takes no `--cloud` flag. The source isn't deleted, and the two sandboxes don't sync afterwards.
+
+| Travels | Doesn't travel |
+|---|---|
+| The sandbox's files: the code you copied in, `~/venv`, what the agent installed | Running processes and memory: the API doesn't run on the other side until you start it |
+| The kit's network rules, to the cloud | Rules you added yourself: the destination's own policy applies |
+| Published ports: a new URL in the cloud, a `127.0.0.1` port locally | Secrets: the destination uses its own secret store |
+| Credentials an agent saved in files | Your local workspace folder: it's mounted, not part of the sandbox |
+
+1. Bring the cloud sandbox to your machine:
+
+    ```bash id=host
+    sbx move devboard-cloud --to local --name devboard-local
+    ```
+
+    `sbx` lists what doesn't carry over, and asks you to confirm (`--force` skips the question). It then downloads the snapshot, in about 2 to 3 minutes, and ends with:
+
+    ```none id=host
+      ✓ port 8000/tcp — published 127.0.0.1:60000
+
+      ✓ Created sandbox devboard-local
+        Stopping cloud sandbox sbx_… ...
+        Stop accepted for cloud source sandbox sbx_…; the stop continues in the background. Check it with `sbx --cloud ls`.
+    Moved to local sandbox devboard-local
+      Files:        inside the sandbox at the image's working directory (no local folder is mounted)
+      Attach with:  sbx run --name devboard-local
+    ```
+
+    Note the stop: once the copy is made, the move **stops the cloud sandbox**, so you don't pay for two.
+
+    > [!NOTE]
+    > The snapshot keeps the sandbox's CPU architecture, and your machine must run the same one: `sbx move` checks it before transferring anything. Our cloud sandbox was `linux/amd64`. On a Mac with Apple silicon, create the cloud sandbox with `--platform linux/arm64` for this step.
+
+2. Look inside the local copy:
+
+    ```bash id=host
+    sbx exec devboard-local sh -c 'ls ~/workspace/backend; ~/venv/bin/python -c "import fastapi; print(fastapi.__version__)"; env | grep _TOKEN'
+    ```
+
+    ```none id=host
+    Dockerfile
+    app
+    pytest.ini
+    requirements.txt
+    tests
+    0.162.4
+    GH_TOKEN=proxy-managed
+    COPILOT_GITHUB_TOKEN=proxy-managed
+    ```
+
+    - **The work came with it:** the backend and the virtual environment the agent created in the cloud.
+    - **The tokens are placeholders again**, now filled in by your **local** secrets, from the [Secrets and credentials](03-secrets-credentials.md) module.
+    - **There's no workspace folder:** the files stay inside the sandbox (`sbx ls` shows `-` as its workspace). Copy them out with `sbx cp`.
+    - **Port 8000 was kept**, on a `127.0.0.1` port that `sbx` picked (`sbx port ls devboard-local`), but nothing listens on it: the API process stayed behind. Your local network policy applies, not the cloud's.
+
+3. Remove the local copy:
+
+    ```bash id=host
+    sbx rm --force devboard-local
+    ```
+
+4. The other direction hands a local sandbox over to the cloud, for example a long task you want to keep running when you close your laptop. Don't run it now:
+
+    ```bash id=host no-run-button
+    sbx move quickstart --to cloud --name quickstart-cloud --ttl 1h --on-timeout stop
+    ```
+
+    - The move **stops the local sandbox** while it captures its filesystem.
+    - Your **workspace folder isn't copied**: `sbx` warns and asks first. Only what's inside the sandbox travels.
+    - The kit's network rules are applied in the cloud, but not the rules you added locally.
+    - CPU and memory are rounded up to a cloud size, and published ports get new public URLs.
+    - `--ttl` and `--on-timeout` work as they do on `sbx --cloud create`.
+    - The move leaves a cloud **template** behind, and its output names it: remove it with `sbx --cloud template rm` once you've removed the sandbox.
+
 ## Expiry, stop and resume
 
-1. Check how long the sandbox has left, and give it 30 more minutes:
+1. The move stopped `devboard-cloud`. Check it:
+
+    ```bash id=host
+    sbx --cloud ls
+    ```
+
+    It shows `○ stopped`. A stopped sandbox keeps its memory and its files, and **isn't billed**. To stop one yourself, when you take a break, run `sbx --cloud stop <name>`.
+
+2. Open the public URL again, with `/docs`. The page loads after a second or two: the request **woke the sandbox up** (that's `Auto-resume: enabled` in `inspect`). The API is still running: its process was kept with the sandbox's memory, so nothing had to start again. `sbx --cloud ls` shows it `● running` again.
+
+    `sbx --cloud attach devboard-cloud` resumes a stopped sandbox the same way, and connects you to its agent.
+
+3. Check how long the sandbox has left, and give it 30 more minutes:
 
     ```bash id=host
     sbx --cloud ttl devboard-cloud
@@ -307,19 +396,7 @@ The cloud has its own policy: the Locked Down policy and the rules from the [net
     Expires in 1h29m (MAX remaining: 23h58m).
     ```
 
-    A sandbox can live at most 24 hours from its creation. When its time runs out, `--on-timeout` decides what happens: `stop` (as here), `restart`, or `delete`.
-
-2. Stop it. A stopped sandbox keeps its memory and its files, and **isn't billed**:
-
-    ```bash id=host
-    sbx --cloud stop devboard-cloud
-    ```
-
-    After a few seconds, `sbx --cloud ls` shows it `○ stopped`.
-
-3. Open the public URL again, with `/docs`. The page loads after a second or two: the request **woke the sandbox up** (that's `Auto-resume: enabled` in `inspect`). The API is still running: its process was kept with the sandbox's memory, so nothing had to start again. `sbx --cloud ls` shows it `● running`, and `sbx --cloud ttl devboard-cloud` shows a new hour.
-
-    `sbx --cloud attach devboard-cloud` resumes a stopped sandbox the same way, and connects you to its agent.
+    Resuming started a new hour. A sandbox can live at most 24 hours from its creation. When its time runs out, `--on-timeout` decides what happens: `stop` (as here), `restart`, or `delete`.
 
 ## Get the result and clean up
 
@@ -357,7 +434,6 @@ The cloud has its own policy: the Locked Down policy and the rules from the [net
 
 ## Going further
 
-- **Move a sandbox:** `sbx move` copies a sandbox's filesystem between your machine and the cloud, for example to hand a long task over to the cloud. The workspace mount, the secrets, the network rules and the running processes don't travel. See [Move sandboxes](https://docs.docker.com/ai/sandboxes/cloud/local-vs-cloud/move/).
 - **Templates:** `sbx --cloud template save` captures a configured sandbox, and `sbx --cloud create --template` starts new ones from it in seconds.
 - **Schedules:** `sbx --cloud schedule` runs an agent on a cron schedule, unattended.
 - **SSH:** `sbx --cloud setup ssh` lets your SSH client and editor connect to a cloud sandbox.

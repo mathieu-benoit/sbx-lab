@@ -213,10 +213,10 @@ sections:
         title: "Have the agent start the API"
       - id: cloud-publish
         title: "Publish the API on a public URL"
+      - id: cloud-move
+        title: "Move the sandbox to your machine"
       - id: cloud-ttl
         title: "Extend the time-to-live"
-      - id: cloud-stop
-        title: "Stop the sandbox"
       - id: cloud-copy-back
         title: "Copy the test report back"
       - id: cloud-rm

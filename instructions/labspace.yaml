@@ -112,8 +112,8 @@ sections:
       - { title: "Copy the backend into the sandbox", match: "sbx --cloud cp ./backend" }
       - { title: "Have the agent start the API", match: "listening on 0.0.0.0:8000" }
       - { title: "Publish the API on a public URL", match: "sbx --cloud port publish devboard-cloud 8000" }
+      - { title: "Move the sandbox to your machine", match: "sbx move devboard-cloud --to local" }
       - { title: "Extend the time-to-live", match: "sbx --cloud ttl +30m" }
-      - { title: "Stop the sandbox", match: "sbx --cloud stop devboard-cloud" }
       - { title: "Copy the test report back", match: "sbx --cloud cp devboard-cloud:" }
       - { title: "Remove the cloud sandbox", match: "sbx --cloud rm devboard-cloud" }
   - title: Wrap up

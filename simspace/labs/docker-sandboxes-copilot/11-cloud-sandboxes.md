@@ -196,9 +196,60 @@ The cloud has its own policy: the Locked Down policy and the rules from the *Net
 
 > **Warning:** treat a published URL as a public endpoint: DevBoard's API lets anyone register. Protect the service itself, and unpublish the port when you no longer need it.
 
+## Move a sandbox between your machine and the cloud
+
+`sbx move` takes a snapshot of a sandbox's filesystem, carries it across, and creates a new sandbox from it on the other side: `--to local` brings a cloud sandbox to your machine, and `--to cloud` sends a local one to the cloud. The command spans both sides, so it takes no `--cloud` flag. The source isn't deleted, and the two sandboxes don't sync afterwards.
+
+| Travels | Doesn't travel |
+|---|---|
+| The sandbox's files: the code you copied in, `~/venv`, what the agent installed | Running processes and memory: the API doesn't run on the other side until you start it |
+| The kit's network rules, to the cloud | Rules you added yourself: the destination's own policy applies |
+| Published ports: a new URL in the cloud, a `127.0.0.1` port locally | Secrets: the destination uses its own secret store |
+| Credentials an agent saved in files | Your local workspace folder: it's mounted, not part of the sandbox |
+
+1. Bring the cloud sandbox to your machine. The real `sbx` lists what doesn't carry over and asks you to confirm (`--force` skips the question), then downloads the snapshot in 2 to 3 minutes. Once the copy is made, it **stops the cloud sandbox**, so you don't pay for two:
+
+    ```bash id=host terminal-id=t2
+    sbx move devboard-cloud --to local --name devboard-local
+    ```
+
+    > **Note:** the snapshot keeps the sandbox's CPU architecture, and your machine must run the same one. On a Mac with Apple silicon, the real lab creates the cloud sandbox with `--platform linux/arm64` for this step.
+
+2. Look inside the local copy. The backend and the virtual environment the agent created came with it, and the tokens are placeholders again, now filled in by your **local** secrets. There's no workspace folder: the files stay inside the sandbox (copy them out with `sbx cp`). Port 8000 was kept on a `127.0.0.1` port, but nothing listens on it: the API process stayed behind:
+
+    ```bash id=host terminal-id=t2
+    sbx exec devboard-local sh -c 'ls ~/workspace/backend; ~/venv/bin/python -c "import fastapi; print(fastapi.__version__)"; env | grep _TOKEN'
+    ```
+
+3. Remove the local copy:
+
+    ```bash id=host terminal-id=t2
+    sbx rm --force devboard-local
+    ```
+
+4. The other direction hands a local sandbox over to the cloud, for example a long task you want to keep running when you close your laptop. Don't run it now:
+
+    ```bash id=host no-run-button
+    sbx move quickstart --to cloud --name quickstart-cloud --ttl 1h --on-timeout stop
+    ```
+
+    The move stops the local sandbox while it captures its filesystem. Your workspace folder isn't copied (`sbx` warns and asks first), the kit's network rules are applied in the cloud but not the rules you added locally, CPU and memory are rounded up to a cloud size, and published ports get new public URLs. It also leaves a cloud **template** behind, named in its output: remove it with `sbx --cloud template rm` once you've removed the sandbox.
+
 ## Expiry, stop and resume
 
-1. Check how long the sandbox has left, and give it 30 more minutes. A sandbox can live at most 24 hours from its creation; when its time runs out, `--on-timeout` decides: `stop` (as here), `restart`, or `delete`:
+1. The move stopped `devboard-cloud`. A stopped sandbox keeps its memory and its files, and **isn't billed**. To stop one yourself, when you take a break, run `sbx --cloud stop <name>`:
+
+    ```bash id=host terminal-id=t2
+    sbx --cloud ls
+    ```
+
+2. Request the public URL again. The request **wakes the sandbox up** (`Auto-resume: enabled` in `inspect`), in a second or two, and the API answers: its process was kept with the sandbox's memory, so nothing had to start again. `sbx --cloud attach devboard-cloud` resumes a stopped sandbox the same way, and connects you to its agent:
+
+    ```bash id=host terminal-id=t2
+    curl https://8000-01jcloudlab7x4k2m9qv3t8hz5r.sbx.sandboxes-cloud.docker.com/health
+    ```
+
+3. Check how long the sandbox has left (resuming started a new hour), and give it 30 more minutes. A sandbox can live at most 24 hours from its creation; when its time runs out, `--on-timeout` decides: `stop` (as here), `restart`, or `delete`:
 
     ```bash id=host terminal-id=t2
     sbx --cloud ttl devboard-cloud
@@ -206,22 +257,6 @@ The cloud has its own policy: the Locked Down policy and the rules from the *Net
 
     ```bash id=host terminal-id=t2
     sbx --cloud ttl +30m devboard-cloud
-    ```
-
-2. Stop it. A stopped sandbox keeps its memory and its files, and **isn't billed**:
-
-    ```bash id=host terminal-id=t2
-    sbx --cloud stop devboard-cloud
-    ```
-
-    ```bash id=host terminal-id=t2
-    sbx --cloud ls
-    ```
-
-3. Request the public URL again. The request **wakes the sandbox up** (`Auto-resume: enabled` in `inspect`), in a second or two, and the API answers: its process was kept with the sandbox's memory, so nothing had to start again. `sbx --cloud attach devboard-cloud` resumes a stopped sandbox the same way, and connects you to its agent:
-
-    ```bash id=host terminal-id=t2
-    curl https://8000-01jcloudlab7x4k2m9qv3t8hz5r.sbx.sandboxes-cloud.docker.com/health
     ```
 
 ## Get the result and clean up
