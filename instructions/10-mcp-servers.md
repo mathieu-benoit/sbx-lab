@@ -259,4 +259,4 @@ The scanner read the images, not your machine: the agent ran it inside its sandb
 
 The two scanners work differently: Trivy matches the images' packages against a database it downloads into the sandbox, while Scout asks the Docker Scout service. Both ran inside the agent's sandbox, under the same rules, and each kit opened only the hosts its scanner needs.
 
-[[<< Previous: Port forwarding](09-port-forwarding.md) | [Next >> Wrap up](11-wrap-up.md)]
+[[<< Previous: Port forwarding](09-port-forwarding.md) | [Next >> Cloud sandboxes](11-cloud-sandboxes.md)]

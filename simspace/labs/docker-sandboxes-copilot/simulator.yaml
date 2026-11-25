@@ -12,6 +12,7 @@ objectives:
   - "Run agents in direct mode, in clone mode and in parallel"
   - "Run Docker inside a sandbox and publish its ports"
   - "Give an agent tools through the MCP gateway"
+  - "Run the same agent in a cloud sandbox"
 
 # In-memory state. Every scenario below reads it in `when.state` and writes it
 # in `then.state`; it is the whole "where am I in the lab" model.
@@ -66,6 +67,15 @@ state:
     registered: false
   scan:
     done: false
+  cloud:                      # module 11, in the cloud backend
+    secret: false
+    sandbox: false
+    stopped: false
+    dockerAllowed: false
+    copied: false
+    apiUp: false
+    port: false
+    report: false
 
 settings:
   pace:
@@ -81,6 +91,374 @@ defaults:
     output: ["This prompt isn't part of the lab. Use the Run button on the prompts of the module, or type /exit to leave the session."]
 
 scenarios:
+  # ════════════════════════════════════════════════════════════════════════
+  # Module 11: cloud sandboxes
+  # `--cloud` takes the verb that follows it as its value (the flag parser is
+  # greedy), so `sbx --cloud ls` arrives as `sbx` with `--cloud: ls`, and the
+  # remaining words are the positionals: `sbx --cloud secret set github` is
+  # command [sbx, set, github]. They come first: they only match with `--cloud`, and
+  # local scenarios such as [sbx, ls] or the TUI's bare [sbx] would take them.
+  # ════════════════════════════════════════════════════════════════════════
+
+  - id: cloud-diagnose
+    completes: cloud-diagnose
+    when:
+      command: [sbx]
+      args: { --cloud: "diagnose" }
+    then:
+      output:
+        - ""
+        - "INSTALLATION"
+        - "  ✓ CLI binary — found"
+        - ""
+        - "CONNECTION"
+        - "  ✓ Authentication — authenticated"
+        - "  ✓ Cloud API — reachable"
+        - "      https://api.sandboxes-cloud.docker.com"
+        - "  ✓ Cloud entitlement — subscribed"
+        - ""
+        - "  5 passed"
+
+  - id: cloud-ls-running
+    when:
+      command: [sbx]
+      args: { --cloud: "ls" }
+      state: { cloud.sandbox: true, cloud.stopped: false }
+    then:
+      output:
+        - "SANDBOX                  AGENT     ID                                STATUS      WORKSPACE"
+        - "copilot/devboard-cloud   copilot   sbx_01jcloudlab7x4k2m9qv3t8hz5r   ● running   -"
+
+  - id: cloud-ls-stopped
+    when:
+      command: [sbx]
+      args: { --cloud: "ls" }
+      state: { cloud.sandbox: true, cloud.stopped: true }
+    then:
+      output:
+        - "SANDBOX                  AGENT     ID                                STATUS      WORKSPACE"
+        - "copilot/devboard-cloud   copilot   sbx_01jcloudlab7x4k2m9qv3t8hz5r   ○ stopped   -"
+
+  - id: cloud-ls-empty
+    when:
+      command: [sbx]
+      args: { --cloud: "ls" }
+    then:
+      output: ["No sandboxes found"]
+
+  - id: cloud-secret-set-github
+    completes: cloud-secret
+    when:
+      command: [sbx, set, github]
+      args: { --cloud: "secret" }
+    then:
+      state: { cloud.secret: true }
+      output:
+        - "Enter the token for github: ********"
+        - "✓ Stored cloud secret github (global)"
+
+  - id: cloud-secret-ls
+    when:
+      command: [sbx, ls]
+      args: { --cloud: "secret" }
+      state: { cloud.secret: true }
+    then:
+      output:
+        - "SCOPE      SERVICE   TYPE    SECRET   CREATED"
+        - "(global)   github    token   ***      5s"
+
+  - id: cloud-secret-ls-empty
+    when:
+      command: [sbx, ls]
+      args: { --cloud: "secret" }
+    then:
+      output: ["No secrets found"]
+
+  - id: cloud-secret-rm-github
+    when:
+      command: [sbx, rm, github]
+      args: { --cloud: "secret" }
+    then:
+      state: { cloud.secret: false }
+      output: ["Removed cloud secret github"]
+
+  - id: cloud-create
+    completes: cloud-create
+    when:
+      command: [sbx, copilot]
+      args:
+        --cloud: "create"
+        --name: "devboard-cloud"
+    then:
+      state: { cloud.sandbox: true, cloud.stopped: false }
+      output:
+        - "  ○ copilot — now ships as a kit; resolving docker.io/sbx/copilot:latest"
+        - "    assembling kit image from 2 kits"
+        - { text: "  ✓ assembled kit image", delay: pull }
+        - "      Uploading to cloud..."
+        - { text: "      Preparing template...", delay: pull }
+        - "      Template ready."
+        - "  ✓ kit image — ready as template tmpl_01jcloudtmpl5n8w2c4r6y0d3k"
+        - "warning: kit credentials for github, copilot are not routed when launching an uploaded or imported kit image; the sandbox starts without them"
+        - ""
+        - "SANDBOX"
+        - "  Name:      devboard-cloud"
+        - "  Agent:     copilot"
+        - "  Template:  tmpl_01jcloudtmpl5n8w2c4r6y0d3k"
+        - { text: "  ✓ created sandbox (5s)", delay: work }
+        - "      Applying kit \"copilot\" to sandbox sbx_01jcloudlab7x4k2m9qv3t8hz5r ..."
+        - { text: "  ✓ configured agent (12s)", delay: work }
+        - ""
+        - "  ✓ Created sandbox copilot/devboard-cloud (sbx_01jcloudlab7x4k2m9qv3t8hz5r, template tmpl_01jcloudtmpl5n8w2c4r6y0d3k)"
+
+  - id: cloud-inspect
+    when:
+      command: [sbx, devboard-cloud]
+      args: { --cloud: "inspect" }
+      state: { cloud.sandbox: true }
+    then:
+      output:
+        - "  ID:           sbx_01jcloudlab7x4k2m9qv3t8hz5r"
+        - "  Name:         copilot/devboard-cloud"
+        - "  Agent:        copilot"
+        - "  State:        running (created 18s ago)"
+        - "  CPUs:         2"
+        - "  Memory:       4096 MiB"
+        - "  On timeout:   stop"
+        - "  Auto-resume:  enabled"
+        - "  Ports:        none published"
+        - "  Expires:      59m"
+
+  # `sbx --cloud exec devboard-cloud …`: the remaining words follow the sandbox
+  # name. Once the agent started the API, `sh -c` is the test report.
+  - id: cloud-exec-report
+    when:
+      command: [sbx, devboard-cloud, sh]
+      args: { --cloud: "exec" }
+      state: { cloud.sandbox: true, cloud.apiUp: true }
+    then:
+      state: { cloud.report: true }
+
+  - id: cloud-exec-check
+    when:
+      command: [sbx, devboard-cloud, sh]
+      args: { --cloud: "exec" }
+      state: { cloud.sandbox: true }
+    then:
+      output:
+        - "Python 3.13.5"
+        - "GH_TOKEN=gho_sbxproxymanaged000000000000000000000"
+        - "COPILOT_GITHUB_TOKEN=proxy-managed"
+
+  - id: cloud-exec-curl-allowed
+    when:
+      command: [sbx, devboard-cloud, curl]
+      args: { --cloud: "exec" }
+      state: { cloud.sandbox: true, cloud.dockerAllowed: true }
+    then:
+      output: ["301"]
+
+  - id: cloud-exec-curl-blocked
+    when:
+      command: [sbx, devboard-cloud, curl]
+      args: { --cloud: "exec" }
+      state: { cloud.sandbox: true }
+    then:
+      stderr: ["curl: (56) CONNECT tunnel failed, response 403"]
+      exit: 56
+
+  - id: cloud-policy-ls
+    when:
+      command: [sbx, ls, devboard-cloud]
+      args: { --cloud: "policy" }
+      state: { cloud.sandbox: true }
+    then:
+      output:
+        - "  Default:  deny-all"
+        - "DECISION   NETWORK"
+        - "allow      api.business.githubcopilot.com:443"
+        - "allow      api.enterprise.githubcopilot.com:443"
+        - "allow      api.github.com:443"
+        - "allow      api.githubcopilot.com:443"
+        - "allow      api.individual.githubcopilot.com:443"
+        - "allow      copilot.github.com:443"
+        - "allow      release-assets.githubusercontent.com:443"
+        - "allow      deb.debian.org:80"
+        - "allow      dhi.io:80"
+        - "allow      pypi.org:443"
+        - "allow      files.pythonhosted.org:443"
+
+  - id: cloud-policy-allow-docker
+    completes: cloud-allow
+    when:
+      command: [sbx, allow, network, "docker.com:443"]
+      args:
+        --cloud: "policy"
+        --sandbox: "devboard-cloud"
+      state: { cloud.sandbox: true }
+    then:
+      state: { cloud.dockerAllowed: true }
+      output: ["Allowed network docker.com:443"]
+
+  - id: cloud-policy-rm-docker
+    when:
+      command: [sbx, rm, network]
+      args:
+        --cloud: "policy"
+        --sandbox: "devboard-cloud"
+      state: { cloud.sandbox: true }
+    then:
+      state: { cloud.dockerAllowed: false }
+      output: ["Removed allow rule docker.com:443"]
+
+  - id: cloud-cp-backend
+    completes: cloud-copy
+    when:
+      command: [sbx, ./backend]
+      args: { --cloud: "cp" }
+      state: { cloud.sandbox: true }
+    then:
+      state: { cloud.copied: true }
+      output:
+        - "  ○ uploading ./backend"
+        - { text: "Uploaded 79 files from ./backend", delay: work }
+
+  - id: cloud-cp-report
+    completes: cloud-copy-back
+    when:
+      command: [sbx, "devboard-cloud:/home/agent/workspace/backend/test-report.txt"]
+      args: { --cloud: "cp" }
+      state: { cloud.report: true }
+    then:
+      output:
+        - "  ○ downloading sbx_01jcloudlab7x4k2m9qv3t8hz5r:/home/agent/workspace/backend/test-report.txt"
+        - "Copied sbx_01jcloudlab7x4k2m9qv3t8hz5r:/home/agent/workspace/backend/test-report.txt to ./test-report.txt"
+
+  - id: cloud-attach
+    when:
+      command: [sbx, devboard-cloud]
+      args: { --cloud: "attach" }
+      state: { cloud.sandbox: true }
+    then:
+      state: { cloud.stopped: false }
+      output:
+        - "Attaching to cloud sandbox devboard-cloud..."
+      session:
+        prompt: "copilot (devboard-cloud)> "
+        intro:
+          - "GitHub Copilot CLI (scripted) · cloud sandbox 'devboard-cloud' · no workspace mount"
+          - "Running with --yolo. Type /exit to leave (in the real lab, Ctrl+\\ detaches and the agent keeps running)."
+        outro:
+          - "Detached. The cloud sandbox keeps running: sbx --cloud attach devboard-cloud joins it again."
+
+  - id: agent-cloud-api
+    completes: cloud-agent
+    when:
+      agent: true
+      promptContains: [listening on 0.0.0.0:8000]
+    then:
+      state: { cloud.apiUp: true }
+      output:
+        - { text: "● $ python3 -m venv ~/venv && ~/venv/bin/pip install -q -r backend/requirements.txt", delay: work }
+        - { text: "● $ cd backend && ~/venv/bin/pytest -q", delay: work }
+        - "    20 passed"
+        - "● $ cd backend && DATABASE_URL=sqlite:///./devboard.db nohup ~/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 &"
+        - { text: "● $ curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8000/docs", delay: work }
+        - "    200"
+        - ""
+        - "The virtual environment is in ~/venv, all 20 tests pass, and the API is running in the background on 0.0.0.0:8000 with SQLite: /docs answers 200."
+
+  - id: cloud-port-publish
+    completes: cloud-publish
+    when:
+      command: [sbx, publish, devboard-cloud, "8000"]
+      args: { --cloud: "port" }
+      state: { cloud.sandbox: true }
+    then:
+      state: { cloud.port: true }
+      output: ["Port 8000 exposed at https://8000-01jcloudlab7x4k2m9qv3t8hz5r.sbx.sandboxes-cloud.docker.com"]
+
+  - id: cloud-port-unpublish
+    when:
+      command: [sbx, unpublish, devboard-cloud, "8000"]
+      args: { --cloud: "port" }
+    then:
+      state: { cloud.port: false }
+      output: ["Port 8000 removed"]
+
+  # curl stands in for the browser. A stopped sandbox wakes up on the request.
+  - id: cloud-url-wakes
+    when:
+      command: [curl]
+      args:
+        0: "https://8000-01jcloudlab7x4k2m9qv3t8hz5r.sbx.sandboxes-cloud.docker.com/health"
+      state: { cloud.port: true, cloud.apiUp: true, cloud.stopped: true }
+    then:
+      state: { cloud.stopped: false }
+      output:
+        - { text: '{"status":"ok"}', delay: work }
+        - ""
+        - "(The sandbox was stopped: this request woke it up. sbx --cloud ls shows it running again.)"
+
+  - id: cloud-url
+    when:
+      command: [curl]
+      args:
+        0: "https://8000-01jcloudlab7x4k2m9qv3t8hz5r.sbx.sandboxes-cloud.docker.com/health"
+      state: { cloud.port: true, cloud.apiUp: true }
+    then:
+      output: ['{"status":"ok"}']
+
+  - id: cloud-ttl-extend
+    completes: cloud-ttl
+    when:
+      command: [sbx, "+30m", devboard-cloud]
+      args: { --cloud: "ttl" }
+      state: { cloud.sandbox: true }
+    then:
+      output:
+        - "Extended TTL"
+        - "Expires in 1h29m (MAX remaining: 23h58m)."
+
+  - id: cloud-ttl
+    when:
+      command: [sbx, devboard-cloud]
+      args: { --cloud: "ttl" }
+      state: { cloud.sandbox: true }
+    then:
+      output:
+        - "Expires in 59m (MAX remaining: 23h59m)."
+
+  - id: cloud-stop
+    completes: cloud-stop
+    when:
+      command: [sbx, devboard-cloud]
+      args: { --cloud: "stop" }
+      state: { cloud.sandbox: true }
+    then:
+      state: { cloud.stopped: true }
+      output:
+        - "  ○ stopping sandbox devboard-cloud"
+        - "Stopping sandbox devboard-cloud"
+
+  - id: cloud-rm
+    completes: cloud-rm
+    when:
+      command: [sbx, devboard-cloud]
+      args: { --cloud: "rm" }
+      state: { cloud.sandbox: true }
+    then:
+      state:
+        cloud.sandbox: false
+        cloud.stopped: false
+        cloud.port: false
+        cloud.apiUp: false
+        cloud.copied: false
+        cloud.report: false
+      output:
+        - "  ○ removing sandbox devboard-cloud"
+        - "Removed sandbox devboard-cloud"
+
   # ════════════════════════════════════════════════════════════════════════
   # Plain shell on your host: cd and gh
   # ════════════════════════════════════════════════════════════════════════
@@ -2452,7 +2830,7 @@ scenarios:
       output: ["✓ Removed MCP server 'dhi'"]
 
   # ════════════════════════════════════════════════════════════════════════
-  # Module 11: wrap up
+  # Module 12: wrap up
   # `--force` swallows the name that follows it, so `sbx rm --force ports-demo`
   # arrives with no positional argument (see the flag parser).
   # ════════════════════════════════════════════════════════════════════════
