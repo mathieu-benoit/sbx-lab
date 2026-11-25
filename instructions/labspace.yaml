@@ -108,6 +108,7 @@ sections:
       - { title: "Check your cloud access", match: "sbx --cloud diagnose" }
       - { title: "Store the github secret in the cloud", match: "sbx --cloud secret set github" }
       - { title: "Create the cloud sandbox", match: "sbx --cloud create --name devboard-cloud" }
+      - { title: "Set the account's default to deny-all", match: "sbx --cloud policy init deny-all" }
       - { title: "Allow a host for this sandbox only", match: "sbx --cloud policy allow network docker.com:443 --sandbox" }
       - { title: "Copy the backend into the sandbox", match: "sbx --cloud cp ./backend" }
       - { title: "Have the agent start the API", match: "listening on 0.0.0.0:8000" }

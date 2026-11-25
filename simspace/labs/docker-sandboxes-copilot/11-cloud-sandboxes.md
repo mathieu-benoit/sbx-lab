@@ -122,21 +122,35 @@ That one secret is enough for Copilot: in the cloud, it covers both `GH_TOKEN` a
 
 ## Network policy in the cloud
 
-The cloud has its own policy: the Locked Down policy and the rules from the *Network policies* module stay on your machine.
+The cloud has its own policy: the Locked Down policy and the rules from the *Network policies* module stay on your machine. It has two scopes: your **account**, whose default your cloud sandboxes start from, and each **sandbox**.
 
-1. List the sandbox's rules. You didn't add any of them: the Copilot agent declares the hosts it needs, and the Python kit adds Debian and PyPI. Everything else is blocked by your account's default, `deny-all` here:
+1. Look at your account's policy. In the real lab, yours may show another default, or rules, if you or your organization set them:
+
+    ```bash id=host terminal-id=t2
+    sbx --cloud policy ls
+    ```
+
+2. Set the account's default to `deny-all`, the cloud's equivalent of the Locked Down policy. The presets are `allow-all`, `balanced` (deny-all plus an allow list of common development services) and `deny-all`. `init` keeps the existing allow and deny rules, and you can run it again to change the default; `sbx --cloud policy reset` removes the account's rules and goes back to the platform's default:
+
+    ```bash id=host terminal-id=t2
+    sbx --cloud policy init deny-all
+    ```
+
+    > **Warning:** this changes the default for **all** the cloud sandboxes of your Docker account, not only this lab's. Add `--sandbox <name>` to set the default of one sandbox only.
+
+3. List the sandbox's rules. You didn't add any of them: the Copilot agent declares the hosts it needs, and the Python kit adds Debian and PyPI. A `deny-all` default still lets through what a sandbox's own rules allow, including its kits' rules, and blocks everything else:
 
     ```bash id=host terminal-id=t2
     sbx --cloud policy ls devboard-cloud
     ```
 
-2. Try a host that isn't on the list:
+4. Try a host that isn't on the list:
 
     ```bash id=host terminal-id=t2
     sbx --cloud exec devboard-cloud curl -sS -o /dev/null https://docker.com
     ```
 
-3. Allow it for this sandbox only, try again (`301` is docker.com's redirect), then remove the rule:
+5. Allow it for this sandbox only, try again (`301` is docker.com's redirect), then remove the rule:
 
     ```bash id=host terminal-id=t2
     sbx --cloud policy allow network docker.com:443 --sandbox devboard-cloud

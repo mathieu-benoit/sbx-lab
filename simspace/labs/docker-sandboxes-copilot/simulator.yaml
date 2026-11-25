@@ -268,6 +268,26 @@ scenarios:
       stderr: ["curl: (56) CONNECT tunnel failed, response 403"]
       exit: 56
 
+  # `sbx --cloud policy ls` with no sandbox: the account's policy.
+  - id: cloud-policy-ls-account
+    when:
+      command: [sbx, ls]
+      args: { --cloud: "policy", 0: false }
+    then:
+      output:
+        - "  Default:  deny-all"
+        - "No allow or deny rules"
+
+  - id: cloud-policy-init-deny-all
+    completes: cloud-init
+    when:
+      command: [sbx, init, deny-all]
+      args: { --cloud: "policy" }
+    then:
+      output:
+        - "  Default:  deny-all"
+        - "No allow or deny rules"
+
   - id: cloud-policy-ls
     when:
       command: [sbx, ls, devboard-cloud]

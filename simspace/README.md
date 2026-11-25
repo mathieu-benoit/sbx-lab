@@ -6,7 +6,7 @@ Use it to preview the real lab before you take it, to revisit it afterwards, or 
 
 ## What's in the translation
 
-One lab, [`labs/docker-sandboxes-copilot/`](labs/docker-sandboxes-copilot), with one section per module of the hands-on lab, a welcome page and the troubleshooting page. Each hands-on section has **milestones** (73 in total) that check off as the learner runs the right command in the right state.
+One lab, [`labs/docker-sandboxes-copilot/`](labs/docker-sandboxes-copilot), with one section per module of the hands-on lab, a welcome page and the troubleshooting page. Each hands-on section has **milestones** (74 in total) that check off as the learner runs the right command in the right state.
 
 | Section | Hands-on module | Simulated |
 |---------|-----------------|-----------|
