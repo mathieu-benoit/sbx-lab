@@ -11,7 +11,7 @@ catalog:
 
 # Bump this whenever you add, remove or rename steps: stored progress is
 # namespaced per version, so stale completion records are cleared.
-version: "1.2.0"
+version: "1.3.0"
 
 # Command behaviour lives in simulator.yaml (relative to this file).
 simulator: simulator.yaml
@@ -196,8 +196,36 @@ sections:
       - id: read-scout-log
         title: "See which hosts Docker Scout reached"
 
+  - title: Cloud sandboxes
+    contentPath: 11-cloud-sandboxes.md
+    steps:
+      - id: cloud-diagnose
+        title: "Check your cloud access"
+      - id: cloud-secret
+        title: "Store the github secret in the cloud"
+      - id: cloud-create
+        title: "Create the cloud sandbox"
+      - id: cloud-init
+        title: "Set the account's default to deny-all"
+      - id: cloud-allow
+        title: "Allow a host for this sandbox only"
+      - id: cloud-copy
+        title: "Copy the backend into the sandbox"
+      - id: cloud-agent
+        title: "Have the agent start the API"
+      - id: cloud-publish
+        title: "Publish the API on a public URL"
+      - id: cloud-move
+        title: "Move the sandbox to your machine"
+      - id: cloud-ttl
+        title: "Extend the time-to-live"
+      - id: cloud-copy-back
+        title: "Copy the test report back"
+      - id: cloud-rm
+        title: "Remove the cloud sandbox"
+
   - title: Wrap up
-    contentPath: 11-wrap-up.md
+    contentPath: 12-wrap-up.md
     steps:
       - id: remove-sandboxes
         title: "Remove the lab's sandboxes"

@@ -6,7 +6,7 @@ Use it to preview the real lab before you take it, to revisit it afterwards, or 
 
 ## What's in the translation
 
-One lab, [`labs/docker-sandboxes-copilot/`](labs/docker-sandboxes-copilot), with one section per module of the hands-on lab, a welcome page and the troubleshooting page. Each hands-on section has **milestones** (59 in total) that check off as the learner runs the right command in the right state.
+One lab, [`labs/docker-sandboxes-copilot/`](labs/docker-sandboxes-copilot), with one section per module of the hands-on lab, a welcome page and the troubleshooting page. Each hands-on section has **milestones** (74 in total) that check off as the learner runs the right command in the right state.
 
 | Section | Hands-on module | Simulated |
 |---------|-----------------|-----------|
@@ -22,7 +22,8 @@ One lab, [`labs/docker-sandboxes-copilot/`](labs/docker-sandboxes-copilot), with
 | Docker inside the sandbox | [08](../instructions/08-docker-inside-the-sandbox.md) | Compose in the sandbox, `!docker ps` inside it vs `docker ps` on the host |
 | Port forwarding | [09](../instructions/09-port-forwarding.md) | `sbx ports`, a kit that publishes a port; `curl` stands in for the browser |
 | MCP servers | [10](../instructions/10-mcp-servers.md) | `sbx mcp add`, a `--static-mcp` sandbox, scripted DHI tool calls, the Trivy scan and its network log |
-| Wrap up | [11](../instructions/11-wrap-up.md) | Cleanup |
+| Cloud sandboxes | [11](../instructions/11-cloud-sandboxes.md) | `sbx --cloud`: a cloud secret, `create` with a kit, the cloud policy, `cp`, an agent session, a public URL (`curl` stands in for the browser), TTL, stop and wake-up |
+| Wrap up | [12](../instructions/12-wrap-up.md) | Cleanup |
 
 ### What differs from the real lab
 

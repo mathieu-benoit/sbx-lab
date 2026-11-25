@@ -11,6 +11,7 @@ You've completed the **Docker Sandboxes with GitHub Copilot Lab**. Well done!
 - Monitor your sandboxes and their network activity from the **TUI dashboard** and with `sbx policy log`.
 - Run **Docker inside a sandbox** and reach the services with **port forwarding**.
 - Give your agent tools through the **MCP gateway** without opening its network.
+- Run the same agent in a **cloud sandbox**, and share its app with a public URL.
 
 ## Clean up
 
@@ -43,6 +44,8 @@ graph LR
     %% Styles — actor
     style You fill:#fff,stroke:#1D63ED,color:#00084D
 ```
+
+If you did the [Cloud sandboxes](11-cloud-sandboxes.md) module, you removed its sandbox at the end of it: `sbx --cloud ls` should show `No sandboxes found`. The steps below are for your machine.
 
 Remove the sandboxes created during the lab, along with everything inside them (images, containers, and data):
 
@@ -96,4 +99,4 @@ Then choose **Balanced** in the picker. To do the same without the picker, run `
 
 Did you find a problem or have an idea to improve this lab? [Open an issue](https://github.com/mathieu-benoit/sbx-lab/issues). Thank you for joining!
 
-[[<< Previous: MCP servers](10-mcp-servers.md) | [Home](../README.md)]
+[[<< Previous: Cloud sandboxes](11-cloud-sandboxes.md) | [Home](../README.md)]
