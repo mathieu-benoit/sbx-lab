@@ -63,6 +63,63 @@
       </li>
     </ul>
 
+    <section class="compare" aria-labelledby="compare-title">
+      <h2 id="compare-title">How the options differ</h2>
+      <div class="compare-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col"></th>
+              <th scope="col">Hands-on lab</th>
+              <th scope="col">Simulated lab</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">You need</th>
+              <td>The <code>git</code>, <code>gh</code> and <code>sbx</code> CLIs, a Docker account, and a GitHub account with Copilot</td>
+              <td>A web browser</td>
+            </tr>
+            <tr>
+              <th scope="row">Before the lab</th>
+              <td>About 15 minutes of prerequisites, at home: installing the tools and downloading the sandbox images</td>
+              <td>Nothing</td>
+            </tr>
+            <tr>
+              <th scope="row">Where it runs</th>
+              <td>MicroVMs on your machine, each with its own private Docker engine, and optionally in the cloud</td>
+              <td>Entirely in your browser</td>
+            </tr>
+            <tr>
+              <th scope="row">Commands</th>
+              <td>Real, in your own terminal</td>
+              <td>Scripted: the same output for everyone</td>
+            </tr>
+            <tr>
+              <th scope="row">The agent</th>
+              <td>The real GitHub Copilot, which uses your Copilot requests</td>
+              <td>Scripted answers to the lab's prompts</td>
+            </tr>
+            <tr>
+              <th scope="row">Cost</th>
+              <td>Your Copilot usage, plus pay-as-you-go compute if you take the optional cloud module</td>
+              <td>None</td>
+            </tr>
+            <tr>
+              <th scope="row">Clean up</th>
+              <td>The last module removes the sandboxes, secrets and MCP server the lab created</td>
+              <td>Nothing to clean up</td>
+            </tr>
+            <tr>
+              <th scope="row">Best for</th>
+              <td>Taking the lab for real, with a real agent on your own machine</td>
+              <td>Previewing, revisiting or teaching the lab, or following it where you can't install tools</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <footer class="catalog-footer">
       Also: the <a href="labspace/">Labspace preview</a> of the hands-on lab · <a href="https://github.com/mathieu-benoit/sbx-lab">Source on GitHub</a>
     </footer>
