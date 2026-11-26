@@ -51,10 +51,10 @@ graph LR
     cd project
     ```
 
-2. Create your agent's sandbox. `--kit` adds the Python kit you read in the *Kits* module to the Copilot kit, and the workspace path (`.`) is the folder that gets mounted into the sandbox:
+2. Create your agent's sandbox. `--kit` adds the DevBoard kit you read in the *Kits* module to the Copilot kit, and the workspace path (`.`) is the folder that gets mounted into the sandbox:
 
     ```bash id=host
-    sbx create --name quickstart --kit ./kits/python copilot .
+    sbx create --name quickstart --kit ./kits/devboard copilot .
     ```
 
     The output shows both kits being assembled, then the install commands, including the one from your kit. If you get an error saying that the `quickstart` sandbox already exists, remove it with `sbx rm quickstart` and run the command again.

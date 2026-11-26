@@ -167,10 +167,10 @@ Try it in a separate sandbox, from the `project` directory, in another terminal.
     cd project
     ```
 
-2. Create a sandbox with the Python kit and the port kit:
+2. Create a sandbox with the DevBoard kit and the port kit:
 
     ```bash id=host terminal-id=terminal-2
-    sbx create --name ports-demo --kit ./kits/python --kit ./kits/api-port copilot .
+    sbx create --name ports-demo --kit ./kits/devboard --kit ./kits/api-port copilot .
     ```
 
 3. Keep it running without an agent session. No agent is attached to this sandbox, so without this step it stops shortly after the `sbx exec` below, and the web server with it:

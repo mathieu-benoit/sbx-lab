@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Docker Sandboxes Lab</title>
+  <meta name="description" content="Docker Sandboxes with GitHub Copilot: a hands-on lab in your own terminal, or the same lab simulated in your browser.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=block">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="home.css">
+  <script>
+    // The hands-on lab used to be served here: send its old deep links (#/02-kits…) to lab/.
+    if (location.hash.startsWith("#/")) location.replace("lab/" + location.hash);
+  </script>
+</head>
+<body>
+  <main class="catalog">
+    <header class="catalog-header">
+      <div class="catalog-brand">
+        <span class="catalog-brand-logo material-symbols-outlined" aria-hidden="true">deployed_code</span>
+        <span class="catalog-eyebrow">Docker Sandboxes lab</span>
+      </div>
+      <h1 class="catalog-title">Start here</h1>
+      <p class="catalog-subtitle">Run GitHub Copilot in Docker Sandboxes on DevBoard, a small FastAPI and Next.js app: lock its network down, read and build kits, keep your credentials out of its reach, run agents in parallel, give them tools, and move them to the cloud. Pick how you want to take it.</p>
+    </header>
+
+    <ul class="catalog-grid">
+      <li>
+        <a class="catalog-card" href="lab/">
+          <span class="catalog-card-icon material-symbols-outlined" aria-hidden="true">terminal</span>
+          <span class="catalog-card-body">
+            <span class="catalog-card-title">Hands-on lab</span>
+            <span class="catalog-card-desc">The real thing: run every command in a terminal on your own machine, with <code>sbx</code>, a Docker account and GitHub Copilot. The instructions are here; the sandboxes run on your laptop.</span>
+            <span class="catalog-card-meta">
+              <span class="catalog-chip catalog-chip-primary">sbx CLI</span>
+              <span class="catalog-chip">GitHub Copilot</span>
+              <span class="catalog-chip">13 modules</span>
+              <span class="catalog-chip">~100 min</span>
+              <span class="catalog-chip">optional cloud module</span>
+            </span>
+          </span>
+          <span class="catalog-card-arrow material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </a>
+      </li>
+      <li>
+        <a class="catalog-card" href="simspace/">
+          <span class="catalog-card-icon material-symbols-outlined" aria-hidden="true">science</span>
+          <span class="catalog-card-body">
+            <span class="catalog-card-title">Simulated lab</span>
+            <span class="catalog-card-desc">The same lab, fully simulated in your browser: the same modules and commands, with four terminals and scripted outputs. Nothing to install, no account needed.</span>
+            <span class="catalog-card-meta">
+              <span class="catalog-chip catalog-chip-primary">in your browser</span>
+              <span class="catalog-chip">no install</span>
+              <span class="catalog-chip">milestones</span>
+              <span class="catalog-chip">~80 min</span>
+            </span>
+          </span>
+          <span class="catalog-card-arrow material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </a>
+      </li>
+    </ul>
+
+    <section class="compare" aria-labelledby="compare-title">
+      <h2 id="compare-title">How the options differ</h2>
+      <div class="compare-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col"></th>
+              <th scope="col">Hands-on lab</th>
+              <th scope="col">Simulated lab</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">You need</th>
+              <td>The <code>git</code>, <code>gh</code> and <code>sbx</code> CLIs, a Docker account, and a GitHub account with Copilot</td>
+              <td>A web browser</td>
+            </tr>
+            <tr>
+              <th scope="row">Before the lab</th>
+              <td>About 15 minutes of prerequisites, at home: installing the tools and downloading the sandbox images</td>
+              <td>Nothing</td>
+            </tr>
+            <tr>
+              <th scope="row">Where it runs</th>
+              <td>MicroVMs on your machine, each with its own private Docker engine, and optionally in the cloud</td>
+              <td>Entirely in your browser</td>
+            </tr>
+            <tr>
+              <th scope="row">Commands</th>
+              <td>Real, in your own terminal</td>
+              <td>Scripted: the same output for everyone</td>
+            </tr>
+            <tr>
+              <th scope="row">The agent</th>
+              <td>The real GitHub Copilot, which uses your Copilot requests</td>
+              <td>Scripted answers to the lab's prompts</td>
+            </tr>
+            <tr>
+              <th scope="row">Cost</th>
+              <td>Your Copilot usage, plus pay-as-you-go compute if you take the optional cloud module</td>
+              <td>None</td>
+            </tr>
+            <tr>
+              <th scope="row">Clean up</th>
+              <td>The last module removes the sandboxes, secrets and MCP server the lab created</td>
+              <td>Nothing to clean up</td>
+            </tr>
+            <tr>
+              <th scope="row">Best for</th>
+              <td>Taking the lab for real, with a real agent on your own machine</td>
+              <td>Previewing, revisiting or teaching the lab, or following it where you can't install tools</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="catalog-footer">
+      Also: the <a href="labspace/">Labspace preview</a> of the hands-on lab · <a href="https://github.com/mathieu-benoit/sbx-lab">Source on GitHub</a>
+    </footer>
+  </main>
+</body>
+</html>

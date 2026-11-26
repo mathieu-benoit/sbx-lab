@@ -1,6 +1,6 @@
 # Give your agent tools with MCP
 
-Your agent can only reach the hosts you allowed in the network policies module. Sometimes it needs a capability rather than a website: that's what [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) servers provide.
+Your agent can only reach the hosts its kits allow, as you saw in the network policies module. Sometimes it needs a capability rather than a website: that's what [MCP](https://modelcontextprotocol.io/) (Model Context Protocol) servers provide.
 
 Each sandbox has an **MCP gateway**. The agent only talks to the gateway; the MCP servers you register run **outside** the sandbox, on your host or as remote services. You give the agent new tools without opening its network.
 
@@ -16,7 +16,7 @@ graph LR
         Gateway["MCP gateway"]
         TrivyKit["Trivy kit<br/>project/kits/trivy"]
         ScoutKit["Scout kit<br/>sbx/scout-cli, from Docker Hub"]
-        Proxy["Proxy<br/>your rules + the kit's rules"]
+        Proxy["Proxy<br/>the kits' rules"]
     end
 
     subgraph Sandbox["Sandbox: dhi"]
@@ -46,7 +46,7 @@ graph LR
     Agent -->|"runs docker scout compare"| Scout
     Scout -->|every request| Proxy
     Proxy -->|"Scout kit's rules"| ScoutApi
-    Proxy -->|"your rules"| Registries
+    Proxy -->|"the DevBoard kit's rules"| Registries
 
     style Host fill:#E5F2FC,stroke:#1D63ED,color:#00084D
     style Sandbox fill:#f0faf4,stroke:#86c5a0,color:#00084D
@@ -78,17 +78,17 @@ graph LR
     sbx mcp ls
     ```
 
-3. From the `project` directory, create a dedicated sandbox, `dhi`, named after the DHI server it gets, with that server and two scanners, the Trivy kit and the Docker Scout kit:
+3. From the `project` directory, create a dedicated sandbox, `dhi`, named after the DHI server it gets, with that server, the DevBoard kit for the registries the scanners read, and two scanners, the Trivy kit and the Docker Scout kit:
 
     ```bash id=host terminal-id=t2
     cd project
     ```
 
     ```bash id=host terminal-id=t2
-    sbx create --name dhi --static-mcp dhi --kit ./kits/trivy --kit sbx/scout-cli copilot .
+    sbx create --name dhi --static-mcp dhi --kit ./kits/devboard --kit ./kits/trivy --kit sbx/scout-cli copilot .
     ```
 
-    The sandbox and the server share the name `dhi`: `--name dhi` names the sandbox, and `--static-mcp dhi` starts the sandbox's MCP gateway with **exactly this server**, and without the discovery tools an agent could use to find and add servers by itself. You decide which servers it gets. `--kit ./kits/trivy` adds the Trivy kit. The first time, `sbx` builds the kit's image, which downloads and checks Trivy. `--kit sbx/scout-cli` adds Docker's `sbx/scout-cli` kit, published on Docker Hub as an OCI image, like the built-in agent kits (*Kits*): the `docker scout` CLI plugin, and network rules for the Docker Scout service, for this sandbox only. You'll use both scanners at the end of this module.
+    The sandbox and the server share the name `dhi`: `--name dhi` names the sandbox, and `--static-mcp dhi` starts the sandbox's MCP gateway with **exactly this server**, and without the discovery tools an agent could use to find and add servers by itself. You decide which servers it gets. `--kit ./kits/devboard` adds the DevBoard kit, whose rules open Docker Hub and `dhi.io`, where the scanners read the images. `--kit ./kits/trivy` adds the Trivy kit. The first time, `sbx` builds the kit's image, which downloads and checks Trivy. `--kit sbx/scout-cli` adds Docker's `sbx/scout-cli` kit, published on Docker Hub as an OCI image, like the built-in agent kits (*Kits*): the `docker scout` CLI plugin, and network rules for the Docker Scout service, for this sandbox only. You'll use both scanners at the end of this module.
 
     Check what the gateway was given:
 
@@ -164,17 +164,17 @@ Before switching DevBoard's Dockerfiles to the hardened images, measure what you
     sbx policy log dhi
     ```
 
-    Each host the scanner reached is allowed either by your own rules or by the Trivy kit's rules:
+    Each host the scanner reached is allowed by the rules of one of the sandbox's kits:
 
     | Host in the log | What Trivy used it for | Allowed by |
     |-----------------|------------------------|------------|
-    | `index.docker.io`, `auth.docker.io`, `production.cloudfront.docker.com` | Reading the Docker Hub images | Your rules, from *Network policies* |
-    | `dhi.io` | Reading the hardened images | Your rules |
+    | `index.docker.io`, `auth.docker.io`, `production.cloudfront.docker.com` | Reading the Docker Hub images | The DevBoard kit's rules |
+    | `dhi.io` | Reading the hardened images | The DevBoard kit's rules |
     | `mirror.gcr.io` | Downloading the vulnerability database | The kit's rules, for this sandbox only |
     | `raw.githubusercontent.com` | Downloading the VEX statements | The kit's rules, for this sandbox only |
-    | `github.com`, `api.github.com`, `codeload.github.com` | Downloading the VEX statements | Both: the kit declares them, and your GitHub rules cover them too |
+    | `github.com`, `api.github.com`, `codeload.github.com` | Downloading the VEX statements | The Trivy kit's rules (the Copilot kit also allows `github.com` and `api.github.com`) |
 
-    One request is blocked: `check.trivy.dev`, Trivy's check for a newer version. Neither your rules nor the kit allow it, and the scan doesn't need it.
+    One request is blocked: `check.trivy.dev`, Trivy's check for a newer version. None of the kits allows it, and the scan doesn't need it.
 
 The scanner read the images, not your machine: the agent ran it inside its sandbox, under the same rules, and it never had your Docker credentials, your `~/.ssh` folder or any host outside its rules. Next time, ask the agent to scan any image it suggests before you switch to it, and check which variant it picked: a `-dev` image scores far worse than its runtime image.
 
@@ -222,6 +222,6 @@ Docker Scout is another way to measure the gain, with Docker's own image analysi
     sbx policy log dhi
     ```
 
-    Scout reached Docker Hub and `dhi.io` (your rules) to read the images, and `api.dso.docker.com`, the Docker Scout service (the Scout kit's rules, for this sandbox only). One host is blocked, `registry.scout.docker.com`: neither your rules nor the kit allow it, and the comparison doesn't need it.
+    Scout reached Docker Hub and `dhi.io` (the DevBoard kit's rules) to read the images, and `api.dso.docker.com`, the Docker Scout service (the Scout kit's rules, for this sandbox only). One host is blocked, `registry.scout.docker.com`: neither your rules nor the kit allow it, and the comparison doesn't need it.
 
 The two scanners work differently: Trivy matches the images' packages against a database it downloads into the sandbox, while Scout asks the Docker Scout service. Both ran inside the agent's sandbox, under the same rules, and each kit opened only the hosts its scanner needs.

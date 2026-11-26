@@ -125,14 +125,14 @@ graph LR
 
 Try it in a separate sandbox, from the `project` directory, in **Terminal 2**:
 
-1. Go to the `project` directory (you're already there if you followed the previous modules), then create a sandbox with the Python kit and the port kit:
+1. Go to the `project` directory (you're already there if you followed the previous modules), then create a sandbox with the DevBoard kit and the port kit:
 
     ```bash id=host terminal-id=t2
     cd project
     ```
 
     ```bash id=host terminal-id=t2
-    sbx create --name ports-demo --kit ./kits/python --kit ./kits/api-port copilot .
+    sbx create --name ports-demo --kit ./kits/devboard --kit ./kits/api-port copilot .
     ```
 
 2. Keep it running without an agent session. No agent is attached to this sandbox, so without this step it stops shortly after the `sbx exec` below, and the web server with it:

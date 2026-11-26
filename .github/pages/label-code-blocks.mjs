@@ -1,5 +1,5 @@
 // Shows where each command runs in the header of its code block, on the Simspace sites of the
-// Pages site (the root and simspace/):
+// Pages site (lab/ and simspace/):
 //
 //   node .github/pages/label-code-blocks.mjs <labs-dir>...
 //

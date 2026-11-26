@@ -6,13 +6,13 @@ Use it to preview the real lab before you take it, to revisit it afterwards, or 
 
 ## What's in the translation
 
-One lab, [`labs/docker-sandboxes-copilot/`](labs/docker-sandboxes-copilot), with one section per module of the hands-on lab, a welcome page and the troubleshooting page. Each hands-on section has **milestones** (74 in total) that check off as the learner runs the right command in the right state.
+One lab, [`labs/docker-sandboxes-copilot/`](labs/docker-sandboxes-copilot), with one section per module of the hands-on lab, a welcome page and the troubleshooting page. Each hands-on section has **milestones** (70 in total) that check off as the learner runs the right command in the right state.
 
 | Section | Hands-on module | Simulated |
 |---------|-----------------|-----------|
 | Welcome | [README](../README.md) | How the simulation works, the "doors" diagram |
 | Prerequisites | [00](../instructions/00-prerequisites.md) | `sbx version`, `login`, `diagnose`, `policy ls`, warm-up sandboxes |
-| Network policies | [01](../instructions/01-network-policies.md) | Locked Down, a shell sandbox hitting the proxy, allow, deny, rm, the lab's four rules |
+| Network policies | [01](../instructions/01-network-policies.md) | Locked Down, a shell sandbox hitting the proxy, allow, deny, rm, then Locked Down with no global rule |
 | Kits | [02](../instructions/02-kits.md) | `sbx kit inspect` and `validate`; the Python, Trivy and port kits as seed files |
 | Secrets and credentials | [03](../instructions/03-secrets-credentials.md) | `sbx secret set`, `ls` |
 | Agent sandbox | [04](../instructions/04-first-sandbox.md) | `sbx create` with a kit, the three isolation checks, the first agent session |
@@ -56,7 +56,7 @@ Edit the files under `labs/docker-sandboxes-copilot/` and refresh the browser:
 
 ## Deploy
 
-**GitHub Pages.** The [`pages`](../.github/workflows/pages.yaml) workflow publishes this folder in `simspace/` on the repository's Pages site (`https://<owner>.github.io/sbx-lab/simspace/`), on every push to `main` that changes it, with the steps of the template's reusable [`deploy-lab.yml`](https://github.com/dockersamples/simspace/blob/main/.github/workflows/deploy-lab.yml): validate the labs, take the runtime image's payload, add the labs and generate `labs.json`. They are inlined rather than called, because the same site also holds the static preview of the Labspace rendering, in `labspace/` (see [`../labspace-local`](../labspace-local)), with the hands-on lab at the root, rendered by the same runtime without terminals (see [`../.github/pages`](../.github/pages)), and a repository has a single Pages site. Enable Pages first (Settings → Pages → Source: "GitHub Actions").
+**GitHub Pages.** The [`pages`](../.github/workflows/pages.yaml) workflow publishes this folder in `simspace/` on the repository's Pages site (`https://<owner>.github.io/sbx-lab/simspace/`), on every push to `main` that changes it, with the steps of the template's reusable [`deploy-lab.yml`](https://github.com/dockersamples/simspace/blob/main/.github/workflows/deploy-lab.yml): validate the labs, take the runtime image's payload, add the labs and generate `labs.json`. They are inlined rather than called, because the same site also holds the static preview of the Labspace rendering, in `labspace/` (see [`../labspace-local`](../labspace-local)), with the hands-on lab in `lab/`, rendered by the same runtime without terminals, and a landing page at the root that links to both labs (see [`../.github/pages`](../.github/pages)), and a repository has a single Pages site. Enable Pages first (Settings → Pages → Source: "GitHub Actions").
 
 **As a container.** The [`Dockerfile`](Dockerfile) serves the labs:
 

@@ -77,10 +77,10 @@ This module uses several terminals on your host, all opened at the root of the r
     > [!IMPORTANT]
     > Clone mode must be started from the root of the Git repository. From the `project` folder, `sbx` stops with the error `--clone requires a Git repository`. The agent therefore sees the whole repository, with the application in the `project/` folder.
 
-2. Start a new agent in clone mode with the `--clone` flag. Give it a name: it also names the Git remote that you will fetch from later. As for `quickstart`, add the Python kit (from the root of the repository, its path is `./project/kits/python`):
+2. Start a new agent in clone mode with the `--clone` flag. Give it a name: it also names the Git remote that you will fetch from later. As for `quickstart`, add the DevBoard kit (from the root of the repository, its path is `./project/kits/devboard`):
 
     ```bash id=host
-    sbx run copilot --clone --name fix-bugs --kit ./project/kits/python
+    sbx run copilot --clone --name fix-bugs --kit ./project/kits/devboard
     ```
 
     The agent works inside a private Git clone, and your own working tree is only available to it read-only.
@@ -126,7 +126,7 @@ The [`project/prompts/`](../project/prompts) directory contains a ready-made pro
 1. In terminal 1, start an agent that implements search:
 
     ```bash id=host terminal-id=terminal-1
-    sbx run copilot --clone --name add-search --kit ./project/kits/python -- -i "$(cat project/prompts/implement-search.txt)"
+    sbx run copilot --clone --name add-search --kit ./project/kits/devboard -- -i "$(cat project/prompts/implement-search.txt)"
     ```
 
     > [!IMPORTANT]
@@ -135,7 +135,7 @@ The [`project/prompts/`](../project/prompts) directory contains a ready-made pro
 2. In terminal 3, start a second agent that implements notifications:
 
     ```bash id=host terminal-id=terminal-3
-    sbx run copilot --clone --name add-notif --kit ./project/kits/python -- -i "$(cat project/prompts/implement-notifications.txt)"
+    sbx run copilot --clone --name add-notif --kit ./project/kits/devboard -- -i "$(cat project/prompts/implement-notifications.txt)"
     ```
 
     Each sandbox gets its own isolated Git clone, so the agents read and write completely separate copies of the code. Copilot already runs with `--yolo` by default, so the agents don't wait for confirmation.

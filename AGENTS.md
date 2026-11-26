@@ -13,7 +13,7 @@ Read [`project/AGENTS.md`](project/AGENTS.md) and [`project/README.md`](project/
 ## Sandbox environment
 
 You are most likely running in a Docker Sandbox (a Linux microVM, user `agent`, with `sudo`). Its image has
-**no Node.js**, and **no Python** unless the sandbox was created with the lab's Python kit (`project/kits/python`).
+**no Node.js**, and **no Python** unless the sandbox was created with the lab's DevBoard kit (`project/kits/devboard`).
 The network is locked down: only GitHub, Copilot, Debian packages (`apt`), PyPI, Docker Hub and npm are allowed.
 If a download is blocked, tell the user which host it needs instead of working around it.
 
