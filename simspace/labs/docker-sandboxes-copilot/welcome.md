@@ -18,4 +18,4 @@ What you will learn, and how a sandbox works: see the [home page](../).
 
 > **What is simulated:** the commands and outputs the modules ask you to run. The outputs are modelled on the real lab and abridged in places, so a real `sbx` may format a line differently. Anything else you type answers "this command isn't part of the lab".
 
-Ready? Open **Prerequisites** in the menu.
+Ready? Open **Network policies** in the menu. There are no prerequisites: everything runs in your browser.

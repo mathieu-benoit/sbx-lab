@@ -20,7 +20,8 @@ there's no build step. The `labs.json` catalog is **generated**: never write or 
 labs/docker-sandboxes-copilot/   # the lab; the directory name is its id
   labspace.yaml                  # title, 4 terminals, sections + milestones, seed files
   simulator.yaml                 # the scenarios: command/prompt (when) -> output, state, files (then)
-  welcome.md, 00-…11-*.md        # one file per section, numbered like ../instructions/
+  welcome.md, 01-…12-*.md        # one file per section, numbered like ../instructions/ (no 00:
+                                 # the prerequisites have nothing to simulate)
   troubleshooting.md
 tools/replay.ts                  # headless replay of the whole lab (see below)
 .sbxenv.yaml                     # `sbx env run`: the sandbox that carries the authoring skills

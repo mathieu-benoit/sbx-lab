@@ -26,8 +26,6 @@ state:
     github: false
     copilot: false
   sandboxes:
-    warmupShell: false
-    warmupCopilot: false
     shellDemo: false
     quickstart: false
     fixBugs: false
@@ -39,7 +37,6 @@ state:
     blocked: false            # shell-demo hit the proxy
   quickstart:
     pasteTried: false
-  cloned: false               # the prerequisites' git clone ran (the files are always there)
   repo:                       # what is in YOUR repository on the host
     paginationCommitted: false
     fixFetched: false
@@ -558,45 +555,6 @@ scenarios:
     then:
       state: { cwd: root }
 
-  # The prerequisites clone the lab. The simulated machine already holds the
-  # repository (the seed files), so `git clone` only shows the output once, and
-  # `cd sbx-lab` lands in its root.
-  - id: git-clone-again
-    when:
-      command: [git, clone]
-      args:
-        0: "https://github.com/mathieu-benoit/sbx-lab"
-      state: { cloned: true }
-    then:
-      stderr:
-        - "fatal: destination path 'sbx-lab' already exists and is not an empty directory."
-      exit: 128
-
-  - id: git-clone
-    completes: clone-repo
-    when:
-      command: [git, clone]
-      args:
-        0: "https://github.com/mathieu-benoit/sbx-lab"
-    then:
-      state: { cloned: true }
-      output:
-        - "Cloning into 'sbx-lab'..."
-        - "remote: Enumerating objects: 698, done."
-        - "remote: Counting objects: 100% (172/172), done."
-        - "remote: Compressing objects: 100% (125/125), done."
-        - "remote: Total 698 (delta 79), reused 92 (delta 45), pack-reused 526 (from 1)"
-        - { text: "Receiving objects: 100% (698/698), 322.05 KiB | 4.35 MiB/s, done.", delay: pull }
-        - "Resolving deltas: 100% (404/404), done."
-
-  - id: cd-sbx-lab
-    when:
-      command: [cd]
-      args:
-        0: "sbx-lab"
-    then:
-      state: { cwd: root }
-
   # Inside a session the terminal handles /exit itself; this is the answer when
   # you type it at a plain host prompt.
   - id: exit-without-session
@@ -615,117 +573,6 @@ scenarios:
         - "  - Active account: true"
         - "  - Git operations protocol: https"
         - "  - Token: gho_************************************"
-
-  # ════════════════════════════════════════════════════════════════════════
-  # Module 00: prerequisites
-  # ════════════════════════════════════════════════════════════════════════
-
-  - id: sbx-version
-    completes: check-sbx
-    when:
-      command: [sbx, version]
-    then:
-      output: ["sbx version v0.54.0 4bec4a5"]
-
-  - id: sbx-login
-    completes: sign-in
-    when:
-      command: [sbx, login]
-    then:
-      output:
-        - "Opening https://login.docker.com/activate in your browser..."
-        - { text: "Waiting for authentication...", delay: short }
-        - { text: "✓ Signed in as your-docker-id", delay: medium }
-        - "Default network policy: Balanced"
-
-  - id: sbx-diagnose
-    completes: run-diagnose
-    when:
-      command: [sbx, diagnose]
-    then:
-      output:
-        - "INSTALLATION"
-        - "  ✓ sbx CLI"
-        - "  ✓ Version"
-        - "PLATFORM"
-        - { text: "  ✓ Virtualization", delay: short }
-        - "  ✓ Daemon"
-        - "CONNECTION"
-        - { text: "  ✓ Authentication", delay: short }
-        - "  ✓ Global network policy"
-        - "OPTIONAL"
-        - "  ✗ SSH client config (not used by this lab)"
-        - ""
-        - "All required checks passed."
-
-  - id: sbx-create-warmup-shell
-    when:
-      command: [sbx, create, shell]
-      args:
-        --name: "warmup-shell"
-    then:
-      state: { sandboxes.warmupShell: true }
-      output:
-        - "  ○ shell — now ships as a kit; resolving docker.io/sbx/shell:latest"
-        - ""
-        - "SANDBOX"
-        - "  Name:       warmup-shell"
-        - "  Agent:      shell"
-        - "  Kit:        docker.io/sbx/shell@sha256:89ed5d63def6bfb2373d408e3ab6ad55aa5c010f884a182a78299fcf85ea42d1"
-        - "  Workspace:  ~/sbx-lab (rw)"
-        - "  Image:      docker.io/sbx/shell@sha256:89ed5d63def6bfb2373d408e3ab6ad55aa5c010f884a182a78299fcf85ea42d1"
-        - "  CPU:        8"
-        - "  Memory:     16 GiB"
-        - ""
-        - "IMAGE"
-        - { text: "  ✓ image — ready", delay: pull }
-        - ""
-        - "  ✓ Created sandbox warmup-shell"
-        - "      try: sbx run --name warmup-shell"
-
-  - id: sbx-create-warmup-copilot
-    when:
-      command: [sbx, create, copilot]
-      args:
-        --name: "warmup-copilot"
-    then:
-      state: { sandboxes.warmupCopilot: true }
-      output:
-        - "  ○ copilot — now ships as a kit; resolving docker.io/sbx/copilot:latest"
-        - ""
-        - "SANDBOX"
-        - "  Name:       warmup-copilot"
-        - "  Agent:      copilot"
-        - "  Kit:        docker.io/sbx/copilot@sha256:9e062b8791ec1ef5bc6a482c35bca217c07f78597a0bb0659fad05d14029aa4b"
-        - "  Workspace:  ~/sbx-lab (rw)"
-        - "  Skills:     0 entries · linked, read-only"
-        - "    Source:   ~/Library/Application Support/com.docker.sandboxes/sandboxes/agent-skills"
-        - "    Target:   /home/agent/.copilot/skills"
-        - "  Image:      docker.io/sbx/copilot@sha256:9e062b8791ec1ef5bc6a482c35bca217c07f78597a0bb0659fad05d14029aa4b"
-        - "  CPU:        8"
-        - "  Memory:     16 GiB"
-        - ""
-        - "IMAGE"
-        - { text: "  ✓ image — ready", delay: pull }
-        - ""
-        - "  ✓ Created sandbox warmup-copilot"
-        - "      try: sbx run --name warmup-copilot"
-
-  # `--force` swallows the first name as its value (see the flag parser), so the
-  # command arrives as: sbx rm warmup-copilot  with force=warmup-shell.
-  - id: sbx-rm-warmup
-    completes: warm-up
-    when:
-      command: [sbx, rm]
-      args:
-        0: "warmup-copilot"
-    then:
-      state:
-        sandboxes.warmupShell: false
-        sandboxes.warmupCopilot: false
-      output:
-        - "✓ Removed sandbox 'warmup-shell'"
-        - "✓ Removed sandbox 'warmup-copilot'"
 
   # ════════════════════════════════════════════════════════════════════════
   # Module 01: network policies
@@ -778,7 +625,6 @@ scenarios:
         - "No policies configured. Choose a default with: sbx policy init <balanced|deny-all|allow-all>"
 
   - id: policy-ls-balanced
-    completes: check-policies
     when:
       command: [sbx, policy, ls]
     then:
