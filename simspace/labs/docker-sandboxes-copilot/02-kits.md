@@ -4,18 +4,18 @@ Every agent you run in this lab comes from a **kit**. A kit is a declarative YAM
 
 Because all of that lives in one versioned artifact, the agent's environment, and the authority it gets, is reproducible and reviewable: a change in what an agent is allowed to do shows up as a change in its kit.
 
-There are two kinds of kits:
+Kits use the **v3** format: a YAML descriptor that starts with `# syntax=docker/sandbox-kit:3` and `schemaVersion: "3"`, often next to a Dockerfile. There are two kinds of kits:
 
 | Kind | What it does | Example |
 |------|--------------|---------|
-| Agent kit (`kind: sandbox`) | Defines the agent: its image, entrypoint, default arguments, and what it needs | `sbx/shell`, `sbx/copilot`, `sbx/claude`, OCI images on Docker Hub |
-| Mixin | Extends an agent kit with a tool, a credential, a network rule, a file… | `sbx/scout-cli`, or your own; added with `sbx create <agent> --kit <reference>` |
+| Workload (`kind: workload`) | Defines what runs, here the agent: its image, entrypoint, default arguments, and what it needs | `sbx/shell`, `sbx/copilot`, `sbx/claude`, OCI images on Docker Hub |
+| Mixin (`kind: mixin`) | Extends a workload with a tool, a credential, a network rule, a file… | `sbx/scout-cli`, or your own; added with `sbx create <agent> --kit <reference>` |
 
 ```mermaid
 graph LR
     subgraph Kits["Kits, written in YAML"]
         direction TB
-        AgentKit["Agent kit: sbx/copilot<br/>OCI image on Docker Hub<br/>entrypoint, --yolo"]
+        AgentKit["Workload: sbx/copilot<br/>OCI image on Docker Hub<br/>entrypoint, --yolo"]
         PythonMixin["Mixin: kits/python<br/>install step, network rules"]
         TrivyMixin["Mixin: kits/trivy<br/>files built ahead, network rules"]
     end
@@ -64,6 +64,8 @@ Then the kit's declaration itself:
 ```bash id=host
 sbx kit inspect sbx/copilot --format yaml
 ```
+
+> **Note:** `sbx kit inspect` shows a kit as `sbx` reads it, not its source file. `sbx` v0.54 prints a workload as `Kind: sandbox`, with a `sandbox:` block for its image, entrypoint and command. In a v3 kit's source, these come from the Dockerfile next to the `kind: workload` descriptor: `FROM` sets the image, and `ENTRYPOINT` and `CMD` set the entrypoint and the default command.
 
 It's a small file, and it tells you a lot about the sandboxes you'll use in this lab:
 

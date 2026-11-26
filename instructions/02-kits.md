@@ -4,18 +4,18 @@ Every agent you'll run in this lab comes from a **kit**. A kit is a declarative 
 
 Because all of that lives in one versioned artifact, the agent's environment, and the authority it gets, is reproducible and reviewable: a change in what an agent is allowed to do shows up as a change in its kit.
 
-There are two kinds of kits:
+Kits use the **v3** format: a YAML descriptor that starts with `# syntax=docker/sandbox-kit:3` and `schemaVersion: "3"`, often next to a Dockerfile. There are two kinds of kits:
 
 | Kind | What it does | Example |
 |------|--------------|---------|
-| Agent kit (`kind: sandbox`) | Defines the agent: its image, entrypoint, default arguments, and what it needs | `sbx/shell`, `sbx/copilot`, `sbx/claude`, OCI images on Docker Hub |
-| Mixin | Extends an agent kit with a tool, a credential, a network rule, a file… | `sbx/scout-cli`, or your own; added with `sbx create <agent> --kit <reference>` |
+| Workload (`kind: workload`) | Defines what runs, here the agent: its image, entrypoint, default arguments, and what it needs | `sbx/shell`, `sbx/copilot`, `sbx/claude`, OCI images on Docker Hub |
+| Mixin (`kind: mixin`) | Extends a workload with a tool, a credential, a network rule, a file… | `sbx/scout-cli`, or your own; added with `sbx create <agent> --kit <reference>` |
 
 ```mermaid
 graph LR
     subgraph Kits["Kits, written in YAML"]
         direction TB
-        AgentKit["Agent kit: sbx/copilot<br/>OCI image on Docker Hub<br/>entrypoint, --yolo"]
+        AgentKit["Workload: sbx/copilot<br/>OCI image on Docker Hub<br/>entrypoint, --yolo"]
         PythonMixin["Mixin: kits/python<br/>install step, network rules"]
         TrivyMixin["Mixin: kits/trivy<br/>files built ahead, network rules"]
     end
@@ -128,6 +128,9 @@ Run the commands of this module from the root of the repository.
         COPILOT_KIT_MODEL: ""
         COPILOT_KIT_REASONING_EFFORT: ""
     ```
+
+> [!NOTE]
+> `sbx kit inspect` shows a kit as `sbx` reads it, not its source file. `sbx` v0.54 prints a workload as `Kind: sandbox`, with a `sandbox:` block for its image, entrypoint and command. In a v3 kit's source, these come from the Dockerfile next to the `kind: workload` descriptor: `FROM` sets the image, and `ENTRYPOINT` and `CMD` set the entrypoint and the default command.
 
 It's a small file, and it tells you a lot about the sandboxes you'll use in this lab:
 
@@ -367,12 +370,12 @@ displayName: Copilot with Python and Trivy
 version: "1.0.0"
 
 kits:
-  - ref: docker.io/sbx/copilot@sha256:<DIGEST>          # the agent kit you inspected above
+  - ref: docker.io/sbx/copilot@sha256:<DIGEST>          # the workload you inspected above
   - ref: docker.io/<NAMESPACE>/python-kit:1.0.0         # the Python mixin, once published
   - ref: docker.io/<NAMESPACE>/trivy-kit:1.0.0          # the Trivy mixin, once published
 ```
 
-- A set lists its components under `kits:`: at most one agent kit (a workload) and any number of mixins.
+- A set lists its components under `kits:`: at most one workload (the agent) and any number of mixins.
 - Every component must be **published** to a registry. Local paths such as `./kits/python` aren't accepted, so you'd publish the Python and Trivy mixins first.
 - Each component keeps its own content and rules: the Python kit still installs Python when the sandbox is created, and the Trivy kit still brings its files and its network rules for the vulnerability database and the VEX statements. The set only adds what the combination needs on top, with the same `capabilities:` as a mixin.
 - You build and publish a set with Docker Buildx, `docker buildx build ./copilot-tools -f ./copilot-tools/copilot-tools.yaml -t docker.io/<NAMESPACE>/copilot-tools:1.0.0 --push`, then run it like any agent: `sbx run docker.io/<NAMESPACE>/copilot-tools:1.0.0 --name quickstart`. No `--kit` needed.
