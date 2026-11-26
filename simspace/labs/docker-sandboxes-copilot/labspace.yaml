@@ -11,7 +11,7 @@ catalog:
 
 # Bump this whenever you add, remove or rename steps: stored progress is
 # namespaced per version, so stale completion records are cleared.
-version: "1.5.0"
+version: "1.6.0"
 
 # Command behaviour lives in simulator.yaml (relative to this file).
 simulator: simulator.yaml
@@ -202,17 +202,6 @@ sections:
 
   - title: Wrap up
     contentPath: 12-wrap-up.md
-    steps:
-      - id: remove-sandboxes
-        title: "Remove the lab's sandboxes"
-      - id: remove-shell-demo
-        title: "Remove the shell-demo sandbox"
-      - id: remove-mcp
-        title: "Remove the DHI MCP registration"
-      - id: remove-github-secret
-        title: "Remove the github secret"
-      - id: remove-copilot-secret
-        title: "Remove the copilot secret"
 
   - title: Troubleshooting
     contentPath: troubleshooting.md

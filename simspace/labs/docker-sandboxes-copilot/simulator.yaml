@@ -2656,7 +2656,6 @@ scenarios:
       output: ["No MCP servers registered."]
 
   - id: mcp-rm-dhi
-    completes: remove-mcp
     when:
       command: [sbx, mcp, rm, dhi]
     then:
@@ -2664,13 +2663,13 @@ scenarios:
       output: ["✓ Removed MCP server 'dhi'"]
 
   # ════════════════════════════════════════════════════════════════════════
-  # Module 12: wrap up
+  # Removing sandboxes and secrets. The wrap up has no cleanup in the simulated lab,
+  # but sbx rm --force ports-demo runs in module 09, and a learner can still type the others.
   # `--force` swallows the name that follows it, so `sbx rm --force ports-demo`
   # arrives with no positional argument (see the flag parser).
   # ════════════════════════════════════════════════════════════════════════
 
   - id: rm-lab-sandboxes
-    completes: remove-sandboxes
     when:
       command: [sbx, rm]
       args:
@@ -2707,7 +2706,6 @@ scenarios:
       output: ["✓ Removed sandbox 'quickstart'"]
 
   - id: rm-shell-demo
-    completes: remove-shell-demo
     when:
       command: [sbx, rm]
       args:
@@ -2736,7 +2734,6 @@ scenarios:
       output: ["✓ Removed sandbox '{{ args.0 }}'"]
 
   - id: secret-rm-github
-    completes: remove-github-secret
     when:
       command: [sbx, secret, rm, github]
     then:
@@ -2744,7 +2741,6 @@ scenarios:
       output: ["✓ Removed secret 'github'"]
 
   - id: secret-rm-copilot
-    completes: remove-copilot-secret
     when:
       command: [sbx, secret, rm, copilot]
     then:
