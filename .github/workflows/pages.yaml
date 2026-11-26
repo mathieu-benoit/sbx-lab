@@ -1,7 +1,7 @@
 name: pages
 
 # Publishes the repository's GitHub Pages site, which holds both web versions of the lab:
-#   /           a landing page with a blade for each version of the lab (.github/pages/home/)
+#   /           a landing page: what the lab covers, and a blade for each version of it (.github/pages/home/)
 #   /lab/       the hands-on lab (README.md + instructions/), in the Simspace runtime's instructions
 #               panel, without terminals (.github/pages/)
 #   /simspace/  the simulated lab (simspace/), as dockersamples/simspace's deploy-lab.yml builds it
@@ -140,7 +140,9 @@ jobs:
         run: |
           set -euo pipefail
           cp -R .github/pages/home/. _site/
-          test -f _site/index.html && test -f _site/sw.js
+          # The README's overview, shared by both labs, written by build-instructions.mjs
+          cp _instructions/overview.md _site/
+          test -f _site/index.html && test -f _site/sw.js && test -s _site/overview.md
 
       # ---- /labspace/ : the static preview of the Labspace rendering
       - name: Build the Labspace preview

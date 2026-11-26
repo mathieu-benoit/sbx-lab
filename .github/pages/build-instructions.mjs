@@ -12,6 +12,8 @@
 //   - the [[<< Previous | Next >>]] lines are dropped: the runtime has its own Previous/Next
 //   - code blocks get no-run-button and lose terminal-id=: there's no terminal to run them in
 //     (the Copy button stays, except on none blocks, which are outputs)
+//   - the README's "What you will learn" and "How a sandbox works" go to overview.md, next to
+//     <out-labs-dir>, for the landing page at the root of the site: the Welcome page links to it
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -72,9 +74,37 @@ function convert(src) {
   return lines.join("\n");
 }
 
+// The README's overview sections are shared by both labs: they're shown on the landing page at the
+// root of the site (written to overview.md, next to <out-dir>, with the links pointing into lab/),
+// and the Welcome page links to it instead.
+const OVERVIEW = ["What you will learn", "How a sandbox works"];
+function splitOverview(markdown) {
+  const welcome = [];
+  const overview = [];
+  let linked = false;
+  for (const part of markdown.split(/^(?=## )/m)) {
+    if (!OVERVIEW.some((t) => part.startsWith(`## ${t}\n`))) { welcome.push(part); continue; }
+    overview.push(part.replace(/\]\(#\//g, "](lab/#/"));
+    if (!linked) {
+      welcome.push("What you will learn, and how a sandbox works: see the [home page](../).\n\n");
+      linked = true;
+    }
+  }
+  if (overview.length !== OVERVIEW.length) throw new Error(`README.md must have the sections ${OVERVIEW.join(", ")}`);
+  return [welcome.join(""), overview.join("").trimEnd() + "\n"];
+}
+
 const dir = join(out, LAB_ID);
 mkdirSync(dir, { recursive: true });
-for (const s of sections) writeFileSync(join(dir, s.file), convert(s.src));
+for (const s of sections) {
+  let md = convert(s.src);
+  if (s.src === "README.md") {
+    const [welcome, overview] = splitOverview(md);
+    md = welcome;
+    writeFileSync(join(out, "..", "overview.md"), overview);
+  }
+  writeFileSync(join(dir, s.file), md);
+}
 
 const q = (s) => JSON.stringify(s);
 writeFileSync(
