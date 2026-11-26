@@ -1,6 +1,6 @@
 // Renders overview.md into the landing page's [data-overview] sections. overview.md holds the
-// README's "What you will learn" and "How a sandbox works", which both labs share: pages.yaml
-// writes it with build-instructions.mjs, with the module links pointing into lab/. If it can't
+// README's "What you will learn", "How a sandbox works" and "Table of contents", which both labs
+// share: pages.yaml writes it with build-instructions.mjs. If it can't
 // be read, the sections are left out and the page still shows the two labs.
 (async () => {
   const slots = [...document.querySelectorAll("[data-overview]")];

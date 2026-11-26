@@ -12,8 +12,9 @@
 //   - the [[<< Previous | Next >>]] lines are dropped: the runtime has its own Previous/Next
 //   - code blocks get no-run-button and lose terminal-id=: there's no terminal to run them in
 //     (the Copy button stays, except on none blocks, which are outputs)
-//   - the README's "What you will learn" and "How a sandbox works" go to overview.md, next to
-//     <out-labs-dir>, for the landing page at the root of the site: the Welcome page links to it
+//   - the README's "What you will learn", "How a sandbox works" and "Table of contents" go to
+//     overview.md, next to <out-labs-dir>, for the landing page at the root of the site: the
+//     Welcome page links to it
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -75,22 +76,38 @@ function convert(src) {
 }
 
 // The README's overview sections are shared by both labs: they're shown on the landing page at the
-// root of the site (written to overview.md, next to <out-dir>, with the links pointing into lab/),
-// and the Welcome page links to it instead.
-const OVERVIEW = ["What you will learn", "How a sandbox works"];
+// root of the site (written to overview.md, next to <out-dir>), and the Welcome page links to it
+// instead. The landing page serves both labs, so the links into the hands-on lab go:
+//   - How a sandbox works: the doors table loses its Module column (README.md keeps it)
+//   - Table of contents: the module names lose their links, and the prerequisites, which only the
+//     hands-on lab has, stay on its Welcome page, as do the "Stuck?" line and Getting started
+const OVERVIEW = ["What you will learn", "How a sandbox works", "Table of contents"];
+const isRow = (line) => /^\|.*\|\s*$/.test(line);
+const unlink = (line) => line.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+const forLanding = {
+  "How a sandbox works": (lines) => lines.map((l) => (isRow(l) ? l.replace(/\|[^|]*\|\s*$/, "|") : l)),
+  "Table of contents": (lines) =>
+    lines.filter((l) => !/^Stuck\?/.test(l) && !/^\|\s*00\s*\|/.test(l)).map((l) => (isRow(l) ? unlink(l) : l)),
+};
 function splitOverview(markdown) {
   const welcome = [];
   const overview = [];
   let linked = false;
   for (const part of markdown.split(/^(?=## )/m)) {
-    if (!OVERVIEW.some((t) => part.startsWith(`## ${t}\n`))) { welcome.push(part); continue; }
-    // The landing page serves both labs: the doors table loses its Module column, whose links
-    // only lead into the hands-on lab (README.md keeps it).
-    const table = (line) => (/^\|.*\|\s*$/.test(line) ? line.replace(/\|[^|]*\|\s*$/, "|") : line);
-    overview.push(part.split("\n").map(table).join("\n").replace(/\]\(#\//g, "](lab/#/"));
+    const title = OVERVIEW.find((t) => part.startsWith(`## ${t}\n`));
+    if (!title) { welcome.push(part); continue; }
+    const lines = part.split("\n");
+    overview.push((forLanding[title] || ((l) => l))(lines).join("\n"));
     if (!linked) {
-      welcome.push("What you will learn, and how a sandbox works: see the [home page](../).\n\n");
+      welcome.push("What you will learn, how a sandbox works, and the modules of the lab: see the [home page](../).\n\n");
       linked = true;
+    }
+    if (title === "Table of contents") {
+      const prerequisites = lines.find((l) => /^\|\s*00\s*\|/.test(l));
+      const stuck = lines.find((l) => /^Stuck\?/.test(l));
+      if (!prerequisites || !stuck) throw new Error("README.md's table of contents changed: update build-instructions.mjs");
+      const [, , module, what] = prerequisites.split("|").map((c) => c.trim());
+      welcome.push(`The lab starts with module 00, ${module}, which you do **before the lab**: ${what.charAt(0).toLowerCase()}${what.slice(1)}.\n\n${stuck}\n\n`);
     }
   }
   if (overview.length !== OVERVIEW.length) throw new Error(`README.md must have the sections ${OVERVIEW.join(", ")}`);

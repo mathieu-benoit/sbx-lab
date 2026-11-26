@@ -6,7 +6,7 @@ This is the **simulated** version of the [hands-on lab](https://github.com/mathi
 
 **Duration:** about 60 minutes.
 
-What you will learn, and how a sandbox works: see the [home page](../).
+What you will learn, how a sandbox works, and the modules of the lab: see the [home page](../).
 
 ## How to use this lab
 
