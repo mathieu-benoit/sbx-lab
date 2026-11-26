@@ -8,14 +8,4 @@ This is the **simulated** version of the [hands-on lab](https://github.com/mathi
 
 What you will learn, how a sandbox works, and the modules of the lab: see the [home page](../).
 
-## How to use this lab
-
-- **Run buttons.** Every command and prompt in these pages has a **Run** button: it types the block into a terminal and runs it. You can also type it yourself.
-- **Four terminals.** The real lab uses several terminals on your laptop: one per agent, one to review and merge their work, one for the dashboard. They are the four tabs on the right, all on the same simulated machine. Use **Terminal 1** until the *Clone mode and parallel agents* module, which tells you when to switch.
-- **Agent sessions.** `sbx run` opens an interactive agent session. The terminal prompt changes, and what you type is a prompt for the agent. Leave a session with `/exit` (in the real lab: **Ctrl-C twice**). Inside a session, start a line with `!` to run a shell command without leaving it, for example `!docker ps`.
-- **Progress.** Each module lists milestones; they get checked off as you run the right command at the right moment.
-- **Stuck?** The **Reset** button puts the simulated machine back to its starting state. Your progress is kept.
-
-> **What is simulated:** the commands and outputs the modules ask you to run. The outputs are modelled on the real lab and abridged in places, so a real `sbx` may format a line differently. Anything else you type answers "this command isn't part of the lab".
-
 Ready? Open **Network policies** in the menu. There are no prerequisites: everything runs in your browser.
