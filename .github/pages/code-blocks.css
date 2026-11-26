@@ -1,5 +1,5 @@
 /* The icon in the header of the code blocks that label-code-blocks.mjs names "host" or "sandbox",
-   on the Simspace sites (the root and simspace/). The runtime gives a block with a filename= a
+   on the Simspace sites (lab/ and simspace/). The runtime gives a block with a filename= a
    file icon: a host block gets back the terminal icon, a sandbox block gets a box (a sandbox).
    The icons are ligatures of the runtime's Material Symbols font, drawn by ::before because the
    runtime owns the icon's text. pages.yaml checks that these class names still exist. */

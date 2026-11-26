@@ -1,7 +1,8 @@
 name: pages
 
 # Publishes the repository's GitHub Pages site, which holds both web versions of the lab:
-#   /           the hands-on lab (README.md + instructions/), in the Simspace runtime's instructions
+#   /           a landing page with a blade for each version of the lab (.github/pages/home/)
+#   /lab/       the hands-on lab (README.md + instructions/), in the Simspace runtime's instructions
 #               panel, without terminals (.github/pages/)
 #   /simspace/  the simulated lab (simspace/), as dockersamples/simspace's deploy-lab.yml builds it
 #   /labspace/  the static preview of the Labspace rendering (labspace-local/static)
@@ -61,7 +62,7 @@ jobs:
               npm run validate-lab -- /labs
           done
 
-      # ---- / and /simspace/ : the Simspace runtime payload + labs + catalog (the steps of
+      # ---- /lab/ and /simspace/ : the Simspace runtime payload + labs + catalog (the steps of
       # deploy-lab.yml), once with the hands-on lab and once with the simulated lab
       - name: Assemble the Simspace sites
         run: |
@@ -85,59 +86,61 @@ jobs:
               "$SIMSPACE_AUTHORING_IMAGE:$SIMSPACE_TAG" \
               npm run generate-catalog -- "/work/$1" "/work/$2/labs.json"
           }
-          assemble _instructions/labs _site
+          assemble _instructions/labs _site/lab
           assemble "$LABS_DIR" _site/simspace
 
-          # / : only the instructions panel (instructions-only.css hides the terminal side).
+          # lab/ : only the instructions panel (instructions-only.css hides the terminal side).
           # Fail if the runtime renamed what the stylesheet relies on.
           for c in labspace-resize-handle labspace-panel terminal-panel workshop-panel workshop-header-bar workshop-progress-track workshop-body; do
-            grep -qF "$c" _site/assets/*.css || { echo "::error::the runtime has no .$c any more: update .github/pages/instructions-only.css"; exit 1; }
+            grep -qF "$c" _site/lab/assets/*.css || { echo "::error::the runtime has no .$c any more: update .github/pages/instructions-only.css"; exit 1; }
           done
-          cp .github/pages/instructions-only.css _site/
-          sed -i 's|</head>|  <link rel="stylesheet" href="./instructions-only.css">\n  </head>|' _site/index.html
-          grep -qF 'instructions-only.css' _site/index.html
+          cp .github/pages/instructions-only.css _site/lab/
+          sed -i 's|</head>|  <link rel="stylesheet" href="./instructions-only.css">\n  </head>|' _site/lab/index.html
+          grep -qF 'instructions-only.css' _site/lab/index.html
 
-          # / and simspace/ : click a Mermaid diagram to open it in a zoomable popup.
-          grep -qF 'aria-roledescription' _site/assets/*.js || { echo "::error::the runtime's diagrams changed: update .github/pages/diagram-zoom.js"; exit 1; }
-          for site in _site _site/simspace; do
+          # lab/ and simspace/ : click a Mermaid diagram to open it in a zoomable popup.
+          grep -qF 'aria-roledescription' _site/lab/assets/*.js || { echo "::error::the runtime's diagrams changed: update .github/pages/diagram-zoom.js"; exit 1; }
+          for site in _site/lab _site/simspace; do
             cp .github/pages/diagram-zoom.js "$site/"
             sed -i 's|</head>|  <script defer src="./diagram-zoom.js"></script>\n  </head>|' "$site/index.html"
             grep -qF 'diagram-zoom.js' "$site/index.html"
           done
 
-          # / and simspace/ : the label above the lab's title, "Labspace" in the runtime: "Lab" at
-          # the root (the instructions only), "Simspace" for the simulated lab. labspace/ keeps its own.
+          # lab/ and simspace/ : the label above the lab's title, "Labspace" in the runtime: "Lab" for
+          # the hands-on lab (the instructions only), "Simspace" for the simulated lab. labspace/ keeps its own.
           label() { # <site dir> <label>
             files="$(grep -lF 'eyebrow:"Labspace"' "$1"/assets/*.js)" || { echo "::error::the runtime has no eyebrow:\"Labspace\" any more: update the header label step"; exit 1; }
             sed -i "s|eyebrow:\"Labspace\"|eyebrow:\"$2\"|" $files
             grep -qF "eyebrow:\"$2\"" $files
           }
-          label _site Lab
+          label _site/lab Lab
           label _site/simspace Simspace
 
-          # / and simspace/ : the icon of the code blocks labelled host or sandbox.
+          # lab/ and simspace/ : the icon of the code blocks labelled host or sandbox.
           for c in code-block-label code-block-label-icon; do
-            grep -qF ".$c{" _site/assets/*.css || { echo "::error::the runtime has no .$c any more: update .github/pages/code-blocks.css"; exit 1; }
+            grep -qF ".$c{" _site/lab/assets/*.css || { echo "::error::the runtime has no .$c any more: update .github/pages/code-blocks.css"; exit 1; }
           done
-          grep -qF 'dataFilename' _site/assets/*.js || { echo "::error::the runtime doesn't show filename= any more: update .github/pages/label-code-blocks.mjs"; exit 1; }
-          for site in _site _site/simspace; do
+          grep -qF 'dataFilename' _site/lab/assets/*.js || { echo "::error::the runtime doesn't show filename= any more: update .github/pages/label-code-blocks.mjs"; exit 1; }
+          for site in _site/lab _site/simspace; do
             cp .github/pages/code-blocks.css "$site/"
             sed -i 's|</head>|  <link rel="stylesheet" href="./code-blocks.css">\n  </head>|' "$site/index.html"
             grep -qF 'code-blocks.css' "$site/index.html"
           done
 
-          # The root's service worker is scoped to the whole site: keep it off simspace/ (which has
-          # its own) and labspace/.
-          anchor='if (url.origin !== self.location.origin) return;'
-          grep -qF "$anchor" _site/sw.js || { echo "::error::sw.js changed: update the simspace/ and labspace/ exclusion"; exit 1; }
-          sed -i "s|$anchor|$anchor\n  if ([\"simspace/\", \"labspace/\"].some((p) => url.pathname.startsWith(new URL(p, self.registration.scope).pathname))) return;|" _site/sw.js
-          grep -q '"simspace/", "labspace/"' _site/sw.js
           # Both service workers serve everything cache-first and never refresh it: with the cleanup
           # and the commit, each deploy installs a new worker that drops the stale cache.
-          for site in _site _site/simspace; do
+          for site in _site/lab _site/simspace; do
             cat .github/pages/sw-cleanup.js >> "$site/sw.js"
             echo "// Deployed from $GITHUB_SHA" >> "$site/sw.js"
           done
+
+      # ---- / : the landing page, with its own sw.js, which retires the service worker that the
+      # root had when it served the hands-on lab
+      - name: Add the landing page
+        run: |
+          set -euo pipefail
+          cp -R .github/pages/home/. _site/
+          test -f _site/index.html && test -f _site/sw.js
 
       # ---- /labspace/ : the static preview of the Labspace rendering
       - name: Build the Labspace preview

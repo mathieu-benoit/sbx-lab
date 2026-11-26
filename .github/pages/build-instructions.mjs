@@ -1,4 +1,4 @@
-// Builds the hands-on lab (README.md + instructions/) as a Simspace lab, for the root of the
+// Builds the hands-on lab (README.md + instructions/) as a Simspace lab, for lab/ in the
 // GitHub Pages site: the Simspace runtime renders it in the same instructions panel as the
 // simulated lab, and instructions-only.css hides the terminal side.
 //
