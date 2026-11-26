@@ -12,6 +12,9 @@
 //   - the [[<< Previous | Next >>]] lines are dropped: the runtime has its own Previous/Next
 //   - code blocks get no-run-button and lose terminal-id=: there's no terminal to run them in
 //     (the Copy button stays, except on none blocks, which are outputs)
+//   - the README's "What you will learn", "How a sandbox works" and "Table of contents" go to
+//     overview.md, next to <out-labs-dir>, for the landing page at the root of the site: the
+//     Welcome page links to it
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -72,9 +75,62 @@ function convert(src) {
   return lines.join("\n");
 }
 
+// The README's overview sections are shared by both labs: they're shown on the landing page at the
+// root of the site (written to overview.md, next to <out-dir>), and the Welcome page links to it
+// instead. The landing page serves both labs, so the links into the hands-on lab go:
+//   - How a sandbox works: the doors table loses its Module column (README.md keeps it)
+//   - Table of contents: the module names lose their links, and the prerequisites, which only the
+//     hands-on lab has, stay on its Welcome page, as does the "Stuck?" line
+// Getting started stays in README.md only.
+const OVERVIEW = ["What you will learn", "How a sandbox works", "Table of contents"];
+const isRow = (line) => /^\|.*\|\s*$/.test(line);
+const unlink = (line) => line.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+const forLanding = {
+  "How a sandbox works": (lines) => lines.map((l) => (isRow(l) ? l.replace(/\|[^|]*\|\s*$/, "|") : l)),
+  "Table of contents": (lines) =>
+    lines.filter((l) => !/^Stuck\?/.test(l) && !/^\|\s*00\s*\|/.test(l)).map((l) => (isRow(l) ? unlink(l) : l)),
+};
+function splitOverview(markdown) {
+  const welcome = [];
+  const overview = [];
+  let linked = false;
+  for (const part of markdown.split(/^(?=## )/m)) {
+    const title = OVERVIEW.find((t) => part.startsWith(`## ${t}\n`));
+    if (!title) {
+      // Getting started (clone the repository, do the prerequisites) is README.md's, for GitHub:
+      // the Prerequisites module has the clone, and the Welcome page already points to it.
+      if (!part.startsWith("## Getting started\n")) welcome.push(part);
+      continue;
+    }
+    const lines = part.split("\n");
+    overview.push((forLanding[title] || ((l) => l))(lines).join("\n"));
+    if (!linked) {
+      welcome.push("What you will learn, how a sandbox works, and the modules of the lab: see the [home page](../).\n\n");
+      linked = true;
+    }
+    if (title === "Table of contents") {
+      const prerequisites = lines.find((l) => /^\|\s*00\s*\|/.test(l));
+      const stuck = lines.find((l) => /^Stuck\?/.test(l));
+      if (!prerequisites || !stuck) throw new Error("README.md's table of contents changed: update build-instructions.mjs");
+      const [, , module, what] = prerequisites.split("|").map((c) => c.trim());
+      welcome.push(`The lab starts with module 00, ${module}, which you do **before the lab**: ${what.charAt(0).toLowerCase()}${what.slice(1)}.\n\n${stuck}\n\n`);
+    }
+  }
+  if (overview.length !== OVERVIEW.length) throw new Error(`README.md must have the sections ${OVERVIEW.join(", ")}`);
+  return [welcome.join(""), overview.join("").trimEnd() + "\n"];
+}
+
 const dir = join(out, LAB_ID);
 mkdirSync(dir, { recursive: true });
-for (const s of sections) writeFileSync(join(dir, s.file), convert(s.src));
+for (const s of sections) {
+  let md = convert(s.src);
+  if (s.src === "README.md") {
+    const [welcome, overview] = splitOverview(md);
+    md = welcome;
+    writeFileSync(join(out, "..", "overview.md"), overview);
+  }
+  writeFileSync(join(dir, s.file), md);
+}
 
 const q = (s) => JSON.stringify(s);
 writeFileSync(

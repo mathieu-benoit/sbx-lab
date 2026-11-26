@@ -1,16 +1,20 @@
 // Click-to-zoom for the Mermaid diagrams of the Pages site, like GitHub's diagram viewer: click a
 // diagram (or focus it and press Enter) to open it in a popup, then zoom with the buttons, the
 // mouse wheel or +/-, drag to pan, and close with Esc, the close button or a click outside.
-// pages.yaml adds it to the Simspace runtime's index.html, in lab/ and simspace/; the Labspace
+// pages.yaml adds it to the Simspace runtime's index.html, in lab/ and simspace/, and to the landing
+// page at the root; the Labspace
 // (labspace-local/content.mjs) loads it too, at home and in labspace/.
 (() => {
-  const DIAGRAM = ".workshop-body svg[aria-roledescription]";
+  // The labs' instructions panel, and the landing page's overview sections (home.js)
+  const ROOTS = [".workshop-body", ".overview"];
+  const sel = (suffix = "") => ROOTS.map((r) => `${r} svg[aria-roledescription]${suffix}`).join(", ");
+  const DIAGRAM = sel();
   const MIN = 0.5, MAX = 8, STEP = 1.25;
 
   const style = document.createElement("style");
   style.textContent = `
     ${DIAGRAM} { cursor: zoom-in; border-radius: 8px; }
-    ${DIAGRAM}:hover, ${DIAGRAM}:focus-visible { outline: 2px solid #2560ff; outline-offset: 4px; }
+    ${sel(":hover")}, ${sel(":focus-visible")} { outline: 2px solid #2560ff; outline-offset: 4px; }
     .dz-overlay { position: fixed; inset: 0; z-index: 10000; display: flex; padding: 24px;
       background: rgba(13, 18, 32, 0.6); }
     .dz-dialog { position: relative; display: flex; flex-direction: column; flex: 1; min-width: 0;
@@ -36,7 +40,7 @@
 
   // Make every diagram reachable from the keyboard, as it is added to the page.
   const tag = () => {
-    for (const svg of document.querySelectorAll(`${DIAGRAM}:not([data-dz])`)) {
+    for (const svg of document.querySelectorAll(sel(":not([data-dz])"))) {
       svg.dataset.dz = "";
       svg.setAttribute("tabindex", "0");
       svg.setAttribute("role", "button");

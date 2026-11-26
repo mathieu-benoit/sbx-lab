@@ -110,6 +110,23 @@ code {
 }
 .catalog-chip-primary { color: var(--primary); background: var(--primary-soft); }
 
+.section-title { margin: 0 0 1rem; font-size: 1.4rem; letter-spacing: -0.01em; }
+
+/* What you will learn, How a sandbox works: the README's sections, rendered by home.js */
+.overview { margin: 0 0 3rem; }
+.overview h2 { margin: 0 0 1rem; font-size: 1.4rem; letter-spacing: -0.01em; }
+.overview p, .overview ul { margin: 0 0 1rem; max-width: 46rem; }
+.overview li + li { margin-top: 0.25rem; }
+.overview pre.mermaid {
+  margin: 0 0 1.25rem; padding: 1rem; overflow-x: auto; text-align: center;
+  border: 1px solid var(--border); border-radius: 0.85rem; background: #fff;
+}
+.overview pre.mermaid svg { max-width: 100%; height: auto; }
+.overview .table-wrap { overflow-x: auto; margin: 0 0 1rem; border: 1px solid var(--border); border-radius: 0.85rem; }
+.overview table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 0.9rem; }
+.overview th, .overview td { padding: 0.75rem 1rem; text-align: left; vertical-align: top; border-top: 1px solid var(--border); }
+.overview thead th { border-top: 0; font-weight: 600; background: var(--primary-soft); }
+
 /* How the options differ: adapted from github.com/mathieu-benoit/dhi-launch */
 .compare { margin-top: 3rem; }
 .compare h2 { margin: 0 0 1rem; font-size: 1.4rem; letter-spacing: -0.01em; }

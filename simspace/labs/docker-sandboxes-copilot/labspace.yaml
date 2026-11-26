@@ -11,7 +11,7 @@ catalog:
 
 # Bump this whenever you add, remove or rename steps: stored progress is
 # namespaced per version, so stale completion records are cleared.
-version: "1.4.0"
+version: "1.5.0"
 
 # Command behaviour lives in simulator.yaml (relative to this file).
 simulator: simulator.yaml
@@ -37,22 +37,6 @@ terminals:
 sections:
   - title: Welcome
     contentPath: welcome.md
-
-  - title: Prerequisites
-    contentPath: 00-prerequisites.md
-    steps:
-      - id: check-sbx
-        title: "Check that sbx is installed"
-      - id: sign-in
-        title: "Sign in to Docker"
-      - id: run-diagnose
-        title: "Run sbx diagnose"
-      - id: check-policies
-        title: "Check that your policies are local"
-      - id: clone-repo
-        title: "Clone the lab repository"
-      - id: warm-up
-        title: "Warm up the sandbox images"
 
   - title: Network policies
     contentPath: 01-network-policies.md
