@@ -114,7 +114,6 @@ code {
 
 /* What you will learn, How a sandbox works: the README's sections, rendered by home.js */
 .overview { margin: 0 0 3rem; }
-.overview:last-of-type { margin: 3rem 0 0; }
 .overview h2 { margin: 0 0 1rem; font-size: 1.4rem; letter-spacing: -0.01em; }
 .overview p, .overview ul { margin: 0 0 1rem; max-width: 46rem; }
 .overview li + li { margin-top: 0.25rem; }
