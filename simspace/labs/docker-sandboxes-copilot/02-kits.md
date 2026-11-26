@@ -85,13 +85,13 @@ The kit's `args` are settings of the kit itself, which you choose when you creat
 - `model`: the Copilot model, such as `claude-sonnet-5.5` or `gpt-5.6-sol`. It must be available on your Copilot plan.
 - `reasoningEffort`: how much the model reasons before it answers: `none`, `minimal`, `low`, `medium`, `high`, `xhigh` or `max`, if the model supports that level.
 
-Both are empty by default, which keeps Copilot's own defaults, and this lab keeps them. When the sandbox is created, the kit sets the two `environment` variables to the values you chose and writes them into Copilot's settings, `~/.copilot/settings.json` (`model` and `effortLevel`). With several kits, as in *Agent sandbox*, prefix each name with the kit's, `copilot.`:
+Both are empty by default, which keeps Copilot's own defaults, and this lab keeps them. To choose them, you add `--kit-arg` flags to `sbx create`, for example:
 
-```bash no-run-button
-sbx create --name tuned --kit ./kits/python --kit-arg copilot.model=claude-sonnet-5.5 --kit-arg copilot.reasoningEffort=high copilot .
-```
+- `--kit-arg model=claude-sonnet-5.5` picks the model.
+- `--kit-arg reasoningEffort=high` raises the reasoning effort.
+- With several kits, as in *Agent sandbox*, where the Python kit comes with the Copilot kit, prefix each name with the kit's: `--kit-arg copilot.model=claude-sonnet-5.5`, `--kit-arg copilot.reasoningEffort=high`.
 
-Copilot then starts with this model and this effort in every session of the sandbox, and `/model` still changes them during a session. Kit arguments configure the kit, not the agent's command line: what you pass after `--`, as in *Clone mode and parallel agents*, goes to Copilot itself and is added to `--yolo`.
+When the sandbox is created, the kit sets the two `environment` variables to the values you chose and writes them into Copilot's settings, `~/.copilot/settings.json` (`model` and `effortLevel`). Copilot then starts with this model and this effort in every session of the sandbox, and `/model` still changes them during a session. Kit arguments configure the kit, not the agent's command line: what you pass after `--`, as in *Clone mode and parallel agents*, goes to Copilot itself and is added to `--yolo`.
 
 ## The built-in agent kits are OCI images
 
