@@ -119,6 +119,43 @@ SCOPE      SERVICE   TYPE    SECRET   CREATED
 
 That one secret is enough for Copilot: in the cloud, it covers both `GH_TOKEN` and `COPILOT_GITHUB_TOKEN`. `--command 'gh auth token'` isn't supported in the cloud, which stores the value itself.
 
+## Network policy in the cloud
+
+The cloud has its own policy: the Locked Down policy and the rules from the [network policies](01-network-policies.md) module stay on your machine. It has two scopes: your **account**, whose default your cloud sandboxes start from, and each **sandbox**.
+
+1. Look at your account's policy:
+
+    ```bash id=host
+    sbx --cloud policy ls
+    ```
+
+    ```none id=host
+      Default:  deny-all
+    No allow or deny rules
+    ```
+
+    Yours may show another default, or rules, if you or your organization set them.
+
+2. Set the account's default to `deny-all`, the cloud's equivalent of the Locked Down policy:
+
+    ```bash id=host
+    sbx --cloud policy init deny-all
+    ```
+
+    ```none id=host
+      Default:  deny-all
+    No allow or deny rules
+    ```
+
+    - The presets are `allow-all`, `balanced` (deny-all plus an allow list of common development services) and `deny-all`.
+    - `init` keeps the existing allow and deny rules, and you can run it again to change the default. `sbx --cloud policy reset` removes the account's rules and goes back to the platform's default.
+    - A `deny-all` default still lets through what a sandbox's own rules allow, including the rules its kits bring: that's how Copilot keeps working.
+
+    > [!WARNING]
+    > This changes the default for **all** the cloud sandboxes of your Docker account, not only this lab's. If you already use cloud sandboxes, check the output of the previous step first. Add `--sandbox <name>` to set the default of one sandbox only.
+
+3. Your sandbox's own policy adds to this default: the rules its **kits** declare, and the ones you add for it, with `--allow-network` or `--deny-network` on `sbx --cloud create`, or later with `--sandbox <name>`. You'll check them once the sandbox exists.
+
 ## Create a cloud sandbox
 
 1. From the `project` directory, create the sandbox with the same Copilot agent and Python kit as `quickstart`:
@@ -172,42 +209,9 @@ That one secret is enough for Copilot: in the cloud, it covers both `GH_TOKEN` a
 
     Python came with the kit, the tokens are placeholders, and the workspace is **empty**: nothing from your machine is there.
 
-## Network policy in the cloud
+### Check its network rules
 
-The cloud has its own policy: the Locked Down policy and the rules from the [network policies](01-network-policies.md) module stay on your machine. It has two scopes: your **account**, whose default your cloud sandboxes start from, and each **sandbox**.
-
-1. Look at your account's policy:
-
-    ```bash id=host
-    sbx --cloud policy ls
-    ```
-
-    ```none id=host
-      Default:  deny-all
-    No allow or deny rules
-    ```
-
-    Yours may show another default, or rules, if you or your organization set them.
-
-2. Set the account's default to `deny-all`, the cloud's equivalent of the Locked Down policy:
-
-    ```bash id=host
-    sbx --cloud policy init deny-all
-    ```
-
-    ```none id=host
-      Default:  deny-all
-    No allow or deny rules
-    ```
-
-    - The presets are `allow-all`, `balanced` (deny-all plus an allow list of common development services) and `deny-all`.
-    - `init` keeps the existing allow and deny rules, and you can run it again to change the default. `sbx --cloud policy reset` removes the account's rules and goes back to the platform's default.
-    - A `deny-all` default still lets through what a sandbox's own rules allow, including the rules its kits bring: that's how Copilot keeps working.
-
-    > [!WARNING]
-    > This changes the default for **all** the cloud sandboxes of your Docker account, not only this lab's. If you already use cloud sandboxes, check the output of the previous step first. Add `--sandbox <name>` to set the default of one sandbox only.
-
-3. List the sandbox's rules:
+4. List the sandbox's rules:
 
     ```bash id=host
     sbx --cloud policy ls devboard-cloud
@@ -231,7 +235,7 @@ The cloud has its own policy: the Locked Down policy and the rules from the [net
 
     You didn't add any of these: they come from the **kits**. The Copilot agent declares the hosts it needs, and the Python kit adds Debian and PyPI. The default, `deny-all`, blocks everything else.
 
-4. Try a host that isn't on the list:
+5. Try a host that isn't on the list:
 
     ```bash id=host
     sbx --cloud exec devboard-cloud curl -sS -o /dev/null https://docker.com
@@ -241,7 +245,7 @@ The cloud has its own policy: the Locked Down policy and the rules from the [net
     curl: (56) CONNECT tunnel failed, response 403
     ```
 
-5. Allow it for this sandbox only, and try again:
+6. Allow it for this sandbox only, and try again:
 
     ```bash id=host
     sbx --cloud policy allow network docker.com:443 --sandbox devboard-cloud
@@ -473,5 +477,8 @@ The cloud has its own policy: the Locked Down policy and the rules from the [net
 - **Docker inside a cloud sandbox:** it works, with one known limit: `docker exec`, `docker compose exec` and healthchecks can run in the sandbox's filesystem instead of the container's, which can block services that wait on `service_healthy`. See [Known limitations](https://docs.docker.com/ai/sandboxes/cloud/usage/#known-limitations).
 
 See the [cloud sandboxes documentation](https://docs.docker.com/ai/sandboxes/cloud/) for the rest.
+
+> [!TIP]
+> Cloud sandboxes also have a **web interface**: [Docker Agentic Platform](https://agentic-platform.docker.com/). Sign in with your Docker account to see your sandboxes, and to manage kits, MCP servers, secrets and policies from your browser. Its secrets are a separate store: a secret set there isn't available to `sbx --cloud secret`, and the other way around.
 
 [[<< Previous: MCP servers](10-mcp-servers.md) | [Next >> Wrap up](12-wrap-up.md)]

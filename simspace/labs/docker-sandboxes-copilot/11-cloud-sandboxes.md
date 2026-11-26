@@ -94,6 +94,26 @@ sbx --cloud secret ls
 
 That one secret is enough for Copilot: in the cloud, it covers both `GH_TOKEN` and `COPILOT_GITHUB_TOKEN`. `--command 'gh auth token'` isn't supported in the cloud, which stores the value itself.
 
+## Network policy in the cloud
+
+The cloud has its own policy: the Locked Down policy and the rules from the *Network policies* module stay on your machine. It has two scopes: your **account**, whose default your cloud sandboxes start from, and each **sandbox**.
+
+1. Look at your account's policy. In the real lab, yours may show another default, or rules, if you or your organization set them:
+
+    ```bash id=host terminal-id=t2
+    sbx --cloud policy ls
+    ```
+
+2. Set the account's default to `deny-all`, the cloud's equivalent of the Locked Down policy. The presets are `allow-all`, `balanced` (deny-all plus an allow list of common development services) and `deny-all`. `init` keeps the existing allow and deny rules, and you can run it again to change the default; `sbx --cloud policy reset` removes the account's rules and goes back to the platform's default:
+
+    ```bash id=host terminal-id=t2
+    sbx --cloud policy init deny-all
+    ```
+
+    > **Warning:** this changes the default for **all** the cloud sandboxes of your Docker account, not only this lab's. Add `--sandbox <name>` to set the default of one sandbox only.
+
+3. Your sandbox's own policy adds to this default: the rules its **kits** declare, and the ones you add for it, with `--allow-network` or `--deny-network` on `sbx --cloud create`, or later with `--sandbox <name>`. You'll check them once the sandbox exists.
+
 ## Create a cloud sandbox
 
 1. Create the sandbox with the same Copilot agent and Python kit as `quickstart`:
@@ -120,23 +140,7 @@ That one secret is enough for Copilot: in the cloud, it covers both `GH_TOKEN` a
 
     Python came with the kit, the tokens are placeholders, and the workspace is **empty**: nothing from your machine is there.
 
-## Network policy in the cloud
-
-The cloud has its own policy: the Locked Down policy and the rules from the *Network policies* module stay on your machine. It has two scopes: your **account**, whose default your cloud sandboxes start from, and each **sandbox**.
-
-1. Look at your account's policy. In the real lab, yours may show another default, or rules, if you or your organization set them:
-
-    ```bash id=host terminal-id=t2
-    sbx --cloud policy ls
-    ```
-
-2. Set the account's default to `deny-all`, the cloud's equivalent of the Locked Down policy. The presets are `allow-all`, `balanced` (deny-all plus an allow list of common development services) and `deny-all`. `init` keeps the existing allow and deny rules, and you can run it again to change the default; `sbx --cloud policy reset` removes the account's rules and goes back to the platform's default:
-
-    ```bash id=host terminal-id=t2
-    sbx --cloud policy init deny-all
-    ```
-
-    > **Warning:** this changes the default for **all** the cloud sandboxes of your Docker account, not only this lab's. Add `--sandbox <name>` to set the default of one sandbox only.
+### Check its network rules
 
 3. List the sandbox's rules. You didn't add any of them: the Copilot agent declares the hosts it needs, and the Python kit adds Debian and PyPI. A `deny-all` default still lets through what a sandbox's own rules allow, including its kits' rules, and blocks everything else:
 
@@ -311,3 +315,5 @@ The cloud has its own policy: the Locked Down policy and the rules from the *Net
 - **Docker inside a cloud sandbox** works, with one known limit: `docker exec`, `docker compose exec` and healthchecks can run in the sandbox's filesystem instead of the container's.
 
 See the [cloud sandboxes documentation](https://docs.docker.com/ai/sandboxes/cloud/) for the rest.
+
+> **Tip:** Cloud sandboxes also have a **web interface**: [Docker Agentic Platform](https://agentic-platform.docker.com/). Sign in with your Docker account to see your sandboxes, and to manage kits, MCP servers, secrets and policies from your browser. Its secrets are a separate store: a secret set there isn't available to `sbx --cloud secret`, and the other way around.
