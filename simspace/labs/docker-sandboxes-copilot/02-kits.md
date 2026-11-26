@@ -95,15 +95,16 @@ When the sandbox is created, the kit sets the two `environment` variables to the
 
 ## The built-in agent kits are OCI images
 
-The agent kits that come with Docker Sandboxes are published on Docker Hub, in the `sbx` namespace, as regular **OCI images**: the same format as any container image, multi-platform (`linux/amd64` and `linux/arm64`), and built from Docker Hardened Images.
+The kits that come with Docker Sandboxes, agents and mixins alike, are published on Docker Hub, in the `sbx` namespace, as regular **OCI images**: the same format as any container image, and multi-platform (`linux/amd64` and `linux/arm64`). The agent kits are built from Docker Hardened Images.
 
-| Kit | Agent | Docker Hub |
-|-----|-------|------------|
-| `sbx/shell` | A plain shell, no agent | [hub.docker.com/r/sbx/shell](https://hub.docker.com/r/sbx/shell) |
-| `sbx/copilot` | GitHub Copilot CLI | [hub.docker.com/r/sbx/copilot](https://hub.docker.com/r/sbx/copilot) |
-| `sbx/claude` | Claude Code | [hub.docker.com/r/sbx/claude](https://hub.docker.com/r/sbx/claude) |
+| Kit | Kind | What it runs or adds | Docker Hub |
+|-----|------|----------------------|------------|
+| `sbx/shell` | `workload` | A plain shell, no agent | [hub.docker.com/r/sbx/shell](https://hub.docker.com/r/sbx/shell) |
+| `sbx/copilot` | `workload` | GitHub Copilot CLI | [hub.docker.com/r/sbx/copilot](https://hub.docker.com/r/sbx/copilot) |
+| `sbx/claude` | `workload` | Claude Code | [hub.docker.com/r/sbx/claude](https://hub.docker.com/r/sbx/claude) |
+| `sbx/scout-cli` | `mixin` | The Docker Scout CLI, added to an agent's sandbox | [hub.docker.com/r/sbx/scout-cli](https://hub.docker.com/r/sbx/scout-cli) |
 
-Docker publishes mixins the same way. [`sbx/scout-cli`](https://hub.docker.com/r/sbx/scout-cli) is one: also a multi-platform OCI image on Docker Hub, which adds the Docker Scout CLI to an agent's sandbox. You'll add it with `--kit sbx/scout-cli` in *MCP servers*, to compare images with Docker Scout.
+You'll add the `sbx/scout-cli` mixin with `--kit sbx/scout-cli` in *MCP servers*, to compare images with Docker Scout.
 
 So the `image` you saw in the kit, `docker.io/sbx/copilot@sha256:9e062b87...`, is the image on [hub.docker.com/r/sbx/copilot](https://hub.docker.com/r/sbx/copilot), pinned by the digest of its image index. Kits are distributed, versioned, pinned and cached like images, through the same registries, which is also how you can share your own kits, with `sbx kit push` (see *Build your own kit*).
 
