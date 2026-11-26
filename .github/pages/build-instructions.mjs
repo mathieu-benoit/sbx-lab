@@ -80,7 +80,8 @@ function convert(src) {
 // instead. The landing page serves both labs, so the links into the hands-on lab go:
 //   - How a sandbox works: the doors table loses its Module column (README.md keeps it)
 //   - Table of contents: the module names lose their links, and the prerequisites, which only the
-//     hands-on lab has, stay on its Welcome page, as do the "Stuck?" line and Getting started
+//     hands-on lab has, stay on its Welcome page, as does the "Stuck?" line
+// Getting started stays in README.md only.
 const OVERVIEW = ["What you will learn", "How a sandbox works", "Table of contents"];
 const isRow = (line) => /^\|.*\|\s*$/.test(line);
 const unlink = (line) => line.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
@@ -95,7 +96,12 @@ function splitOverview(markdown) {
   let linked = false;
   for (const part of markdown.split(/^(?=## )/m)) {
     const title = OVERVIEW.find((t) => part.startsWith(`## ${t}\n`));
-    if (!title) { welcome.push(part); continue; }
+    if (!title) {
+      // Getting started (clone the repository, do the prerequisites) is README.md's, for GitHub:
+      // the Prerequisites module has the clone, and the Welcome page already points to it.
+      if (!part.startsWith("## Getting started\n")) welcome.push(part);
+      continue;
+    }
     const lines = part.split("\n");
     overview.push((forLanding[title] || ((l) => l))(lines).join("\n"));
     if (!linked) {
