@@ -105,7 +105,7 @@ The agent kits that come with Docker Sandboxes are published on Docker Hub, in t
 
 Docker publishes mixins the same way. [`sbx/scout-cli`](https://hub.docker.com/r/sbx/scout-cli) is one: also a multi-platform OCI image on Docker Hub, which adds the Docker Scout CLI to an agent's sandbox. You'll add it with `--kit sbx/scout-cli` in *MCP servers*, to compare images with Docker Scout.
 
-So the `image` you saw in the kit, `docker.io/sbx/copilot@sha256:906cde56...`, is the image on [hub.docker.com/r/sbx/copilot](https://hub.docker.com/r/sbx/copilot), pinned by the digest of its image index. Kits are distributed, versioned, pinned and cached like images, through the same registries, which is also how you can share your own kits, with `sbx kit push` (see *Build your own kit*).
+So the `image` you saw in the kit, `docker.io/sbx/copilot@sha256:9e062b87...`, is the image on [hub.docker.com/r/sbx/copilot](https://hub.docker.com/r/sbx/copilot), pinned by the digest of its image index. Kits are distributed, versioned, pinned and cached like images, through the same registries, which is also how you can share your own kits, with `sbx kit push` (see *Build your own kit*).
 
 If you have the Docker CLI on your host, you can see it for yourself (optional):
 

@@ -75,7 +75,7 @@ Run the commands of this module from the root of the repository.
       Display:            GitHub Copilot
       Description:        GitHub Copilot CLI, GitHub's agentic coding CLI.
       Binary:             copilot
-      Template:           docker.io/sbx/copilot@sha256:906cde56...
+      Template:           docker.io/sbx/copilot@sha256:9e062b87...
       Run Options:        --yolo
       Arguments:
         model:            Copilot model to use (settings.json `model`); empty keeps the CLI default (default "", matching ^[A-Za-z0-9._/:-]*$)
@@ -117,7 +117,7 @@ Run the commands of this module from the root of the repository.
         - xhigh
         - max
     sandbox:
-      image: docker.io/sbx/copilot@sha256:906cde56...
+      image: docker.io/sbx/copilot@sha256:9e062b87...
       entrypoint:
       - copilot
       command:
@@ -170,7 +170,7 @@ The agent kits that come with Docker Sandboxes are published on Docker Hub, in t
 
 Docker publishes mixins the same way. [`sbx/scout-cli`](https://hub.docker.com/r/sbx/scout-cli) is one: also a multi-platform OCI image on Docker Hub, which adds the Docker Scout CLI to an agent's sandbox. You'll add it with `--kit sbx/scout-cli` in [MCP servers](10-mcp-servers.md#compare-the-images-with-docker-scout), to compare images with Docker Scout.
 
-So the `image` you saw in the kit, `docker.io/sbx/copilot@sha256:906cde56...`, is the image on [hub.docker.com/r/sbx/copilot](https://hub.docker.com/r/sbx/copilot), pinned by the digest of its image index. Kits are distributed, versioned, pinned and cached like images, through the same registries, which is also how you can share your own kits, with `sbx kit push` (see [Build your own kit](#build-your-own-kit)).
+So the `image` you saw in the kit, `docker.io/sbx/copilot@sha256:9e062b87...`, is the image on [hub.docker.com/r/sbx/copilot](https://hub.docker.com/r/sbx/copilot), pinned by the digest of its image index. Kits are distributed, versioned, pinned and cached like images, through the same registries, which is also how you can share your own kits, with `sbx kit push` (see [Build your own kit](#build-your-own-kit)).
 
 If you have the Docker CLI on your host, you can see it for yourself (optional):
 
@@ -181,16 +181,16 @@ docker buildx imagetools inspect sbx/copilot:latest
 ```none id=host
 Name:      docker.io/sbx/copilot:latest
 MediaType: application/vnd.oci.image.index.v1+json
-Digest:    sha256:906cde5606fca5dbacd827a18a4b7add53203f4fb6af653e2fa4370fa623f318
+Digest:    sha256:9e062b8791ec1ef5bc6a482c35bca217c07f78597a0bb0659fad05d14029aa4b
 
 Manifests:
-  Name:        docker.io/sbx/copilot:latest@sha256:29d73385...
-  MediaType:   application/vnd.oci.image.manifest.v1+json
-  Platform:    linux/amd64
-  ...
-  Name:        docker.io/sbx/copilot:latest@sha256:b5c0b2dd...
+  Name:        docker.io/sbx/copilot:latest@sha256:2bf4b18c...
   MediaType:   application/vnd.oci.image.manifest.v1+json
   Platform:    linux/arm64
+  ...
+  Name:        docker.io/sbx/copilot:latest@sha256:3a2aa5c6...
+  MediaType:   application/vnd.oci.image.manifest.v1+json
+  Platform:    linux/amd64
   ...
 ```
 
