@@ -142,6 +142,8 @@ jobs:
           cp -R .github/pages/home/. _site/
           # The README's overview, shared by both labs, written by build-instructions.mjs
           cp _instructions/overview.md _site/
+          # Click the diagram to zoom, as in the labs
+          cp .github/pages/diagram-zoom.js _site/
           test -f _site/index.html && test -f _site/sw.js && test -s _site/overview.md
 
       # ---- /labspace/ : the static preview of the Labspace rendering
