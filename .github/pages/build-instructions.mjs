@@ -84,7 +84,10 @@ function splitOverview(markdown) {
   let linked = false;
   for (const part of markdown.split(/^(?=## )/m)) {
     if (!OVERVIEW.some((t) => part.startsWith(`## ${t}\n`))) { welcome.push(part); continue; }
-    overview.push(part.replace(/\]\(#\//g, "](lab/#/"));
+    // The landing page serves both labs: the doors table loses its Module column, whose links
+    // only lead into the hands-on lab (README.md keeps it).
+    const table = (line) => (/^\|.*\|\s*$/.test(line) ? line.replace(/\|[^|]*\|\s*$/, "|") : line);
+    overview.push(part.split("\n").map(table).join("\n").replace(/\]\(#\//g, "](lab/#/"));
     if (!linked) {
       welcome.push("What you will learn, and how a sandbox works: see the [home page](../).\n\n");
       linked = true;
