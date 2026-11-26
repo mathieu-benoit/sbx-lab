@@ -6,13 +6,13 @@ Use it to preview the real lab before you take it, to revisit it afterwards, or 
 
 ## What's in the translation
 
-One lab, [`labs/docker-sandboxes-copilot/`](labs/docker-sandboxes-copilot), with one section per module of the hands-on lab, a welcome page and the troubleshooting page. Each hands-on section has **milestones** (74 in total) that check off as the learner runs the right command in the right state.
+One lab, [`labs/docker-sandboxes-copilot/`](labs/docker-sandboxes-copilot), with one section per module of the hands-on lab, a welcome page and the troubleshooting page. Each hands-on section has **milestones** (70 in total) that check off as the learner runs the right command in the right state.
 
 | Section | Hands-on module | Simulated |
 |---------|-----------------|-----------|
 | Welcome | [README](../README.md) | How the simulation works, the "doors" diagram |
 | Prerequisites | [00](../instructions/00-prerequisites.md) | `sbx version`, `login`, `diagnose`, `policy ls`, warm-up sandboxes |
-| Network policies | [01](../instructions/01-network-policies.md) | Locked Down, a shell sandbox hitting the proxy, allow, deny, rm, the lab's four rules |
+| Network policies | [01](../instructions/01-network-policies.md) | Locked Down, a shell sandbox hitting the proxy, allow, deny, rm, then Locked Down with no global rule |
 | Kits | [02](../instructions/02-kits.md) | `sbx kit inspect` and `validate`; the Python, Trivy and port kits as seed files |
 | Secrets and credentials | [03](../instructions/03-secrets-credentials.md) | `sbx secret set`, `ls` |
 | Agent sandbox | [04](../instructions/04-first-sandbox.md) | `sbx create` with a kit, the three isolation checks, the first agent session |

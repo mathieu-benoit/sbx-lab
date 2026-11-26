@@ -8,7 +8,7 @@ Every sandbox routes outbound HTTP/HTTPS through a host-side proxy that enforces
 | Balanced    | Default deny, with a broad allow-list covering AI APIs, npm, pip, GitHub, registries |
 | Locked Down | Everything blocked; you explicitly allow what you need                               |
 
-In this lab you will use **Locked Down**, and allow only the hosts the exercises need.
+In this lab you will use **Locked Down**, and let each sandbox's kits allow only the hosts its exercises need.
 
 ```mermaid
 graph LR
@@ -16,7 +16,7 @@ graph LR
 
     subgraph Host["Your machine"]
         direction TB
-        Rules["Policy rules<br/>Locked Down + lab allow list"]
+        Rules["Policy rules<br/>Locked Down + each kit's rules"]
         Proxy["Proxy"]
         Log["sbx policy log"]
     end
@@ -262,62 +262,56 @@ sbx policy allow network localhost:11434
 
 Then inside the sandbox, point your client at `host.docker.internal:11434`.
 
-## Allow only what the lab needs
+## Keep Locked Down for the rest of the lab
 
-You will keep the **Locked Down** policy for the rest of the lab: rather than trusting a broad allow list, you allow exactly the hosts your agents need, and nothing else.
+You keep the **Locked Down** policy for the rest of the lab, without adding any host to it: rather than trusting a broad allow list, each sandbox gets exactly the hosts its **kits** declare, for that sandbox only. You'll read those kits in the next module.
 
-Add these four rules:
+1. Check your policy. You removed the rules you added above, so it's back to Locked Down, with no network rule of your own:
 
-```bash id=host
-# GitHub and GitHub Copilot: the agent itself
-sbx policy allow network "github.com:443,**.github.com:443,**.githubcopilot.com:443"
+    ```bash id=host
+    sbx policy ls
+    ```
 
-# Python for the backend tests: Debian packages and PyPI
-sbx policy allow network "deb.debian.org:80,dhi.io:80,dhi.io:443,pypi.org:443,files.pythonhosted.org:443"
+    ```none id=host
+    POLICY             SOURCE   APPLIES TO   SUMMARY
+    default-deny-all   local    all          network: deny when no rule decides
+    local-policy       local    all          filesystem read: 1 allow; filesystem write: 1 allow
+    ```
 
-# Docker: pulling images from Docker Hub
-sbx policy allow network "**.docker.io:443,production.cloudfront.docker.com:443"
+2. Check a host your agents will use:
 
-# Node.js: installing the frontend's npm packages
-sbx policy allow network "registry.npmjs.org:443"
-```
+    ```bash id=host
+    sbx policy check network api.github.com
+    ```
 
-| Rule | Used by | Module |
-|------|---------|--------|
-| `github.com:443`, `**.github.com:443` | GitHub API, used by Copilot; also where Trivy downloads the VEX statements | all agent modules, [MCP servers](10-mcp-servers.md) |
-| `**.githubcopilot.com:443` | Copilot service; the subdomain depends on your plan (`api.individual…`, `api.business…`, `api.enterprise…`), hence `**` | all agent modules |
-| `deb.debian.org:80`, `dhi.io:80`, `dhi.io:443` | The sandbox image's `apt` repositories (Debian and Docker Hardened Images), used to install Python, which the image doesn't include, over HTTP (port 80). The Python kit you'll build in the next module declares them too, for the sandboxes that use it. `dhi.io` is also the Docker Hardened Images registry, where Trivy and Docker Scout read the hardened images they analyze, over HTTPS (port 443) | [Kits](02-kits.md), [Run in direct mode](06-run-in-direct-mode.md), MCP servers |
-| `pypi.org:443`, `files.pythonhosted.org:443` | Installing the backend's Python packages | Run in direct mode, Clone mode, [Docker inside the sandbox](08-docker-inside-the-sandbox.md) |
-| `**.docker.io:443`, `production.cloudfront.docker.com:443` | Pulling the `python`, `node` and `postgres` images from Docker Hub, and reading the Docker Hub images that Trivy and Docker Scout analyze | Docker inside the sandbox, MCP servers |
-| `registry.npmjs.org:443` | Installing the frontend's npm packages | Docker inside the sandbox |
+    ```none id=host
+      Denied:      api.github.com:443
+      Governance:  Local policy only
+      Context:     global
+      Reason:      no matching allow rule (default deny)
+    ```
 
-A few more hosts are needed later, but you don't add them here: the kits that need them declare them, and those rules apply only to the sandboxes that use the kit. The Trivy kit, in [MCP servers](10-mcp-servers.md), adds `mirror.gcr.io` (Trivy's vulnerability database) and `raw.githubusercontent.com` (part of the VEX statements) for its sandbox only. So does Docker's Scout kit, `sbx/scout-cli`, with `api.dso.docker.com:443` and `api.scout.docker.com:443` (the Docker Scout service). You'll see the difference in that sandbox's network log.
+    `sbx policy check` reads your global policy, which allows nothing. `api.github.com` will only be reachable from the sandboxes whose kits allow it, such as every Copilot sandbox.
 
-Each rule ends with a **port**, so it allows that host on that port only. Everything is HTTPS (port 443), except the `apt` repositories: the sandbox image reads `deb.debian.org` and `dhi.io` over plain HTTP (port 80), so a `:443` rule alone would break `apt-get update`. `dhi.io` gets both ports, `:80` for its packages and `:443` for its image registry. A rule without a port would allow the host on any port.
+Here are the hosts the lab needs, and the kit that brings each of them:
 
-List the policies again: `local-policy` now has one network rule per host and port.
+| Hosts | Used for | Declared by | Module |
+|-------|----------|-------------|--------|
+| `github.com`, `api.github.com`, `api.*.githubcopilot.com`, `copilot.github.com` | The Copilot agent, and the GitHub API | The Copilot kit, `sbx/copilot` | All agent modules |
+| `deb.debian.org:80`, `dhi.io:80` | The sandbox image's `apt` repositories (Debian and Docker Hardened Images), to install Python | The DevBoard kit, during the install | [Agent sandbox](04-first-sandbox.md) |
+| `pypi.org`, `files.pythonhosted.org` | The backend's Python packages | The DevBoard kit | [Run in direct mode](06-run-in-direct-mode.md), [Clone mode](07-parallel-agents.md), [Docker inside the sandbox](08-docker-inside-the-sandbox.md) |
+| `**.docker.io`, `production.cloudfront.docker.com` | Pulling the `python`, `node` and `postgres` images, and the images Trivy and Docker Scout read | The DevBoard kit | Docker inside the sandbox, [MCP servers](10-mcp-servers.md) |
+| `dhi.io:443` | The Docker Hardened Images registry, read by Trivy and Docker Scout | The DevBoard kit | MCP servers |
+| `registry.npmjs.org` | The frontend's npm packages | The DevBoard kit | Docker inside the sandbox |
+| `mirror.gcr.io`, `ghcr.io`, `raw.githubusercontent.com`, `codeload.github.com`… | Trivy's vulnerability database, and the VEX statements | The Trivy kit | MCP servers |
+| `api.dso.docker.com`, `api.scout.docker.com` | The Docker Scout service | Docker's Scout kit, `sbx/scout-cli` | MCP servers |
 
-```bash id=host
-sbx policy ls
-```
+Every host is on port 443 (HTTPS), except the `apt` repositories: the sandbox image reads `deb.debian.org` and `dhi.io` over plain HTTP, on port 80. `dhi.io` gets both ports, `:80` for its packages and `:443` for its image registry. A rule without a port would allow the host on any port.
 
-```none id=host
-POLICY             SOURCE   APPLIES TO   SUMMARY
-default-deny-all   local    all          network: deny when no rule decides
-local-policy       local    all          network: 11 allow; filesystem read: 1 allow; filesystem write: 1 allow
-```
-
-Check a few of them:
-
-```bash id=host
-sbx policy check network api.github.com
-sbx policy check network api.individual.githubcopilot.com
-sbx policy check network docker.com
-```
-
-The first two are `Allowed`, both by a wildcard rule: `api.github.com` by `**.github.com:443` and the Copilot host by `**.githubcopilot.com:443` (each `Rule` line shows a different ID). A host without a port is checked on port 443. `docker.com` is still `Denied`, because you removed its rule above.
+> [!NOTE]
+> Copilot also calls telemetry hosts, such as `telemetry.*.githubcopilot.com` and `cafe.github.com`, that no kit allows. They show as blocked in `sbx policy log`, and Copilot works without them.
 
 > [!TIP]
-> If an agent later fails to download something, run `sbx policy log` to see the blocked host, then allow it with `sbx policy allow network <host>`.
+> If an agent later fails to download something, run `sbx policy log` to see the blocked host. Then allow it for that sandbox only, with `sbx policy allow network <host> --sandbox <name>`, or add it to the kit that needs it.
 
 [[<< Previous: Prerequisites](00-prerequisites.md) | [Next >> Kits](02-kits.md)]

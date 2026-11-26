@@ -158,10 +158,10 @@ The cloud has its own policy: the Locked Down policy and the rules from the [net
 
 ## Create a cloud sandbox
 
-1. From the `project` directory, create the sandbox with the same Copilot agent and Python kit as `quickstart`:
+1. From the `project` directory, create the sandbox with the same Copilot agent and DevBoard kit as `quickstart`:
 
     ```bash id=host
-    sbx --cloud create --name devboard-cloud --kit ./kits/python --ttl 1h --on-timeout stop copilot
+    sbx --cloud create --name devboard-cloud --kit ./kits/devboard --ttl 1h --on-timeout stop copilot
     ```
 
     - There's **no `.`** at the end: a cloud sandbox has no workspace to mount, and passing a path is an error.
@@ -231,9 +231,13 @@ The cloud has its own policy: the Locked Down policy and the rules from the [net
     allow      dhi.io:80
     allow      pypi.org:443
     allow      files.pythonhosted.org:443
+    allow      **.docker.io:443
+    allow      production.cloudfront.docker.com:443
+    allow      dhi.io:443
+    allow      registry.npmjs.org:443
     ```
 
-    You didn't add any of these: they come from the **kits**. The Copilot agent declares the hosts it needs, and the Python kit adds Debian and PyPI. The default, `deny-all`, blocks everything else.
+    You didn't add any of these: they come from the **kits**. The Copilot agent declares the hosts it needs, and the DevBoard kit adds Debian, PyPI, Docker Hub, `dhi.io` and npm. The default, `deny-all`, blocks everything else.
 
 5. Try a host that isn't on the list:
 

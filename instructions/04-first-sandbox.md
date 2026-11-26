@@ -60,21 +60,21 @@ graph LR
     cd project
     ```
 
-2. Create your agent's sandbox with the `sbx create` command. `--kit` adds the Python kit you built in [Kits](02-kits.md) to the Copilot kit, and the workspace path (`.`) is the folder that gets mounted into the sandbox:
+2. Create your agent's sandbox with the `sbx create` command. `--kit` adds the DevBoard kit you built in [Kits](02-kits.md) to the Copilot kit, and the workspace path (`.`) is the folder that gets mounted into the sandbox:
 
     ```bash id=host
-    sbx create --name quickstart --kit ./kits/python copilot .
+    sbx create --name quickstart --kit ./kits/devboard copilot .
     ```
 
     The output shows both kits being assembled, then the install commands, including the one from your kit:
 
     ```none id=host
       Kits:       docker.io/sbx/copilot@sha256:9e062b87...
-                  ./kits/python
+                  ./kits/devboard
       ...
         running 3 install commands
           ...
-          $ Install Python 3, venv and pip (kit=python, user=0)
+          $ Install Python 3, venv and pip (kit=devboard, user=0)
     ```
 
     > [!NOTE]
@@ -120,7 +120,7 @@ graph LR
     sbx policy ls
     ```
 
-    A new `kit` policy applies only to `sandbox:quickstart`. Its name, in the `POLICY` column, is an ID such as `0e9c5242-cd95-4d02-89c3-0f6181c07dbd`: copy it and inspect the policy (`sbx policy inspect <POLICY>`) to see Copilot's own hosts, plus the apt and PyPI hosts your kit declared. These rules add to your **Locked Down** policy, for this sandbox only.
+    A new `kit` policy applies only to `sandbox:quickstart`. Its name, in the `POLICY` column, is an ID such as `0e9c5242-cd95-4d02-89c3-0f6181c07dbd`: copy it and inspect the policy (`sbx policy inspect <POLICY>`) to see Copilot's own hosts, plus the hosts the DevBoard kit declared for runtime: PyPI, Docker Hub, `dhi.io` and npm. These rules add to your **Locked Down** policy, for this sandbox only.
 
 ## See the isolation for yourself
 

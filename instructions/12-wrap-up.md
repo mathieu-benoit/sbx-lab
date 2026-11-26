@@ -24,7 +24,7 @@ graph LR
         Sandboxes["Sandboxes<br/>quickstart, fix-bugs, add-search, add-notif, dhi, shell-demo"]
         McpRegistration["DHI MCP registration"]
         Secrets["github and copilot secrets"]
-        Policy["Locked Down policy<br/>and the lab's rules"]
+        Policy["Locked Down policy"]
     end
 
     You -->|sbx rm| Sandboxes
@@ -79,7 +79,7 @@ sbx secret rm github -f
 sbx secret rm copilot -f
 ```
 
-Your network policy is still **Locked Down**, with the rules you added for the lab (check with `sbx policy ls`). Keep it, adding hosts as your projects need them, or go back to the **Balanced** profile:
+Your network policy is still **Locked Down**, with no rule of your own: the lab's hosts came from the kits, for their sandboxes only (check with `sbx policy ls`). Keep it, adding hosts as your projects need them, or go back to the **Balanced** profile:
 
 ```bash id=host terminal-id=terminal-2
 sbx policy reset

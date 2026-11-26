@@ -33,18 +33,14 @@ sections:
       - { title: "Allow a host", match: "sbx policy allow network docker.com" }
       - { title: "Reach the allowed host from the sandbox", match: "curl -I docker.com" }
       - { title: "Remove a custom rule", match: "sbx policy rm network --resource" }
-      - { title: "Allow GitHub and Copilot", match: "**.githubcopilot.com" }
-      - { title: "Allow Debian and PyPI", match: "files.pythonhosted.org" }
-      - { title: "Allow Docker Hub", match: "production.cloudfront.docker.com" }
-      - { title: "Allow npm", match: "registry.npmjs.org" }
-      - { title: "List the lab's policy", match: "sbx policy check network api.github.com" }
+      - { title: "Check that the lab adds no global rule", match: "sbx policy check network api.github.com" }
   - title: Kits
     contentPath: 02-kits.md
     steps:
       - { title: "Inspect the Copilot kit", match: "sbx kit inspect sbx/copilot" }
       - { title: "Compare with the Claude Code kit", match: "sbx kit inspect sbx/claude" }
-      - { title: "Validate the Python kit", match: "sbx kit validate ./project/kits/python" }
-      - { title: "Inspect the Python kit", match: "sbx kit inspect ./project/kits/python" }
+      - { title: "Validate the DevBoard kit", match: "sbx kit validate ./project/kits/devboard" }
+      - { title: "Inspect the DevBoard kit", match: "sbx kit inspect ./project/kits/devboard" }
   - title: Secrets and credentials
     contentPath: 03-secrets-credentials.md
     steps:

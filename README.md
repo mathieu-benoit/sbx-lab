@@ -93,7 +93,7 @@ Because the agent can't step outside these doors, you can let it work without ap
 | #  | Module | You will... | Time |
 |----|--------|-------------|------|
 | 00 | [Prerequisites](instructions/00-prerequisites.md) | Check your accounts and tools | **before the lab** |
-| 01 | [Network policies](instructions/01-network-policies.md) | Start your first sandbox, lock the network down, then allow what you need | 10 min |
+| 01 | [Network policies](instructions/01-network-policies.md) | Start your first sandbox, lock the network down, and see how kits allow what each sandbox needs | 10 min |
 | 02 | [Kits](instructions/02-kits.md) | See how an agent's sandbox is defined, and build a kit | 8 min |
 | 03 | [Secrets and credentials](instructions/03-secrets-credentials.md) | Store a token the agent can use but never read | 3 min |
 | 04 | [Agent sandbox](instructions/04-first-sandbox.md) | Create your agent's sandbox, check its isolation, and meet your agent | 12 min |

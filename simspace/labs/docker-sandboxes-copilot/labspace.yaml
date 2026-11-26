@@ -11,7 +11,7 @@ catalog:
 
 # Bump this whenever you add, remove or rename steps: stored progress is
 # namespaced per version, so stale completion records are cleared.
-version: "1.3.0"
+version: "1.4.0"
 
 # Command behaviour lives in simulator.yaml (relative to this file).
 simulator: simulator.yaml
@@ -69,16 +69,8 @@ sections:
         title: "Reach the allowed host from the sandbox"
       - id: remove-rules
         title: "Remove a custom rule"
-      - id: allow-github
-        title: "Allow GitHub and Copilot"
-      - id: allow-python
-        title: "Allow Debian and PyPI"
-      - id: allow-docker-hub
-        title: "Allow Docker Hub"
-      - id: allow-npm
-        title: "Allow npm"
       - id: verify-rules
-        title: "List the lab's policy"
+        title: "Check that the lab adds no global rule"
 
   - title: Kits
     contentPath: 02-kits.md
@@ -88,9 +80,9 @@ sections:
       - id: compare-claude-kit
         title: "Compare with the Claude Code kit"
       - id: validate-python-kit
-        title: "Validate the Python kit"
+        title: "Validate the DevBoard kit"
       - id: inspect-python-kit
-        title: "Inspect the Python kit"
+        title: "Inspect the DevBoard kit"
 
   - title: Secrets and credentials
     contentPath: 03-secrets-credentials.md
@@ -245,13 +237,13 @@ sections:
 # copied from ../../../project. The scenarios edit them (the pagination fix, the
 # merged agent work), so `cat` shows the result.
 files:
-  project/kits/python/python.yaml: |
+  project/kits/devboard/devboard.yaml: |
     # syntax=docker/sandbox-kit:3
     schemaVersion: "3"
     kind: mixin
-    displayName: Python
-    description: Python 3 with venv and pip, installed when the sandbox is created
-
+    displayName: DevBoard
+    description: What DevBoard needs in a sandbox, Python 3 with venv and pip, and the hosts its builds and scans reach
+    
     capabilities:
       # Install Python once, as root, when the sandbox is created.
       - type: com.docker.sandbox/lifecycle@1
@@ -260,16 +252,24 @@ files:
             - description: Install Python 3, venv and pip
               user: "0"
               command: apt-get update && apt-get install -y --no-install-recommends python3 python3-venv python3-pip
-
-      # Only the hosts this kit needs. For the install: the sandbox image's apt
+    
+      # Only the hosts DevBoard needs. For the install: the sandbox image's apt
       # repositories (Debian and Docker Hardened Images), which apt-get update reads.
-      # At runtime: PyPI, for pip.
+      # At runtime: PyPI, for pip; Docker Hub, for the python, node and postgres
+      # images that Docker Compose pulls and for the images Trivy and Docker Scout
+      # read; the Docker Hardened Images registry; and npm, for the frontend.
       - type: com.docker.sandbox/network-policy@1
         config:
           install:
             allow: [deb.debian.org:80, dhi.io:80]
           runtime:
-            allow: [pypi.org:443, files.pythonhosted.org:443]
+            allow:
+              - pypi.org:443
+              - files.pythonhosted.org:443
+              - "**.docker.io:443"
+              - production.cloudfront.docker.com:443
+              - dhi.io:443
+              - registry.npmjs.org:443
   project/kits/api-port/api-port.yaml: |
     # syntax=docker/sandbox-kit:3
     schemaVersion: "3"

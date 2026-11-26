@@ -22,11 +22,6 @@ state:
     stage: balanced           # balanced -> none (after reset) -> locked (after init deny-all)
     dockerAllowed: false      # the docker.com allow rule from the network module
     adsDenied: false
-  rules:                      # the four rules the lab adds
-    github: false
-    python: false
-    dockerhub: false
-    npm: false
   secrets:
     github: false
     copilot: false
@@ -308,6 +303,10 @@ scenarios:
         - "allow      dhi.io:80"
         - "allow      pypi.org:443"
         - "allow      files.pythonhosted.org:443"
+        - "allow      **.docker.io:443"
+        - "allow      production.cloudfront.docker.com:443"
+        - "allow      dhi.io:443"
+        - "allow      registry.npmjs.org:443"
 
   - id: cloud-policy-allow-docker
     completes: cloud-allow
@@ -734,54 +733,31 @@ scenarios:
   # ════════════════════════════════════════════════════════════════════════
 
   - id: policy-ls-lab-mcp
-    completes: verify-rules
     when:
       command: [sbx, policy, ls]
       state:
-        rules.github: true
-        rules.python: true
-        rules.dockerhub: true
-        rules.npm: true
+        policy.stage: locked
         sandboxes.mcp: true
     then:
       output:
         - "POLICY             SOURCE   APPLIES TO           SUMMARY"
         - "default-deny-all   local    all                  network: deny when no rule decides"
-        - "local-policy       local    all                  network: 11 allow; filesystem read: 1 allow; filesystem write: 1 allow"
-        - "kit-quickstart     kit      sandbox:quickstart   network: the Copilot hosts, plus the Python kit's"
-        - "kit-dhi            kit      sandbox:dhi          network: the Copilot hosts, plus the Trivy kit's"
+        - "local-policy       local    all                  filesystem read: 1 allow; filesystem write: 1 allow"
+        - "kit-quickstart     kit      sandbox:quickstart   network: the Copilot hosts, plus the DevBoard kit's"
+        - "kit-dhi            kit      sandbox:dhi          network: the Copilot hosts, plus the DevBoard, Trivy and Scout kits'"
 
   - id: policy-ls-lab-quickstart
-    completes: verify-rules
     when:
       command: [sbx, policy, ls]
       state:
-        rules.github: true
-        rules.python: true
-        rules.dockerhub: true
-        rules.npm: true
+        policy.stage: locked
         sandboxes.quickstart: true
     then:
       output:
         - "POLICY             SOURCE   APPLIES TO           SUMMARY"
         - "default-deny-all   local    all                  network: deny when no rule decides"
-        - "local-policy       local    all                  network: 11 allow; filesystem read: 1 allow; filesystem write: 1 allow"
-        - "kit-quickstart     kit      sandbox:quickstart   network: the Copilot hosts, plus the Python kit's"
-
-  - id: policy-ls-lab
-    completes: verify-rules
-    when:
-      command: [sbx, policy, ls]
-      state:
-        rules.github: true
-        rules.python: true
-        rules.dockerhub: true
-        rules.npm: true
-    then:
-      output:
-        - "POLICY             SOURCE   APPLIES TO   SUMMARY"
-        - "default-deny-all   local    all          network: deny when no rule decides"
-        - "local-policy       local    all          network: 11 allow; filesystem read: 1 allow; filesystem write: 1 allow"
+        - "local-policy       local    all                  filesystem read: 1 allow; filesystem write: 1 allow"
+        - "kit-quickstart     kit      sandbox:quickstart   network: the Copilot hosts, plus the DevBoard kit's"
 
   - id: policy-ls-locked
     when:
@@ -823,10 +799,6 @@ scenarios:
         policy.stage: none
         policy.dockerAllowed: false
         policy.adsDenied: false
-        rules.github: false
-        rules.python: false
-        rules.dockerhub: false
-        rules.npm: false
       output:
         - "Restarting the daemon..."
         - { text: "✓ Policies reset. Pick a default with: sbx policy init <profile>", delay: medium }
@@ -840,10 +812,6 @@ scenarios:
         policy.stage: locked
         policy.dockerAllowed: false
         policy.adsDenied: false
-        rules.github: false
-        rules.python: false
-        rules.dockerhub: false
-        rules.npm: false
       output:
         - "Restarting the daemon..."
         - { text: "✓ Policies reset.", delay: medium }
@@ -902,30 +870,17 @@ scenarios:
         - "    Reason:      no matching allow rule (default deny)"
 
   - id: policy-check-github
+    completes: verify-rules
     when:
       command: [sbx, policy, check, network]
       args:
         0: "api.github.com"
-      state: { rules.github: true }
     then:
       output:
-        - "    Allowed:     api.github.com:443"
+        - "    Denied:      api.github.com:443"
         - "    Governance:  Local policy only"
         - "    Context:     global"
-        - "    Rule:        c2185734-ea42-4f5d-b083-a2266ca721a5"
-
-  - id: policy-check-copilot
-    when:
-      command: [sbx, policy, check, network]
-      args:
-        0: "api.individual.githubcopilot.com"
-      state: { rules.github: true }
-    then:
-      output:
-        - "    Allowed:     api.individual.githubcopilot.com:443"
-        - "    Governance:  Local policy only"
-        - "    Context:     global"
-        - "    Rule:        b9b155c9-49aa-4131-96b1-bc2d7e2ac1b1"
+        - "    Reason:      no matching allow rule (default deny)"
 
   - id: policy-check-any
     when:
@@ -939,7 +894,7 @@ scenarios:
         - "    Context:     global"
         - "    Reason:      no matching allow rule (default deny)"
 
-  # The allow rules. Each of the lab's four rules is matched by its exact host list.
+  # The allow rules.
   - id: policy-allow-docker
     completes: allow-host
     when:
@@ -950,57 +905,6 @@ scenarios:
       state: { policy.dockerAllowed: true }
       output:
         - "  Added rule f652c735-f8f6-4a6b-9b9e-51ebc6d52545 to policy local (scope: global): docker.com [tcp]"
-
-  - id: policy-allow-github
-    completes: allow-github
-    when:
-      command: [sbx, policy, allow, network]
-      args:
-        0: "github.com:443,**.github.com:443,**.githubcopilot.com:443"
-    then:
-      state: { rules.github: true }
-      output:
-        - "  Added rule dda4bd8b-3f33-4d3b-97a8-b19796285f2c to policy local (scope: global): github.com:443 [tcp]"
-        - "  Added rule c2185734-ea42-4f5d-b083-a2266ca721a5 to policy local (scope: global): **.github.com:443 [tcp]"
-        - "  Added rule b9b155c9-49aa-4131-96b1-bc2d7e2ac1b1 to policy local (scope: global): **.githubcopilot.com:443 [tcp]"
-
-  - id: policy-allow-python
-    completes: allow-python
-    when:
-      command: [sbx, policy, allow, network]
-      args:
-        0: "deb.debian.org:80,dhi.io:80,dhi.io:443,pypi.org:443,files.pythonhosted.org:443"
-    then:
-      state: { rules.python: true }
-      output:
-        - "  Added rule ddbffc51-658f-4440-9b21-04fe6d64e05c to policy local (scope: global): deb.debian.org:80 [tcp]"
-        - "  Added rule 65162871-96bf-4d91-ac62-13790f32214d to policy local (scope: global): dhi.io:80 [tcp]"
-        - "  Added rule 3a1f6c0e-8d2b-4f57-9e64-2c7b1d9a5e83 to policy local (scope: global): dhi.io:443 [tcp]"
-        - "  Added rule 49133bd8-43e7-4195-bb9e-59294b13a0df to policy local (scope: global): pypi.org:443 [tcp]"
-        - "  Added rule 5e799db9-4b4a-4ea0-9a46-912847ccb08c to policy local (scope: global): files.pythonhosted.org:443 [tcp]"
-
-  - id: policy-allow-docker-hub
-    completes: allow-docker-hub
-    when:
-      command: [sbx, policy, allow, network]
-      args:
-        0: "**.docker.io:443,production.cloudfront.docker.com:443"
-    then:
-      state: { rules.dockerhub: true }
-      output:
-        - "  Added rule 0f8cabf0-64bd-4c9d-aee6-d5d18d205f8f to policy local (scope: global): **.docker.io:443 [tcp]"
-        - "  Added rule e09d8452-9f1f-49a9-a8ed-09bf90606714 to policy local (scope: global): production.cloudfront.docker.com:443 [tcp]"
-
-  - id: policy-allow-npm
-    completes: allow-npm
-    when:
-      command: [sbx, policy, allow, network]
-      args:
-        0: "registry.npmjs.org:443"
-    then:
-      state: { rules.npm: true }
-      output:
-        - "  Added rule 9f487778-51f3-45e9-b154-0a75b3118ff3 to policy local (scope: global): registry.npmjs.org:443 [tcp]"
 
   - id: policy-allow-any
     when:
@@ -1340,27 +1244,27 @@ scenarios:
         - ""
         - "(Abridged: the real output has more fields.)"
 
-  - id: kit-validate-python
+  - id: kit-validate-devboard
     completes: validate-python-kit
     when:
-      command: [sbx, kit, validate, ./project/kits/python]
+      command: [sbx, kit, validate, ./project/kits/devboard]
     then:
-      output: ["  ✓ ./project/kits/python — valid (directory)"]
+      output: ["  ✓ ./project/kits/devboard — valid (directory)"]
 
-  - id: kit-inspect-python
+  - id: kit-inspect-devboard
     completes: inspect-python-kit
     when:
-      command: [sbx, kit, inspect, ./project/kits/python]
+      command: [sbx, kit, inspect, ./project/kits/devboard]
     then:
       output:
-        - "  Name:         python"
+        - "  Name:         devboard"
         - "  Kind:         mixin"
         - "  Schema:       v3"
-        - "  Display:      Python"
-        - "  Description:  Python 3 with venv and pip, installed when the sandbox is created"
-        - "  Template:     sbx-kit-src:python-14804de38edb"
+        - "  Display:      DevBoard"
+        - "  Description:  What DevBoard needs in a sandbox, Python 3 with venv and pip, and the hosts its builds and scans reach"
+        - "  Template:     sbx-kit-src:devboard-e268c422e3de"
         - "  Policies:"
-        - "    Network:    2 allow, 0 deny"
+        - "    Network:    6 allow, 0 deny"
         - "    Commands:   1 install, 0 startup, 0 init files"
 
   # ════════════════════════════════════════════════════════════════════════
@@ -1430,11 +1334,11 @@ scenarios:
     when:
       command: [sbx, create, copilot]
       args:
-        --kit: { oneOf: ["./kits/python", "./kits/trivy", "./kits/api-port"] }
+        --kit: { oneOf: ["./kits/devboard", "./kits/trivy", "./kits/api-port"] }
       state: { cwd: root }
     then:
       stderr:
-        - "Error: kit './kits/python' not found."
+        - "Error: kit './kits/devboard' not found."
         - "Run this command from the project directory: cd project"
       exit: 1
 
@@ -1464,7 +1368,7 @@ scenarios:
         - "  Name:       quickstart"
         - "  Agent:      copilot"
         - "  Kits:       docker.io/sbx/copilot@sha256:9e062b8791ec1ef5bc6a482c35bca217c07f78597a0bb0659fad05d14029aa4b"
-        - "              ./kits/python"
+        - "              ./kits/devboard"
         - "  Workspace:  ~/sbx-lab/project (rw)"
         - "  Skills:     0 entries · linked, read-only"
         - "    Source:   ~/Library/Application Support/com.docker.sandboxes/sandboxes/agent-skills"
@@ -1479,7 +1383,7 @@ scenarios:
         - "AGENT"
         - "    assembling kit image from 2 kits"
         - "    loading kit image docker.io/sbx/copilot@sha256:9e062b8791ec1ef5bc6a482c35bca217c07f78597a0bb0659fad05d14029aa4b"
-        - "    loading kit image ~/sbx-lab/project/kits/python"
+        - "    loading kit image ~/sbx-lab/project/kits/devboard"
         - "  ✓ assembled kit image (3 layers)"
         - "    setting 2 environment variables"
         - "      +COPILOT_GITHUB_TOKEN +GH_TOKEN"
@@ -1488,8 +1392,8 @@ scenarios:
         - "      ✓ Ensure .copilot is owned by agent before bind mounts and th… (kit=copilot, user=0, 5ms)"
         - "      $ Copilot config with trusted workspace folder (kit=copilot, user=agent)"
         - "      ✓ Copilot config with trusted workspace folder (kit=copilot, user=agent, 6ms)"
-        - "      $ Install Python 3, venv and pip (kit=python, user=0)"
-        - { text: "      ✓ Install Python 3, venv and pip (kit=python, user=0, 6.1s)", delay: pull }
+        - "      $ Install Python 3, venv and pip (kit=devboard, user=0)"
+        - { text: "      ✓ Install Python 3, venv and pip (kit=devboard, user=0, 6.1s)", delay: pull }
         - "      view install logs: ls /var/log/sbx-kits"
         - "    registering 1 startup command, run on every container start"
         - "      ○ Register the sandbox MCP gateway in ~/.copilot/mcp-config.j… (kit=copilot, user=agent)"
@@ -1541,6 +1445,7 @@ scenarios:
         - "  Name:       dhi"
         - "  Agent:      copilot"
         - "  Kits:       docker.io/sbx/copilot@sha256:9e062b8791ec1ef5bc6a482c35bca217c07f78597a0bb0659fad05d14029aa4b"
+        - "              ./kits/devboard"
         - "              ./kits/trivy"
         - "              sbx/scout-cli"
         - "  MCP:        dhi (static)"
@@ -1556,18 +1461,21 @@ scenarios:
         - { text: "  ✓ image — ready", delay: pull }
         - ""
         - "AGENT"
-        - "    assembling kit image from 3 kits"
+        - "    assembling kit image from 4 kits"
         - "    loading kit image docker.io/sbx/copilot@sha256:9e062b8791ec1ef5bc6a482c35bca217c07f78597a0bb0659fad05d14029aa4b"
+        - "    loading kit image ~/sbx-lab/project/kits/devboard"
         - "    loading kit image ~/sbx-lab/project/kits/trivy"
         - "    loading kit image docker.io/sbx/scout-cli:1.30.0-0"
-        - "  ✓ assembled kit image (6 layers)"
+        - "  ✓ assembled kit image (7 layers)"
         - "    setting 3 environment variables"
         - "      +COPILOT_GITHUB_TOKEN +DOCKER_SCOUT_HUB_TOKEN +GH_TOKEN"
-        - "    running 2 install commands"
+        - "    running 3 install commands"
         - "      $ Ensure .copilot is owned by agent before bind mounts and th… (kit=copilot, user=0)"
         - "      ✓ Ensure .copilot is owned by agent before bind mounts and th… (kit=copilot, user=0, 5ms)"
         - "      $ Copilot config with trusted workspace folder (kit=copilot, user=agent)"
         - "      ✓ Copilot config with trusted workspace folder (kit=copilot, user=agent, 6ms)"
+        - "      $ Install Python 3, venv and pip (kit=devboard, user=0)"
+        - { text: "      ✓ Install Python 3, venv and pip (kit=devboard, user=0, 6.1s)", delay: pull }
         - "      view install logs: ls /var/log/sbx-kits"
         - "    registering 1 startup command, run on every container start"
         - "      ○ Register the sandbox MCP gateway in ~/.copilot/mcp-config.j… (kit=copilot, user=agent)"
@@ -1605,7 +1513,7 @@ scenarios:
         - "  Name:       ports-demo"
         - "  Agent:      copilot"
         - "  Kits:       docker.io/sbx/copilot@sha256:9e062b8791ec1ef5bc6a482c35bca217c07f78597a0bb0659fad05d14029aa4b"
-        - "              ./kits/python"
+        - "              ./kits/devboard"
         - "              ./kits/api-port"
         - "  Workspace:  ~/sbx-lab/project (rw)"
         - "  Skills:     0 entries · linked, read-only"
@@ -1622,7 +1530,7 @@ scenarios:
         - "    assembling kit image from 3 kits"
         - "    loading kit image docker.io/sbx/copilot@sha256:9e062b8791ec1ef5bc6a482c35bca217c07f78597a0bb0659fad05d14029aa4b"
         - "    loading kit image ~/sbx-lab/project/kits/api-port"
-        - "    loading kit image ~/sbx-lab/project/kits/python"
+        - "    loading kit image ~/sbx-lab/project/kits/devboard"
         - "  ✓ assembled kit image (4 layers)"
         - "    setting 2 environment variables"
         - "      +COPILOT_GITHUB_TOKEN +GH_TOKEN"
@@ -1631,8 +1539,8 @@ scenarios:
         - "      ✓ Ensure .copilot is owned by agent before bind mounts and th… (kit=copilot, user=0, 5ms)"
         - "      $ Copilot config with trusted workspace folder (kit=copilot, user=agent)"
         - "      ✓ Copilot config with trusted workspace folder (kit=copilot, user=agent, 6ms)"
-        - "      $ Install Python 3, venv and pip (kit=python, user=0)"
-        - { text: "      ✓ Install Python 3, venv and pip (kit=python, user=0, 6.1s)", delay: pull }
+        - "      $ Install Python 3, venv and pip (kit=devboard, user=0)"
+        - { text: "      ✓ Install Python 3, venv and pip (kit=devboard, user=0, 6.1s)", delay: pull }
         - "      view install logs: ls /var/log/sbx-kits"
         - "    registering 1 startup command, run on every container start"
         - "      ○ Register the sandbox MCP gateway in ~/.copilot/mcp-config.j… (kit=copilot, user=agent)"

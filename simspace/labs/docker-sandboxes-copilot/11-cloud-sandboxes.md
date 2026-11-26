@@ -116,10 +116,10 @@ The cloud has its own policy: the Locked Down policy and the rules from the *Net
 
 ## Create a cloud sandbox
 
-1. Create the sandbox with the same Copilot agent and Python kit as `quickstart`:
+1. Create the sandbox with the same Copilot agent and DevBoard kit as `quickstart`:
 
     ```bash id=host terminal-id=t2
-    sbx --cloud create --name devboard-cloud --kit ./kits/python --ttl 1h --on-timeout stop copilot
+    sbx --cloud create --name devboard-cloud --kit ./kits/devboard --ttl 1h --on-timeout stop copilot
     ```
 
     - There's **no `.`** at the end: a cloud sandbox has no workspace to mount, and passing a path is an error.
@@ -142,7 +142,7 @@ The cloud has its own policy: the Locked Down policy and the rules from the *Net
 
 ### Check its network rules
 
-3. List the sandbox's rules. You didn't add any of them: the Copilot agent declares the hosts it needs, and the Python kit adds Debian and PyPI. A `deny-all` default still lets through what a sandbox's own rules allow, including its kits' rules, and blocks everything else:
+3. List the sandbox's rules. You didn't add any of them: the Copilot agent declares the hosts it needs, and the DevBoard kit adds Debian, PyPI, Docker Hub, `dhi.io` and npm. A `deny-all` default still lets through what a sandbox's own rules allow, including its kits' rules, and blocks everything else:
 
     ```bash id=host terminal-id=t2
     sbx --cloud policy ls devboard-cloud

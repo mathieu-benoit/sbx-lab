@@ -16,7 +16,7 @@ graph LR
     subgraph Kits["Kits, written in YAML"]
         direction TB
         AgentKit["Workload: sbx/copilot<br/>OCI image on Docker Hub<br/>entrypoint, --yolo"]
-        PythonMixin["Mixin: kits/python<br/>install step, network rules"]
+        PythonMixin["Mixin: kits/devboard<br/>Python install, network rules"]
         TrivyMixin["Mixin: kits/trivy<br/>files built ahead, network rules"]
     end
 
@@ -154,7 +154,7 @@ Both are empty by default, which keeps Copilot's own defaults, and this lab keep
 
 - `--kit-arg model=claude-sonnet-5.5` picks the model.
 - `--kit-arg reasoningEffort=high` raises the reasoning effort.
-- With several kits, as in [Agent sandbox](04-first-sandbox.md), where the Python kit comes with the Copilot kit, prefix each name with the kit's: `--kit-arg copilot.model=claude-sonnet-5.5`, `--kit-arg copilot.reasoningEffort=high`.
+- With several kits, as in [Agent sandbox](04-first-sandbox.md), where the DevBoard kit comes with the Copilot kit, prefix each name with the kit's: `--kit-arg copilot.model=claude-sonnet-5.5`, `--kit-arg copilot.reasoningEffort=high`.
 
 When the sandbox is created, the kit sets the two `environment` variables to the values you chose and writes them into Copilot's settings, `~/.copilot/settings.json` (`model` and `effortLevel`). Copilot then starts with this model and this effort in every session of the sandbox, and `/model` still changes them during a session. Kit arguments configure the kit, not the agent's command line: what you pass after `--`, as in [Clone mode and parallel agents](07-parallel-agents.md), goes to Copilot itself and is added to `--yolo`.
 
@@ -213,14 +213,14 @@ It's described the same way, with one more part of the format:
 
 ## Build your own kit
 
-Writing a kit is mostly writing YAML. The DevBoard project includes a small mixin, [`project/kits/python/python.yaml`](../project/kits/python/python.yaml), that adds Python to an agent's sandbox, so your agent doesn't have to install it by hand.
+Writing a kit is mostly writing YAML. The DevBoard project includes a small mixin, [`project/kits/devboard/devboard.yaml`](../project/kits/devboard/devboard.yaml), with what DevBoard needs in an agent's sandbox: Python, so your agent doesn't have to install it by hand, and the hosts DevBoard's builds and scans reach.
 
 ```yaml id=host
 # syntax=docker/sandbox-kit:3
 schemaVersion: "3"
 kind: mixin
-displayName: Python
-description: Python 3 with venv and pip, installed when the sandbox is created
+displayName: DevBoard
+description: What DevBoard needs in a sandbox, Python 3 with venv and pip, and the hosts its builds and scans reach
 
 capabilities:
   # Install Python once, as root, when the sandbox is created.
@@ -231,57 +231,65 @@ capabilities:
           user: "0"
           command: apt-get update && apt-get install -y --no-install-recommends python3 python3-venv python3-pip
 
-  # Only the hosts this kit needs. For the install: the sandbox image's apt
+  # Only the hosts DevBoard needs. For the install: the sandbox image's apt
   # repositories (Debian and Docker Hardened Images), which apt-get update reads.
-  # At runtime: PyPI, for pip.
+  # At runtime: PyPI, for pip; Docker Hub, for the python, node and postgres
+  # images that Docker Compose pulls and for the images Trivy and Docker Scout
+  # read; the Docker Hardened Images registry; and npm, for the frontend.
   - type: com.docker.sandbox/network-policy@1
     config:
       install:
         allow: [deb.debian.org:80, dhi.io:80]
       runtime:
-        allow: [pypi.org:443, files.pythonhosted.org:443]
+        allow:
+          - pypi.org:443
+          - files.pythonhosted.org:443
+          - "**.docker.io:443"
+          - production.cloudfront.docker.com:443
+          - dhi.io:443
+          - registry.npmjs.org:443
 ```
 
-It declares two capabilities: a **lifecycle** hook that runs once when the sandbox is created, and a **network policy** that opens only the hosts this kit needs. For the install, that's the sandbox image's apt repositories, `deb.debian.org` and `dhi.io` (Docker Hardened Images), on port 80 because `apt` reads them over HTTP, and because `apt-get update` reads every configured source. At runtime, it's PyPI for `pip`, on port 443. No Dockerfile is needed for this one.
+It declares two capabilities: a **lifecycle** hook that runs once when the sandbox is created, and a **network policy** that opens only the hosts this kit needs. For the install, that's the sandbox image's apt repositories, `deb.debian.org` and `dhi.io` (Docker Hardened Images), on port 80 because `apt` reads them over HTTP, and because `apt-get update` reads every configured source. At runtime, on port 443: PyPI for `pip`, Docker Hub and its download host for the images Docker Compose pulls and the scanners read, the Docker Hardened Images registry, `dhi.io`, and npm for the frontend. These are the lab's hosts: with them in the kit, your own policy stays Locked Down, with no rule of your own. No Dockerfile is needed for this one.
 
 > [!NOTE]
-> The `install` and `runtime` lists say when each host is needed. Once the sandbox runs, `sbx policy inspect` shows only the `runtime` hosts, `pypi.org:443` and `files.pythonhosted.org:443`, in its kit policy. In a Copilot sandbox the kit policy also lists `deb.debian.org:80` and `dhi.io:80`: they come from the Copilot agent, not from this kit. The sandbox can reach both hosts anyway, because the global rules you added in [Allow only what the lab needs](01-network-policies.md#allow-only-what-the-lab-needs) allow them.
+> The `install` and `runtime` lists say when each host is needed. Once the sandbox runs, `sbx policy inspect` shows only the `runtime` hosts in its kit policy. In a Copilot sandbox the kit policy also lists `deb.debian.org:80` and `dhi.io:80`: they come from the Copilot agent, not from this kit.
 
 1. Check that the kit is valid:
 
     ```bash id=host
-    sbx kit validate ./project/kits/python
+    sbx kit validate ./project/kits/devboard
     ```
 
     ```none id=host
-      ✓ ./project/kits/python — valid (directory)
+      ✓ ./project/kits/devboard — valid (directory)
     ```
 
 2. See what it declares:
 
     ```bash id=host
-    sbx kit inspect ./project/kits/python
+    sbx kit inspect ./project/kits/devboard
     ```
 
     ```none id=host
-      Name:         python
+      Name:         devboard
       Kind:         mixin
       Schema:       v3
-      Display:      Python
-      Description:  Python 3 with venv and pip, installed when the sandbox is created
-      Template:     sbx-kit-src:python-14804de38edb
+      Display:      DevBoard
+      Description:  What DevBoard needs in a sandbox, Python 3 with venv and pip, and the hosts its builds and scans reach
+      Template:     sbx-kit-src:devboard-e268c422e3de
       Policies:
-        Network:    2 allow, 0 deny
+        Network:    6 allow, 0 deny
         Commands:   1 install, 0 startup, 0 init files
     ```
 
-You'll use this kit to create the sandboxes your agents work in, in [Agent sandbox](04-first-sandbox.md) and [Clone mode and parallel agents](07-parallel-agents.md).
+You'll add this kit to every sandbox your agents work in, from [Agent sandbox](04-first-sandbox.md) on.
 
-To share a kit, publish it in a Git repository or an OCI registry (`sbx kit push`). Remote kits are only installed from trusted publishers: `sbx` checks each reference against the `kit.allowedSources` setting (see `sbx settings get kit.allowedSources`). For example, if you published this kit in your own GitHub repository, someone using it as `--kit "git+https://github.com/<YOUR-GITHUB-USERNAME>/<REPOSITORY>.git#dir=kits/python"` must first allow `github.com/<YOUR-GITHUB-USERNAME>/` there.
+To share a kit, publish it in a Git repository or an OCI registry (`sbx kit push`). Remote kits are only installed from trusted publishers: `sbx` checks each reference against the `kit.allowedSources` setting (see `sbx settings get kit.allowedSources`). For example, if you published this kit in your own GitHub repository, someone using it as `--kit "git+https://github.com/<YOUR-GITHUB-USERNAME>/<REPOSITORY>.git#dir=kits/devboard"` must first allow `github.com/<YOUR-GITHUB-USERNAME>/` there.
 
 ## A kit with its own image: Trivy
 
-The Python kit installs its tool when the sandbox is created, so its network policy must open the Debian hosts during that install. A kit can also bring a Dockerfile and install its tools **when the kit itself is built**, on your machine, before any sandbox exists. The project includes a second mixin made that way, [`project/kits/trivy/`](../project/kits/trivy/), adapted from Docker's [trivy-mixin kit](https://github.com/docker/sbx-kits-contrib/tree/v3/trivy-mixin). It adds [Trivy](https://trivy.dev/), Aqua's open source vulnerability scanner, to an agent's sandbox:
+The DevBoard kit installs its tool when the sandbox is created, so its network policy must open the Debian hosts during that install. A kit can also bring a Dockerfile and install its tools **when the kit itself is built**, on your machine, before any sandbox exists. The project includes a second mixin made that way, [`project/kits/trivy/`](../project/kits/trivy/), adapted from Docker's [trivy-mixin kit](https://github.com/docker/sbx-kits-contrib/tree/v3/trivy-mixin). It adds [Trivy](https://trivy.dev/), Aqua's open source vulnerability scanner, to an agent's sandbox:
 
 ```yaml id=host
 # syntax=docker/sandbox-kit:3
@@ -345,15 +353,15 @@ COPY --chmod=0755 scan-images.sh /usr/local/bin/scan-images
 COPY vex-repository.yaml /usr/local/share/trivy/vex-repository.yaml
 ```
 
-Compared with the Python kit, both are mixins, but:
+Compared with the DevBoard kit, both are mixins, but:
 
-| | Python kit | Trivy kit |
+| | DevBoard kit | Trivy kit |
 |---|---|---|
 | Installs its tool | When the sandbox is created (`lifecycle` hook running `apt-get`) | When the kit is built (`trivy.dockerfile`), pinned by version and SHA256 |
 | Adds to the sandbox | Packages, installed inside each new sandbox | A layer of files, laid over the agent's image |
-| Network policy | Debian hosts for the install, PyPI at runtime | Trivy's vulnerability database and the VEX statements, at runtime only |
+| Network policy | Debian hosts for the install; PyPI, Docker Hub, `dhi.io` and npm at runtime | Trivy's vulnerability database and the VEX statements, at runtime only |
 
-Why put a scanner in a sandbox? It reads all your code, and it's a supply-chain target like any other tool: Trivy's own releases were compromised in March 2026. In a sandbox, it sees the workspace but not your `~/.ssh` or `~/.docker/config.json`, and it can reach its database, the VEX statements and the hosts you allowed, nothing else.
+Why put a scanner in a sandbox? It reads all your code, and it's a supply-chain target like any other tool: Trivy's own releases were compromised in March 2026. In a sandbox, it sees the workspace but not your `~/.ssh` or `~/.docker/config.json`, and it can reach its database, the VEX statements and the hosts its sandbox's other kits allow, nothing else.
 
 You'll add this kit to an agent's sandbox in [MCP servers](10-mcp-servers.md), to scan DevBoard's base images before and after switching them to Docker Hardened Images.
 
@@ -361,7 +369,7 @@ The next two sections show two more ways to package what you just did. They're h
 
 ## Combine kits into a kit set
 
-In this lab you add mixins to the Copilot kit with `--kit` each time you create a sandbox: the Python kit, and in [MCP servers](10-mcp-servers.md), the Trivy kit. A [kit set](https://docs.docker.com/ai/sandboxes/customize/author/kit-sets/) (Early Access) packages such a combination as a single kit, so your team runs one reference, with the versions you chose:
+In this lab you add mixins to the Copilot kit with `--kit` each time you create a sandbox: the DevBoard kit, and in [MCP servers](10-mcp-servers.md), the Trivy kit. A [kit set](https://docs.docker.com/ai/sandboxes/customize/author/kit-sets/) (Early Access) packages such a combination as a single kit, so your team runs one reference, with the versions you chose:
 
 ```yaml id=host
 # syntax=docker/sandbox-kit:3
@@ -372,13 +380,13 @@ version: "1.0.0"
 
 kits:
   - ref: docker.io/sbx/copilot@sha256:<DIGEST>          # the workload you inspected above
-  - ref: docker.io/<NAMESPACE>/python-kit:1.0.0         # the Python mixin, once published
+  - ref: docker.io/<NAMESPACE>/devboard-kit:1.0.0         # the DevBoard mixin, once published
   - ref: docker.io/<NAMESPACE>/trivy-kit:1.0.0          # the Trivy mixin, once published
 ```
 
 - A set lists its components under `kits:`: at most one workload (the agent) and any number of mixins.
-- Every component must be **published** to a registry. Local paths such as `./kits/python` aren't accepted, so you'd publish the Python and Trivy mixins first.
-- Each component keeps its own content and rules: the Python kit still installs Python when the sandbox is created, and the Trivy kit still brings its files and its network rules for the vulnerability database and the VEX statements. The set only adds what the combination needs on top, with the same `capabilities:` as a mixin.
+- Every component must be **published** to a registry. Local paths such as `./kits/devboard` aren't accepted, so you'd publish the Python and Trivy mixins first.
+- Each component keeps its own content and rules: the DevBoard kit still installs Python when the sandbox is created, and the Trivy kit still brings its files and its network rules for the vulnerability database and the VEX statements. The set only adds what the combination needs on top, with the same `capabilities:` as a mixin.
 - You build and publish a set with Docker Buildx, `docker buildx build ./copilot-tools -f ./copilot-tools/copilot-tools.yaml -t docker.io/<NAMESPACE>/copilot-tools:1.0.0 --push`, then run it like any agent: `sbx run docker.io/<NAMESPACE>/copilot-tools:1.0.0 --name quickstart`. No `--kit` needed.
 
 A sandbox created from a set is the same as one created from its kits. The set keeps its kits' layers as they are, so it downloads the same bytes and shares the same local cache, and the same install hooks run at create, and the same startup hooks at every start. What changes is when the work happens:
@@ -406,7 +414,7 @@ agent: copilot
 workspace: ./project          # the folder shared with the sandbox (module 04)
 
 kits:
-  - ./project/kits/python     # the Python mixin from this module
+  - ./project/kits/devboard     # the DevBoard mixin from this module
 
 secrets:                      # the GitHub token (module 03), stored for this sandbox only
   github:
